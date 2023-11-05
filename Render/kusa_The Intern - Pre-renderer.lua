@@ -119,6 +119,7 @@ if project then
         regionCounter = getNextRegionCounter(project, mergedRegion)
         local regionIndex = addRegionWithRenderMatrix(project, mergedRegion, regionCounter)
         reaper.UpdateArrange()
+        reaper.GetSetProjectInfo_String(0, 'RENDER_PATTERN','$region', true)
     else
         reaper.MB("No selected items.", "Error", 0)
     end
