@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="97ed5af90b458402b4882ca5bc47f5423eebb12b">
+<index version="1" name="kusa_reascripts" commit="bd43e5d8144c0e96e67dbbc8a8998fd5968b3338">
   <category name="Render">
-    <reapack name="kusa_The Intern - Pre-renderer.lua" type="script" desc="Creates unique region for each selected item, two ways to rename the regions for rendering (user prompt), sets render matrix to Master Mix. I'm preparing a short video presenting this script.">
+    <reapack name="kusa_The Intern - Pre-renderer.lua" type="script" desc="kusa_The Intern - Pre-renderer">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
       </metadata>
