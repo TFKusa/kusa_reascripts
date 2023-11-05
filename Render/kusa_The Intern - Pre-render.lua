@@ -1,4 +1,4 @@
--- @description kusa_The Intern - Pre-renderer
+-- @description kusa_The Intern - Pre-render
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
