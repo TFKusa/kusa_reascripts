@@ -1,4 +1,4 @@
--- @description Creates unique region for each selected item, two ways to rename the regions for rendering (user prompt), sets render matrix to Master Mix. I'm preparing a short video presenting this script.
+-- @description kusa_The Intern - Pre-renderer
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
