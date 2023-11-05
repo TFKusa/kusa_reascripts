@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="bd43e5d8144c0e96e67dbbc8a8998fd5968b3338">
+<index version="1" name="kusa_reascripts" commit="6f4c3893ecf51c1c211a4cdf23c8f8585656e0bd">
   <category name="Render">
-    <reapack name="kusa_The Intern - Pre-renderer.lua" type="script" desc="kusa_The Intern - Pre-renderer">
+    <reapack name="kusa_The Intern - Pre-render.lua" type="script" desc="kusa_The Intern - Pre-render">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-11-05T10:34:03Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/97ed5af90b458402b4882ca5bc47f5423eebb12b/Render/kusa_The%20Intern%20-%20Pre-renderer.lua</source>
+      <version name="1.0" author="Kusa" time="2023-11-05T12:28:13Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/6f4c3893ecf51c1c211a4cdf23c8f8585656e0bd/Render/kusa_The%20Intern%20-%20Pre-render.lua</source>
       </version>
     </reapack>
   </category>
