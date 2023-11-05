@@ -1,33 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="998dd64d6c0522501d57453ba57a538ef02ad0b5">
-  <category name="Example">
-    <reapack name="cfillion_Hello world.lua" type="script" desc="Hello world">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 This is an example of a package file. It installs itself as a ReaScript that does nothing but show "Hello World!" in REAPER's scripting console.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 Packages may also include additional files specified using the @provides tag.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 This text is the documentation shown when using ReaPack's "About this package" feature. {\field{\*\fldinst{HYPERLINK "https://commonmark.org/"}}{\fldrslt{\ul
-Markdown
-}}}
- {\i formatting} is supported.\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="cfillion" time="2021-01-04T23:30:32Z">
-        <source main="main">https://github.com/cfillion/reapack-repository-template/raw/58a3e39ba95bd0f35846aa1f39aa4cb2574295e1/Example/cfillion_Hello%20world.lua</source>
-      </version>
-    </reapack>
-  </category>
+<index version="1" name="kusa_reascripts" commit="97ed5af90b458402b4882ca5bc47f5423eebb12b">
   <category name="Render">
-    <reapack name="kusa_The finisher.lua" type="script" desc="Creates unique region for each selected item, two ways to rename the regions for rendering (user prompt), sets render matrix to Master Mix. I'm preparing a short video presenting this script.">
+    <reapack name="kusa_The Intern - Pre-renderer.lua" type="script" desc="Creates unique region for each selected item, two ways to rename the regions for rendering (user prompt), sets render matrix to Master Mix. I'm preparing a short video presenting this script.">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-11-05T01:16:14Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/4db1ae75fa0d011f59ef989ca35dec82610dae86/Render/kusa_The%20finisher.lua</source>
+      <version name="1.0" author="Kusa" time="2023-11-05T10:34:03Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/97ed5af90b458402b4882ca5bc47f5423eebb12b/Render/kusa_The%20Intern%20-%20Pre-renderer.lua</source>
       </version>
     </reapack>
   </category>
