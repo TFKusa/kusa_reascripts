@@ -1,4 +1,4 @@
--- @description kusa_The Intern - Pre-render
+-- @description kusa_The Intern - Assistant TO the Region Manager
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
@@ -69,16 +69,15 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------------
 
-local dialogResult, userChoice = reaper.GetUserInputs("Region Naming Source", 1, "1: Item Track | 2: Selected Track", "1")
-userChoice = tonumber(userChoice)
-if not dialogResult then
-    return
-end
-
+reaper.GetSetProjectInfo_String(0, 'RENDER_PATTERN','$region', true)
 local project = reaper.EnumProjects(-1)
-if project then
     local numSelectedItems = reaper.CountSelectedMediaItems(project)
     if numSelectedItems > 0 then
+        local dialogResult, userChoice = reaper.GetUserInputs("Region Naming Source", 1, "1: Item Track | 2: Selected Track", "1")
+        userChoice = tonumber(userChoice)
+        if not dialogResult then
+            return
+        end
         local regionData = {}
         local lastRegionName = ""
 
@@ -119,10 +118,76 @@ if project then
         regionCounter = getNextRegionCounter(project, mergedRegion)
         local regionIndex = addRegionWithRenderMatrix(project, mergedRegion, regionCounter)
         reaper.UpdateArrange()
-        reaper.GetSetProjectInfo_String(0, 'RENDER_PATTERN','$region', true)
+        
     else
-        reaper.MB("No selected items.", "Error", 0)
+
+        function sortRegionsID()
+            local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
+            local regions = {}
+    
+            for i = 0, num_markers + num_regions - 1 do
+                local retval, isRegion, pos, rgnend, name, markrgnindexnumber, color = reaper.EnumProjectMarkers3(0, i)
+                if retval and isRegion then
+                    table.insert(regions, {index = markrgnindexnumber, position = pos, endPos = rgnend, name = name, color = color})
+                end
+            end
+
+            table.sort(regions, function(a, b) return a.position < b.position end)        
+            reaper.Undo_BeginBlock()
+    
+            for _, region in ipairs(regions) do
+                reaper.DeleteProjectMarker(0, region.index, true)
+            end
+        
+            for _, region in ipairs(regions) do
+                local new_index = reaper.AddProjectMarker2(0, true, region.position, region.endPos, region.name, -1, region.color)
+                reaper.SetRegionRenderMatrix(0, new_index, reaper.GetMasterTrack(0), 1)
+            end
+        
+            reaper.Undo_EndBlock("Sort and Renumber Regions and Set Render Matrix to Master Mix", -1)
+            reaper.UpdateArrange()
+        end
+
+        function sortIncrements()
+            function parseRegionName(name)
+                local baseName = name:match("^(.-)%d+$")
+                return baseName
+            end            
+            function buildNewName(baseName, idx)
+                return baseName .. string.format("%02d", idx)
+            end            
+            local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
+            local regions = {}
+            for i = 0, num_markers + num_regions - 1 do
+                local retval, isRegion, pos, rgnend, name, idx, color = reaper.EnumProjectMarkers3(0, i)
+                if retval and isRegion then
+                    local baseName = parseRegionName(name)
+                    if baseName then
+                        table.insert(regions, {index = idx, position = pos, endPos = rgnend, name = name, baseName = baseName, color = color})
+                    end
+                end
+            end           
+            local groupedRegions = {}
+            for _, region in ipairs(regions) do
+                groupedRegions[region.baseName] = groupedRegions[region.baseName] or {}
+                table.insert(groupedRegions[region.baseName], region)
+            end
+            reaper.Undo_BeginBlock()
+            for baseName, group in pairs(groupedRegions) do
+                table.sort(group, function(a, b) return a.position < b.position end)
+                for i, region in ipairs(group) do
+                    local newName = buildNewName(baseName, i)
+                    if region.name ~= newName then
+                        reaper.SetProjectMarker3(0, region.index, true, region.position, region.endPos, newName, region.color)
+                    end
+                end
+            end
+            
+            reaper.Undo_EndBlock("Sequentially Renumber Regions", -1)
+            reaper.UpdateArrange()
+        end
+
+        sortRegionsID()
+        sortIncrements()
+
     end
-else
-    reaper.MB("No project is open.", "Error", 0)
-end
