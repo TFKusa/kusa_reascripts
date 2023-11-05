@@ -3,7 +3,6 @@
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 
-
 local function regionsOverlap(region1, region2)
     return (region1.endPos > region2.startPos) and (region1.startPos < region2.endPos)
 end
