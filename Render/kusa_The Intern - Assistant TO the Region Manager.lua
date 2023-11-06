@@ -2,6 +2,7 @@
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
+-- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 local function regionsOverlap(region1, region2)
     return (region1.endPos > region2.startPos) and (region1.startPos < region2.endPos)
