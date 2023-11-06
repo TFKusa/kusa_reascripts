@@ -1,4 +1,4 @@
--- @description kusa_Structure selected tracks into a nested folder hierarchy
+-- @description kusa_The Intern - Structure selected tracks into a nested folder hierarchy
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
