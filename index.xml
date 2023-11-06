@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="18aa3d67f19f3f2de012fc18129c2b8353a67c56">
+<index version="1" name="kusa_reascripts" commit="36342f702632d4192569052090e732b46f60fdae">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -39,6 +39,24 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-11-06T15:56:43Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cfb0c62f9fecfd7aab26e26cc6d6fbde7e3bfbbc/Rendering/kusa_The%20Intern%20-%20Assistant%20TO%20the%20Region%20Manager.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_The Intern - Render 48-24 Mono to folder (Prompt).lua" type="script" desc="kusa_The Intern - Render 48-24 Mono to folder (Prompt)">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-11-06T16:46:18Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/36342f702632d4192569052090e732b46f60fdae/Rendering/kusa_The%20Intern%20-%20Render%2048-24%20Mono%20to%20folder%20(Prompt).lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_The Intern - Render 48-24 Stereo to folder (Prompt).lua" type="script" desc="kusa_The Intern - Render 48-24 Stereo to folder (Prompt)">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-11-06T16:46:18Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/36342f702632d4192569052090e732b46f60fdae/Rendering/kusa_The%20Intern%20-%20Render%2048-24%20Stereo%20to%20folder%20(Prompt).lua</source>
       </version>
     </reapack>
   </category>
