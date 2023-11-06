@@ -1,6 +1,7 @@
 # Kusa ReaScripts
 
-If you like and use my scripts, consider making a small donation!
+If you like and use my scripts, please consider making a small donation!
+
 https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 
