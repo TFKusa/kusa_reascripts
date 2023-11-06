@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="ab32f4949c11fde410e78c04a18c007dbc402bd7">
+<index version="1" name="kusa_reascripts" commit="cfb0c62f9fecfd7aab26e26cc6d6fbde7e3bfbbc">
+  <category name="FX">
+    <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-11-06T15:56:43Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cfb0c62f9fecfd7aab26e26cc6d6fbde7e3bfbbc/FX/kusa_Setup%20Trackspacer%20from%20selected%20to%20hovered%20track.lua</source>
+      </version>
+    </reapack>
+  </category>
   <category name="Organising">
     <reapack name="kusa_Structure selected tracks into a nested folder hierarchy.lua" type="script" desc="kusa_Structure selected tracks into a nested folder hierarchy">
       <metadata>
@@ -11,14 +22,14 @@
       </version>
     </reapack>
   </category>
-  <category name="Render">
+  <category name="Rendering">
     <reapack name="kusa_The Intern - Assistant TO the Region Manager.lua" type="script" desc="kusa_The Intern - Assistant TO the Region Manager">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-11-05T22:36:36Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/db558440bc07c84121ad164a30151b70f4b0e946/Render/kusa_The%20Intern%20-%20Assistant%20TO%20the%20Region%20Manager.lua</source>
+      <version name="1.0" author="Kusa" time="2023-11-06T15:56:43Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cfb0c62f9fecfd7aab26e26cc6d6fbde7e3bfbbc/Rendering/kusa_The%20Intern%20-%20Assistant%20TO%20the%20Region%20Manager.lua</source>
       </version>
     </reapack>
   </category>
