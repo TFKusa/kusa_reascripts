@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="9f99492697994b7b6c156299aa497583bf863750">
+<index version="1" name="kusa_reascripts" commit="9fdbc3e9acb27b2847347c361bdebb1c13c3382c">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -12,22 +12,22 @@
     </reapack>
   </category>
   <category name="Organising">
-    <reapack name="kusa_The Intern - Structure selected tracks into a nested folder hierarchy.lua" type="script" desc="kusa_The Intern - Structure selected tracks into a nested folder hierarchy">
+    <reapack name="kusa_Structure selected tracks into a nested folder hierarchy.lua" type="script" desc="kusa_The Intern - Structure selected tracks into a nested folder hierarchy">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-11-06T16:00:52Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/41d17f60fe43e0785a1001ef9d1df5a4fd373d00/Organising/kusa_The%20Intern%20-%20Structure%20selected%20tracks%20into%20a%20nested%20folder%20hierarchy.lua</source>
+      <version name="1.0" author="Kusa" time="2023-11-07T12:37:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fdbc3e9acb27b2847347c361bdebb1c13c3382c/Organising/kusa_Structure%20selected%20tracks%20into%20a%20nested%20folder%20hierarchy.lua</source>
       </version>
     </reapack>
-    <reapack name="kusa_The Intern - Toggle Hide:Show All Tracks Except Selected.lua" type="script" desc="kusa_The Intern - Toggle Hide/Show All Tracks Except Selected">
+    <reapack name="kusa_Toggle Hide:Show All Tracks Except Selected.lua" type="script" desc="kusa_The Intern - Toggle Hide/Show All Tracks Except Selected">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-11-06T16:10:39Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/18aa3d67f19f3f2de012fc18129c2b8353a67c56/Organising/kusa_The%20Intern%20-%20Toggle%20Hide:Show%20All%20Tracks%20Except%20Selected.lua</source>
+      <version name="1.0" author="Kusa" time="2023-11-07T12:37:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fdbc3e9acb27b2847347c361bdebb1c13c3382c/Organising/kusa_Toggle%20Hide:Show%20All%20Tracks%20Except%20Selected.lua</source>
       </version>
     </reapack>
   </category>
