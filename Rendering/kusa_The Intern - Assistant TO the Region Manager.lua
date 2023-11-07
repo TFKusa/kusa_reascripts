@@ -1,5 +1,5 @@
 -- @description kusa_The Intern - Assistant TO the Region Manager
--- @version 1.0
+-- @version 1.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -48,7 +48,6 @@ end
 function addRegionWithRenderMatrix(project, mergedRegion, regionCounter)
     local regionNameWithNumber = mergedRegion.name .. "_" .. string.format("%02d", regionCounter)
     local regionIndex = reaper.AddProjectMarker2(project, true, mergedRegion.startPos, mergedRegion.endPos, regionNameWithNumber, -1, 0)
-    reaper.SetRegionRenderMatrix(project, regionIndex, reaper.GetMasterTrack(0), 1)
 
     return regionIndex
 end
@@ -142,7 +141,6 @@ local project = reaper.EnumProjects(-1)
         
             for _, region in ipairs(regions) do
                 local new_index = reaper.AddProjectMarker2(0, true, region.position, region.endPos, region.name, -1, region.color)
-                reaper.SetRegionRenderMatrix(0, new_index, reaper.GetMasterTrack(0), 1)
             end
         
             reaper.Undo_EndBlock("Sort and Renumber Regions and Set Render Matrix to Master Mix", -1)
