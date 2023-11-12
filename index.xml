@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="490d7dac0ce503f98dfebd59aed47eeb3e61ad60">
+<index version="1" name="kusa_reascripts" commit="ac05f32939fa1d01125b95ddc38c4d6fb5288021">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -42,6 +42,15 @@
       </version>
       <version name="1.1" author="Kusa" time="2023-11-07T12:34:42Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9f99492697994b7b6c156299aa497583bf863750/Rendering/kusa_The%20Intern%20-%20Assistant%20TO%20the%20Region%20Manager.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_The Intern.lua" type="script" desc="kusa_The Intern">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-11-12T22:08:33Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ac05f32939fa1d01125b95ddc38c4d6fb5288021/Rendering/kusa_The%20Intern.lua</source>
       </version>
     </reapack>
   </category>
