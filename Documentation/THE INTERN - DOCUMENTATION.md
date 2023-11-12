@@ -1,8 +1,26 @@
         THE INTERN - DOCUMENTATION
 
+
+        Installation
+
 -- You will need to install Scythe library v3 for this script to work (available on ReaPack) --
 
+- Install ReaPack : https://reapack.com
+- In Reaper -> Extensions -> ReaPack -> Import repositories...
+- Paste this link : https://github.com/TFKusa/kusa_reascripts/raw/master/index.xml
+- In Reaper -> Extensions -> ReaPack -> Browse packages
+- Type "kusa", right click on "kusa_The Intern" and install it.
+- Type "Scythe", right click on "Scythe library v3" and install it
+- In Reaper -> Actions -> Show actions list -> type "Scythe" and run "Scythe_Set v3 library path"
+- You should be able to find "kusa_The Intern" in the Action list
+
+
+
+
+        What is The Intern
+
 The Intern is a ReaScript that enhances region and rendering management. It utilizes Track Folder hierarchy for naming regions and supports filtering for rendering processes.
+
 
 
         Tab 1 - Create Regions
