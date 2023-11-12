@@ -1,18 +1,20 @@
-        THE INTERN - DOCUMENTATION
+THE INTERN - DOCUMENTATION
 
 
         Installation
 
--- You will need to install Scythe library v3 for this script to work (available on ReaPack) --
+-- You will need to install Scythe library v3 and SWS Extension for this script to work --
 
 - Install ReaPack : https://reapack.com
+- Install SWS : https://www.sws-extension.org
 - In Reaper -> Extensions -> ReaPack -> Import repositories...
 - Paste this link : https://github.com/TFKusa/kusa_reascripts/raw/master/index.xml
 - In Reaper -> Extensions -> ReaPack -> Browse packages
 - Type "kusa", right click on "kusa_The Intern" and install it.
 - Type "Scythe", right click on "Scythe library v3" and install it
+- Type "JS_ReaScript", right click on "js_ReaScriptAPI: API functions for ReaScripts" and install it
 - In Reaper -> Actions -> Show actions list -> type "Scythe" and run "Scythe_Set v3 library path"
-- You should be able to find "kusa_The Intern" in the Action list
+- You should be able to find "kusa_The Intern" in the Action list and use it !
 
 
 
