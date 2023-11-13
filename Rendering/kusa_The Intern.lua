@@ -1236,7 +1236,7 @@ layers[4]:addElements( GUI.createElements(
         font = { table.unpack(fontPresets["smallMonaco"]) },
         shadow = true,
         bg = uiBgColor
-    }, ]]
+    }, ]] 
     {
         name = "renders",
         type = "Label",
