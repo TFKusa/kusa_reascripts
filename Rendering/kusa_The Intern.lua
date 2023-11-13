@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.1
+-- @version 1.2
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -940,7 +940,7 @@ function onClickDeleteAllRegions()
     deleteAllRegions(allRegions)
 end
 -----------------------------------------------------------------
-function onClickToFolder()
+function onClickToNested()
     local sampleRate, out_str, channels = processRenderSettings()
     local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
     if not retval or exportPath == "" then return end
@@ -987,7 +987,23 @@ function onClickToFolder()
     reaper.Main_OnCommand(reaper.NamedCommandLookup("_S&M_ADD_ALLQUEUE"), 0)
     reaper.Main_OnCommand(41207, 0)
 end
-
+-----------------------------------------------------------------
+function onClickToSimple()
+    local sampleRate, out_str, channels = processRenderSettings()
+    local retval, exportPath = reaper.JS_Dialog_BrowseForFolder("Select export directory", "")
+    if not retval or exportPath == "" then return end
+    local projectName = getProjectName()
+    local projectExportPath = exportPath .. "/" .. projectName .. "_Export"
+    createDirectory(projectExportPath)
+    
+    reaper.GetSetProjectInfo(0, 'RENDER_SETTINGS', 8, true)
+    reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
+    reaper.GetSetProjectInfo(0, "RENDER_SRATE", sampleRate, true)
+    reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
+    reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)   
+    reaper.GetSetProjectInfo_String(0, "RENDER_FILE", projectExportPath, true)
+    reaper.Main_OnCommand(41824, 0) 
+end
 -----------------------------------------------------------------
 function editMatrix(setMatrix)
     local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
@@ -1155,18 +1171,31 @@ layers[3]:addElements(btnItemTrack, btnSelectedTrack, btnFixIncrements, btnToggl
 -----------------------------------------------------------------
 
 
-btnRenderToFolder = Button:new{
-    name = "Render to folder",
+btnRenderToNested = Button:new{
+    name = "Render to folder nested",
     type = "Button",
     x = halfGuiWidth - 100,
     y = 420,
-    w = 200,
+    w = 90,
     h = 45,
-    caption = "Render to folder",
+    caption = "Nested",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
     font = { table.unpack(fontPresets["smallImpact"]) },
-    func = onClickToFolder
+    func = onClickToNested
+}
+btnRenderToSimple = Button:new{
+    name = "Render to folder simple",
+    type = "Button",
+    x = halfGuiWidth + 10,
+    y = 420,
+    w = 90,
+    h = 45,
+    caption = "Simple",
+    fillColor = uiButtonColor,
+    textColor = uiBgColorLighter,
+    font = { table.unpack(fontPresets["smallImpact"]) },
+    func = onClickToSimple
 }
 btnToRegionMatrix = Button:new{
     name = "To Matrix",
@@ -1196,13 +1225,24 @@ btnResetMatrix = Button:new{
 }
 
 layers[4]:addElements( GUI.createElements(
-    btnRenderToFolder, btnToRegionMatrix, btnResetMatrix,
+    btnRenderToNested, btnToRegionMatrix, btnResetMatrix, btnRenderToSimple,
     {
         name = "reaWwise",
         type = "Label",
-        x = 69, --nice
-        y = 370,
-        caption = "For ReaWwise",
+        x = 5,
+        y = 369,
+        caption = "For ReaWwise & To Folder-Simple",
+        color = uiTxtColor,
+        font = { table.unpack(fontPresets["smallMonaco"]) },
+        shadow = true,
+        bg = uiBgColor
+    },
+    {
+        name = "renders",
+        type = "Label",
+        x = 215,
+        y = 400,
+        caption = "To Folder",
         color = uiTxtColor,
         font = { table.unpack(fontPresets["smallMonaco"]) },
         shadow = true,
