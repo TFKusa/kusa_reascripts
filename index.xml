@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="ab03e664bae55fd8c6413cba11e24d6d1233d2cc">
+<index version="1" name="kusa_reascripts" commit="1a4a749113a7dc1352d50f46052941dce2c906b2">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -54,6 +54,9 @@
       </version>
       <version name="1.1" author="Kusa" time="2023-11-13T19:28:25Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab03e664bae55fd8c6413cba11e24d6d1233d2cc/Rendering/kusa_The%20Intern.lua</source>
+      </version>
+      <version name="1.2" author="Kusa" time="2023-11-13T20:46:13Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/1a4a749113a7dc1352d50f46052941dce2c906b2/Rendering/kusa_The%20Intern.lua</source>
       </version>
     </reapack>
   </category>
