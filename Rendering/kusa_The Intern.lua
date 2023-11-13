@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.0
+-- @version 1.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
