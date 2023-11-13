@@ -62,7 +62,7 @@ To Region Matrix :
 - Configures regions to "Master Mix" in the Matrix, considering the specified keywords.
 
 Nested :
-- Prompts for a directory and creates a nested folder hierarchy based on region names for rendering. Rendering your regions could be long if you have lots of plugins in your project, due to how Reaper processes its render queue.
+- Prompts for a directory and creates a nested folder hierarchy based on region names for rendering. Rendering your could take quite some time if you have lots of plugins in your project.
 - Ignores Region Render Matrix settings, focusing solely on keywords. 
 
 Simple :

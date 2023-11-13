@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.2
+-- @version 1.2.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -974,18 +974,13 @@ function onClickToNested()
                 reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
                 reaper.GetSetProjectInfo(0, "RENDER_SRATE", sampleRate, true)
                 reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
-                reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)
-                reaper.GetSetProjectInfo(0, "RENDER_BOUNDSFLAG", 1, true)
-                reaper.GetSetProjectInfo(0, "RENDER_STARTPOS", startPos, true)
-                reaper.GetSetProjectInfo(0, "RENDER_ENDPOS", endPos, true)
+                reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)   
                 reaper.GetSetProjectInfo_String(0, "RENDER_FILE", renderPath, true)
-                reaper.Main_OnCommand(41823, 0)
+                reaper.Main_OnCommand(42230, 0) 
                 reaper.SetRegionRenderMatrix(0, markrgnindex, reaper.GetMasterTrack(0), -1)
             end
         end
     end
-    reaper.Main_OnCommand(reaper.NamedCommandLookup("_S&M_ADD_ALLQUEUE"), 0)
-    reaper.Main_OnCommand(41207, 0)
 end
 -----------------------------------------------------------------
 function onClickToSimple()
@@ -1226,17 +1221,6 @@ btnResetMatrix = Button:new{
 
 layers[4]:addElements( GUI.createElements(
     btnRenderToNested, btnToRegionMatrix, btnResetMatrix, btnRenderToSimple,
---[[     {
-        name = "reaWwise",
-        type = "Label",
-        x = 5,
-        y = 369,
-        caption = "For ReaWwise & To Folder-Simple",
-        color = uiTxtColor,
-        font = { table.unpack(fontPresets["smallMonaco"]) },
-        shadow = true,
-        bg = uiBgColor
-    }, ]] 
     {
         name = "renders",
         type = "Label",
