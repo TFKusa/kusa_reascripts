@@ -850,10 +850,12 @@ local function processDirectories()
 
     local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
     local orderedKeywords = processKeywords(myTextbox:val())
+    
 
     for i = 0, num_markers + num_regions - 1 do
-        local _, isRegion, _, _, name = reaper.EnumProjectMarkers(i)
+        local _, isRegion, _, _, name, markrgnindex = reaper.EnumProjectMarkers(i)
         if isRegion then
+            reaper.SetRegionRenderMatrix(0, markrgnindex, reaper.GetMasterTrack(0), -1)
             local finalAction = (#orderedKeywords == 0) and 'include' or nil
 
             for _, entry in ipairs(orderedKeywords) do
