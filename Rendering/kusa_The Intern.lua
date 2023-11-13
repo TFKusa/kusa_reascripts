@@ -1226,7 +1226,7 @@ btnResetMatrix = Button:new{
 
 layers[4]:addElements( GUI.createElements(
     btnRenderToNested, btnToRegionMatrix, btnResetMatrix, btnRenderToSimple,
-    {
+--[[     {
         name = "reaWwise",
         type = "Label",
         x = 5,
@@ -1236,7 +1236,7 @@ layers[4]:addElements( GUI.createElements(
         font = { table.unpack(fontPresets["smallMonaco"]) },
         shadow = true,
         bg = uiBgColor
-    },
+    }, ]]
     {
         name = "renders",
         type = "Label",
