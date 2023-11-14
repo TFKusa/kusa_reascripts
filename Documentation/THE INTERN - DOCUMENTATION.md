@@ -61,6 +61,9 @@ Filter regions :
 To Region Matrix :
 - Configures regions to "Master Mix" in the Matrix, considering the specified keywords.
 
+Master folder :
+- Whether the script needs to create a "MyProjectName_Export" folder within the directory selected by the user
+
 Nested :
 - Prompts for a directory and creates a nested folder hierarchy based on region names for rendering.
 

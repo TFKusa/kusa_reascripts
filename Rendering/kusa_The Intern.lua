@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.2.2
+-- @version 1.3
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -24,6 +24,7 @@ local Button = require("gui.elements.Button")
 local Menubox = require("gui.elements.Menubox")
 local Textbox = require("gui.elements.Textbox")
 local Buffer = require("public.buffer")
+local Checklist = require("gui.elements.Checklist")
 
 
 -----------------------------------------------------------------
@@ -840,13 +841,44 @@ local function processRenderSettings()
     end
     return sampleRate, out_str, channels
 end
+
+
+-----------------------------------------------------------------
+------------------------CHECK BOX--------------------------------
+-----------------------------------------------------------------
+checkMasterFolder = Checklist:new{
+    name = "chkNames",
+    type = "Checklist",
+    x = guiWidth /2 - 14,
+    y = 350,
+    w = 28,
+    h = 35,
+    caption = "",
+    options = {"Master folder"},
+    dir = "v",
+    horizontal = true,
+    frame = false,
+    bg = uiBgColor,
+    textFont = { table.unpack(fontPresets["smallMonaco"]) },
+    textColor = uiTxtColor,
+    fillColor = uiButtonColor
+}
+
+layers[4]:addElements(checkMasterFolder)
+
+checkMasterFolder:val({[1] = true})
 -----------------------------------------------------------------
 local function processDirectories()
     local retval, exportPath = reaper.JS_Dialog_BrowseForFolder("Select export directory", "")
     if not retval or exportPath == "" then return end
-    local projectName = getProjectName()
-    local projectExportPath = exportPath .. "/" .. projectName .. "_Export"
-    createDirectory(projectExportPath)
+    isMasterFolderChecked = checkMasterFolder:val(nil, true)
+    if isMasterFolderChecked then
+        local projectName = getProjectName()
+        projectExportPath = exportPath .. "/" .. projectName .. "_Export"
+        createDirectory(projectExportPath)
+    else
+        projectExportPath = exportPath
+    end
 
     local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
     local orderedKeywords = processKeywords(myTextbox:val())
@@ -860,19 +892,6 @@ local function processDirectories()
             for _, entry in ipairs(orderedKeywords) do
                 if name:find(entry.keyword) then
                     finalAction = entry.action
-                end
-            end
-
-            if finalAction == 'include' then
-                local segments = {}
-                for segment in string.gmatch(name, "([^_]+)") do
-                    table.insert(segments, segment)
-                end
-                table.remove(segments)
-                local currentPath = projectExportPath
-                for _, segment in ipairs(segments) do
-                    currentPath = currentPath .. "/" .. segment
-                    createDirectory(currentPath)
                 end
             end
         end
@@ -963,6 +982,29 @@ local function moveFileToDestination(source, destination)
     return true
 end
 -----------------------------------------------------------------
+function fileExists(filePath)
+    local file = io.open(filePath, "r")
+    if file then
+        file:close()
+        return true
+    else
+        return false
+    end
+end
+-----------------------------------------------------------------
+function isDirectoryEmpty(dirPath)
+    local pfile
+    if os.getenv("OS") == "Windows_NT" then
+        pfile = io.popen('dir "' .. dirPath .. '" /b /a')
+    else
+        pfile = io.popen('ls -1A "' .. dirPath .. '"')
+    end
+
+    local files = pfile:read('*a')
+    pfile:close()
+    return files == ''
+end
+-----------------------------------------------------------------
 function onClickToNested()
     local sampleRate, out_str, channels = processRenderSettings()
     local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
@@ -982,35 +1024,45 @@ function onClickToNested()
     for i = 0, num_markers + num_regions - 1 do
         local _, isRegion, startPos, endPos, name, markrgnindex = reaper.EnumProjectMarkers(i)
         if isRegion then
-            local segments = {}
-            for segment in string.gmatch(name, "([^_]+)") do
-                table.insert(segments, segment)
-            end
-            table.remove(segments)
-            local folderPath = projectExportPath
-            for _, segment in ipairs(segments) do
-                folderPath = folderPath .. "/" .. segment
-                createDirectoryIfNeeded(folderPath)
-            end
             local filename = name .. ".wav"
             local sourceFile = tempRenderPath .. '/' .. filename
-            local destFile = folderPath .. '/' .. filename
-            if moveFileToDestination(sourceFile, destFile) then
-                print("File moved successfully: " .. destFile)
+            if fileExists(sourceFile) then
+                local segments = {}
+                for segment in string.gmatch(name, "([^_]+)") do
+                    table.insert(segments, segment)
+                end
+                table.remove(segments)
+
+                local folderPath = projectExportPath
+                for _, segment in ipairs(segments) do
+                    folderPath = folderPath .. "/" .. segment
+                    createDirectoryIfNeeded(folderPath)
+                end
+                local destFile = folderPath .. '/' .. filename
+                if moveFileToDestination(sourceFile, destFile) then
+                    print("File moved successfully: " .. destFile)
+                end
             end
         end
     end
     removeDirectory(tempRenderPath)
+    if isDirectoryEmpty(projectExportPath) then
+        removeDirectory(projectExportPath)
+    end
 end
-
 -----------------------------------------------------------------
 function onClickToSimple()
     local sampleRate, out_str, channels = processRenderSettings()
     local retval, exportPath = reaper.JS_Dialog_BrowseForFolder("Select export directory", "")
     if not retval or exportPath == "" then return end
-    local projectName = getProjectName()
-    local projectExportPath = exportPath .. "/" .. projectName .. "_Export"
-    createDirectory(projectExportPath)
+    isMasterFolderChecked = checkMasterFolder:val(nil, true)
+    if isMasterFolderChecked then
+        local projectName = getProjectName()
+        projectExportPath = exportPath .. "/" .. projectName .. "_Export"
+        createDirectory(projectExportPath)
+    else
+        projectExportPath = exportPath
+    end
     
     reaper.GetSetProjectInfo(0, 'RENDER_SETTINGS', 8, true)
     reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
@@ -1018,7 +1070,10 @@ function onClickToSimple()
     reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
     reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)   
     reaper.GetSetProjectInfo_String(0, "RENDER_FILE", projectExportPath, true)
-    reaper.Main_OnCommand(42230, 0) 
+    reaper.Main_OnCommand(42230, 0)
+    if isDirectoryEmpty(projectExportPath) then
+        removeDirectory(projectExportPath)
+    end
 end
 -----------------------------------------------------------------
 function editMatrix(setMatrix)
