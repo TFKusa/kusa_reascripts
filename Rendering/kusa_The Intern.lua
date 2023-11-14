@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.2.1
+-- @version 1.2.2
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -855,7 +855,6 @@ local function processDirectories()
     for i = 0, num_markers + num_regions - 1 do
         local _, isRegion, _, _, name, markrgnindex = reaper.EnumProjectMarkers(i)
         if isRegion then
-            reaper.SetRegionRenderMatrix(0, markrgnindex, reaper.GetMasterTrack(0), -1)
             local finalAction = (#orderedKeywords == 0) and 'include' or nil
 
             for _, entry in ipairs(orderedKeywords) do
@@ -940,48 +939,70 @@ function onClickDeleteAllRegions()
     deleteAllRegions(allRegions)
 end
 -----------------------------------------------------------------
+function removeDirectory(path)
+    local handle, err = io.popen('rm -r "' .. path .. '"')
+    if handle then
+        handle:close()
+    else
+        print("Error removing directory: " .. err)
+    end
+end
+-----------------------------------------------------------------
+local function createDirectoryIfNeeded(path)
+    if not reaper.file_exists(path) then
+        reaper.RecursiveCreateDirectory(path, 0)
+    end
+end
+-----------------------------------------------------------------
+local function moveFileToDestination(source, destination)
+    local success, err = os.rename(source, destination)
+    if not success then
+        print("Error moving file: " .. err)
+        return false
+    end
+    return true
+end
+-----------------------------------------------------------------
 function onClickToNested()
     local sampleRate, out_str, channels = processRenderSettings()
     local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
     if not retval or exportPath == "" then return end
-    local orderedKeywords = processKeywords(myTextbox:val())
 
+    reaper.GetSetProjectInfo(0, 'RENDER_SETTINGS', 8, true)
+    reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
+    reaper.GetSetProjectInfo(0, "RENDER_SRATE", sampleRate, true)
+    reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
+    reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)
+
+    local tempRenderPath = projectExportPath .. "/tempRender"
+    createDirectoryIfNeeded(tempRenderPath)
+    reaper.GetSetProjectInfo_String(0, "RENDER_FILE", tempRenderPath, true)
+
+    reaper.Main_OnCommand(42230, 0)
     for i = 0, num_markers + num_regions - 1 do
         local _, isRegion, startPos, endPos, name, markrgnindex = reaper.EnumProjectMarkers(i)
         if isRegion then
-            local finalAction = (#orderedKeywords == 0) and 'include' or nil
-
-            for _, entry in ipairs(orderedKeywords) do
-                if name:find(entry.keyword) then
-                    finalAction = entry.action
-                end
+            local segments = {}
+            for segment in string.gmatch(name, "([^_]+)") do
+                table.insert(segments, segment)
             end
-
-            if finalAction == 'include' then
-                local segments = {}
-                for segment in string.gmatch(name, "([^_]+)") do
-                    table.insert(segments, segment)
-                end
-                table.remove(segments)
-                local currentPath = projectExportPath
-                for _, segment in ipairs(segments) do
-                    currentPath = currentPath .. "/" .. segment
-                end
-
-                local renderPath = currentPath
-                reaper.SetRegionRenderMatrix(0, markrgnindex, reaper.GetMasterTrack(0), 1)
-                reaper.GetSetProjectInfo(0, 'RENDER_SETTINGS', 8, true)
-                reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
-                reaper.GetSetProjectInfo(0, "RENDER_SRATE", sampleRate, true)
-                reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
-                reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)   
-                reaper.GetSetProjectInfo_String(0, "RENDER_FILE", renderPath, true)
-                reaper.Main_OnCommand(42230, 0) 
-                reaper.SetRegionRenderMatrix(0, markrgnindex, reaper.GetMasterTrack(0), -1)
+            table.remove(segments)
+            local folderPath = projectExportPath
+            for _, segment in ipairs(segments) do
+                folderPath = folderPath .. "/" .. segment
+                createDirectoryIfNeeded(folderPath)
+            end
+            local filename = name .. ".wav"
+            local sourceFile = tempRenderPath .. '/' .. filename
+            local destFile = folderPath .. '/' .. filename
+            if moveFileToDestination(sourceFile, destFile) then
+                print("File moved successfully: " .. destFile)
             end
         end
     end
+    removeDirectory(tempRenderPath)
 end
+
 -----------------------------------------------------------------
 function onClickToSimple()
     local sampleRate, out_str, channels = processRenderSettings()
@@ -997,7 +1018,7 @@ function onClickToSimple()
     reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
     reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)   
     reaper.GetSetProjectInfo_String(0, "RENDER_FILE", projectExportPath, true)
-    reaper.Main_OnCommand(41824, 0) 
+    reaper.Main_OnCommand(42230, 0) 
 end
 -----------------------------------------------------------------
 function editMatrix(setMatrix)
