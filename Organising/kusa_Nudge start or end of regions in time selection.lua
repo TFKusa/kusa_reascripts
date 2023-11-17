@@ -1,11 +1,11 @@
 -- @description kusa_Nudge start or end of regions in time selection
--- @version 1.0
+-- @version 1.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 
-retval, userInput = reaper.GetUserInputs("Nudge Regions", 2, "Start 1/End 2,Nudge Amount (seconds)", "end,1")
+retval, userInput = reaper.GetUserInputs("Nudge Regions", 2, "start / end,Nudge Amount (seconds)", "end,1")
 if not retval then return end
 
 nudgeStart, nudgeAmount = userInput:match("([^,]+),([^,]+)")
