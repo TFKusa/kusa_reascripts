@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="04623354ab902bb3a912231f2d529dfd6b53d457">
+<index version="1" name="kusa_reascripts" commit="099df8da6e73893b24d3bfa5e7a36eb74947b6bc">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -12,6 +12,15 @@
     </reapack>
   </category>
   <category name="Organising">
+    <reapack name="kusa_Align selected items on new takes or toggle visibility of inactive takes.lua" type="script" desc="kusa_Align selected items on new takes or toggle visibility of inactive takes">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-11-17T23:12:18Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/099df8da6e73893b24d3bfa5e7a36eb74947b6bc/Organising/kusa_Align%20selected%20items%20on%20new%20takes%20or%20toggle%20visibility%20of%20inactive%20takes.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_Nudge start or end of regions in time selection.lua" type="script" desc="kusa_Nudge start or end of regions in time selection">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
