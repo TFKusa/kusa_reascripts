@@ -28,7 +28,7 @@ end
 
 local itemCount = reaper.CountSelectedMediaItems(0)
 
-if itemCount == 1 then
+if itemCount <= 1 then
     -- Only one item selected, toggle visibility of inactive takes
     reaper.Undo_BeginBlock()
     local item = reaper.GetSelectedMediaItem(0, 0)
