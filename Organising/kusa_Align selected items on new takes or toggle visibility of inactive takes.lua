@@ -5,10 +5,6 @@
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 
-
-
-
-
 local function DetectFirstTransient(item)
     local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
     reaper.SetEditCurPos(itemPos, false, false)
@@ -29,14 +25,12 @@ end
 local itemCount = reaper.CountSelectedMediaItems(0)
 
 if itemCount <= 1 then
-    -- Only one item selected, toggle visibility of inactive takes
     reaper.Undo_BeginBlock()
     local item = reaper.GetSelectedMediaItem(0, 0)
     reaper.Main_OnCommand(40435, 0)
     reaper.UpdateItemInProject(item)
     reaper.Undo_EndBlock("Toggle visibility of inactive takes", -1)
 else
-    -- More than one item selected, align items
     reaper.Undo_BeginBlock()
     local firstItem = reaper.GetSelectedMediaItem(0, 0)
     local firstItemTrack = reaper.GetMediaItem_Track(firstItem)
