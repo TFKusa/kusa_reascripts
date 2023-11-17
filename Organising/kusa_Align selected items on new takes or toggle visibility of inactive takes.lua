@@ -26,9 +26,7 @@ local itemCount = reaper.CountSelectedMediaItems(0)
 
 if itemCount <= 1 then
     reaper.Undo_BeginBlock()
-    local item = reaper.GetSelectedMediaItem(0, 0)
     reaper.Main_OnCommand(40435, 0)
-    reaper.UpdateItemInProject(item)
     reaper.Undo_EndBlock("Toggle visibility of inactive takes", -1)
 else
     reaper.Undo_BeginBlock()
