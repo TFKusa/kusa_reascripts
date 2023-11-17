@@ -35,7 +35,7 @@ if itemCount <= 1 then
     reaper.Main_OnCommand(40435, 0)
     reaper.UpdateItemInProject(item)
     reaper.Undo_EndBlock("Toggle visibility of inactive takes", -1)
-elseif itemCount > 1 then
+else
     -- More than one item selected, align items
     reaper.Undo_BeginBlock()
     local firstItem = reaper.GetSelectedMediaItem(0, 0)
@@ -55,6 +55,4 @@ elseif itemCount > 1 then
     end
     reaper.UpdateArrange()
     reaper.Undo_EndBlock("Align Items to First Item as Takes", -1)
-else
-    reaper.ShowMessageBox("Select at least one item.", "Error", 0)
 end
