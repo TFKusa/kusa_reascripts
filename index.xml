@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="1a91856199ff4dd4e9f6ff3a3aa496092baea908">
+<index version="1" name="kusa_reascripts" commit="43cf23047cbd93d7b7ca24cc35efd6c2adf11510">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -12,6 +12,15 @@
     </reapack>
   </category>
   <category name="Organising">
+    <reapack name="kusa_Nudge start or end of regions in time selection.lua" type="script" desc="kusa_Nudge start or end of regions in time selection">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-11-17T21:38:06Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/43cf23047cbd93d7b7ca24cc35efd6c2adf11510/Organising/kusa_Nudge%20start%20or%20end%20of%20regions%20in%20time%20selection.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_Structure selected tracks into a nested folder hierarchy.lua" type="script" desc="kusa_The Intern - Structure selected tracks into a nested folder hierarchy">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
