@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.3
+-- @version 1.3.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -1188,29 +1188,7 @@ btnDeleteAllRegions = Button:new{
     func = onClickDeleteAllRegions
 }
 -----------------------------------------------------------------
-local descriptionType, description, descriptionToggle,descriptionDeleteRegions = GUI.createElements(
-    {
-        name = "Description Title",
-        type = "Label",
-        x = 28,
-        y = guiHeight * (1/4),
-        caption = "Select the items you want to render and choose\n         a method for renaming the regions.",
-        color = uiTxtColor,
-        font = { table.unpack(fontPresets["bigTNR"]) },
-        shadow = true,
-        bg = uiBgColor
-    },
-    {
-        name = "Description",
-        type = "Label",
-        x = 15,
-        y = guiHeight * (1/2) - 30,
-        caption = "The names of the regions are defined by the names of the\n          parent tracks in the Track Folder hierarchy.",
-        color = uiTxtColor,
-        font = { table.unpack(fontPresets["smallTNRB"]) },
-        shadow = true,
-        bg = uiBgColor
-    },
+local descriptionToggle,descriptionDeleteRegions = GUI.createElements(
     {
         name = "Descriptiontoggle",
         type = "Label",
@@ -1234,7 +1212,7 @@ local descriptionType, description, descriptionToggle,descriptionDeleteRegions =
         bg = uiBgColor
     }
 )
-layers[3]:addElements(btnItemTrack, btnSelectedTrack, btnFixIncrements, btnToggleSelectAllItems, btnDeleteAllRegions, descriptionType, description, descriptionToggle, descriptionDeleteRegions)
+layers[3]:addElements(btnItemTrack, btnSelectedTrack, btnFixIncrements, btnToggleSelectAllItems, btnDeleteAllRegions, descriptionToggle, descriptionDeleteRegions)
 
 
 -----------------------------------------------------------------
@@ -1385,11 +1363,11 @@ layers[5]:addElements( GUI.createElements(
     {
         name = "Description Title",
         type = "Label",
-        x = 51,
+        x = 91,
         y = 390,
         caption = "Thanks to MPL for the Bit Depth system.",
         color = uiTxtColor,
-        font = { table.unpack(fontPresets["bigTNR"]) },
+        font = { table.unpack(fontPresets["smallTNR"]) },
         shadow = true,
         bg = uiBgColor
     },
