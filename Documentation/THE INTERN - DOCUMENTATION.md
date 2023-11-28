@@ -69,3 +69,13 @@ Nested :
 
 Simple :
 - Prompts for a directory and creates a new folder for rendering.
+
+Render to Wwise :
+- Set up in the Matrix the regions you want to export
+- Choose a container type (or no container at all)
+- Go !
+
+        !! MAKE SURE THAT REAPER HAS FOCUS WHEN RENDERING. If it doesn't have focus, the items will be offline and it will create blank files (this behaviour can be changed in the Reaper preferences) !!
+
+Precisions : It will create a nested folder hierarchy with the assets in pathToYourWwiseProjectFolder/Originals/SFX.
+It will also group regions that have the same base name (name without the incrementing number) in the same container, if a container is selected in the dropdown menu.
