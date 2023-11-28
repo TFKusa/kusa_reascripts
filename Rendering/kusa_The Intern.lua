@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.3.1
+-- @version 1.5
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -867,28 +867,53 @@ checkMasterFolder = Checklist:new{
 layers[4]:addElements(checkMasterFolder)
 
 checkMasterFolder:val({[1] = true})
+
 -----------------------------------------------------------------
-local function processDirectories()
+------------------------CONTAINER--------------------------------
+-----------------------------------------------------------------
+
+dpWwise = GUI.createElement({
+    name = "mnuWwise",
+    type = "Menubox",
+    x = guiWidth - 225,
+    y = 432,
+    w = 140,
+    h = 20,
+    caption = "",
+    captionColor = uiTxtColor,
+    textColor = uiTxtColor,
+    retval = 1,
+    captionFont = { table.unpack(fontPresets["medMonaco"]) },
+    textFont = { table.unpack(fontPresets["smallMonaco"]) },
+    options = {"No container","Random/Sequence", "Switch", "Blend", "Actor-Mixer", "Work Unit", "Folder"},
+    bg = uiBgColor
+})
+
+layers[4]:addElements(dpWwise)
+-----------------------------------------------------------------
+local function getExportPath()
     local retval, exportPath = reaper.JS_Dialog_BrowseForFolder("Select export directory", "")
-    if not retval or exportPath == "" then return end
-    isMasterFolderChecked = checkMasterFolder:val(nil, true)
-    if isMasterFolderChecked then
+    if not retval or exportPath == "" then return nil end
+    return retval, exportPath
+end
+-----------------------------------------------------------------
+local function getProjectExportPath(exportPath)
+    if checkMasterFolder:val(nil, true) then
         local projectName = getProjectName()
-        projectExportPath = exportPath .. "/" .. projectName .. "_Export"
+        local projectExportPath = exportPath .. "/" .. projectName .. "_Export"
         createDirectory(projectExportPath)
+        return projectExportPath
     else
-        projectExportPath = exportPath
+        return exportPath
     end
-
+end
+-----------------------------------------------------------------
+local function processMarkersAndRegions(orderedKeywords)
     local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
-    local orderedKeywords = processKeywords(myTextbox:val())
-    
-
     for i = 0, num_markers + num_regions - 1 do
-        local _, isRegion, _, _, name, markrgnindex = reaper.EnumProjectMarkers(i)
+        local _, isRegion, _, _, name = reaper.EnumProjectMarkers(i)
         if isRegion then
             local finalAction = (#orderedKeywords == 0) and 'include' or nil
-
             for _, entry in ipairs(orderedKeywords) do
                 if name:find(entry.keyword) then
                     finalAction = entry.action
@@ -896,6 +921,16 @@ local function processDirectories()
             end
         end
     end
+    return num_markers, num_regions
+end
+-----------------------------------------------------------------
+local function processDirectories()
+    local retval, exportPath = getExportPath()
+    if not exportPath then return end
+
+    local projectExportPath = getProjectExportPath(exportPath)
+    local orderedKeywords = processKeywords(myTextbox:val())
+    local num_markers, num_regions = processMarkersAndRegions(orderedKeywords)
 
     return projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath
 end
@@ -906,6 +941,10 @@ local function splitString(str, delimiter)
         table.insert(segments, segment)
     end
     return segments
+end
+-----------------------------------------------------------------
+function isMacOS()
+    return os.getenv("HOME") ~= nil
 end
 -----------------------------------------------------------------
 local function constructRenderPath(basePath, name)
@@ -959,7 +998,18 @@ function onClickDeleteAllRegions()
 end
 -----------------------------------------------------------------
 function removeDirectory(path)
-    local handle, err = io.popen('rm -r "' .. path .. '"')
+    local os = reaper.GetOS()
+    local command
+
+    if os == "Win32" or os == "Win64" then
+        -- Windows command to remove directory
+        command = 'rmdir /s /q "' .. path .. '"'
+    else
+        -- Unix/Linux command to remove directory
+        command = 'rm -r "' .. path .. '"'
+    end
+
+    local handle, err = io.popen(command)
     if handle then
         handle:close()
     else
@@ -1005,49 +1055,329 @@ function isDirectoryEmpty(dirPath)
     return files == ''
 end
 -----------------------------------------------------------------
-function onClickToNested()
-    local sampleRate, out_str, channels = processRenderSettings()
-    local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
-    if not retval or exportPath == "" then return end
-
+local function setRenderSettings(sampleRate, out_str, channels, tempRenderPath)
     reaper.GetSetProjectInfo(0, 'RENDER_SETTINGS', 8, true)
     reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
     reaper.GetSetProjectInfo(0, "RENDER_SRATE", sampleRate, true)
     reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
     reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)
-
-    local tempRenderPath = projectExportPath .. "/tempRender"
-    createDirectoryIfNeeded(tempRenderPath)
     reaper.GetSetProjectInfo_String(0, "RENDER_FILE", tempRenderPath, true)
+end
+-----------------------------------------------------------------
+local function createNestedDirectories(basePath, name)
+    local segments = {}
+    for segment in string.gmatch(name, "([^_]+)") do
+        table.insert(segments, segment)
+    end
+    table.remove(segments)
 
-    reaper.Main_OnCommand(42230, 0)
+    local folderPath = basePath
+    for _, segment in ipairs(segments) do
+        folderPath = folderPath .. "/" .. segment
+        createDirectoryIfNeeded(folderPath)
+    end
+    return folderPath
+end
+-----------------------------------------------------------------
+local function processRegionsForNestedRendering(num_markers, num_regions, projectExportPath, tempRenderPath)
+    local movedFiles = {}
     for i = 0, num_markers + num_regions - 1 do
-        local _, isRegion, startPos, endPos, name, markrgnindex = reaper.EnumProjectMarkers(i)
+        local _, isRegion, _, _, name, _ = reaper.EnumProjectMarkers(i)
         if isRegion then
             local filename = name .. ".wav"
             local sourceFile = tempRenderPath .. '/' .. filename
             if fileExists(sourceFile) then
-                local segments = {}
-                for segment in string.gmatch(name, "([^_]+)") do
-                    table.insert(segments, segment)
-                end
-                table.remove(segments)
-
-                local folderPath = projectExportPath
-                for _, segment in ipairs(segments) do
-                    folderPath = folderPath .. "/" .. segment
-                    createDirectoryIfNeeded(folderPath)
-                end
+                local folderPath = createNestedDirectories(projectExportPath, name)
                 local destFile = folderPath .. '/' .. filename
                 if moveFileToDestination(sourceFile, destFile) then
                     print("File moved successfully: " .. destFile)
+                    table.insert(movedFiles, destFile) 
                 end
             end
         end
     end
+    return movedFiles
+end
+-----------------------------------------------------------------
+local function cleanUpRendering(tempRenderPath, projectExportPath)
     removeDirectory(tempRenderPath)
     if isDirectoryEmpty(projectExportPath) then
         removeDirectory(projectExportPath)
+    end
+end
+-----------------------------------------------------------------
+local function executeNestedRendering(sampleRate, out_str, channels, projectExportPath, num_markers, num_regions)
+    local tempRenderPath = projectExportPath .. "/tempRender"
+    createDirectoryIfNeeded(tempRenderPath)
+
+    setRenderSettings(sampleRate, out_str, channels, tempRenderPath)
+    reaper.Main_OnCommand(42230, 0)
+    movedFiles = processRegionsForNestedRendering(num_markers, num_regions, projectExportPath, tempRenderPath)
+    cleanUpRendering(tempRenderPath, projectExportPath)
+    return movedFiles
+end
+-----------------------------------------------------------------
+function onClickToNested()
+    local sampleRate, out_str, channels = processRenderSettings()
+    local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
+    if not retval or exportPath == "" then return end
+
+    executeNestedRendering(sampleRate, out_str, channels, projectExportPath, num_markers, num_regions)
+end
+-----------------------------------------------------------------
+function getWwiseProjectPath()
+    if(reaper.AK_Waapi_Connect("127.0.0.1", 8080)) then
+        local result = reaper.AK_Waapi_Call("ak.wwise.core.getProjectInfo", reaper.AK_AkJson_Map(), reaper.AK_AkJson_Map())
+        if result then
+            local projectPathVariant = reaper.AK_AkJson_Map_Get(result, "path")
+            if projectPathVariant then
+                local projectPath = reaper.AK_AkVariant_GetString(projectPathVariant)
+                reaper.AK_Waapi_Disconnect()
+                return projectPath
+            end
+        end
+        reaper.AK_Waapi_Disconnect()
+    end
+    return nil, "Failed to retrieve project path"
+end
+-----------------------------------------------------------------
+function convertToMacPath(windowsPath)
+    local macPath = windowsPath:gsub("\\", "/")
+
+    if macPath:find("^Y:/Documents/") then
+        local homeDir = os.getenv("HOME")
+        if homeDir then
+            macPath = homeDir .. "/" .. macPath:sub(4)
+        end
+    end
+
+    return macPath
+end
+-----------------------------------------------------------------
+function convertToWindowsPath(macPath)
+    local windowsPath = macPath:gsub("/", "\\")
+    local homeDir = os.getenv("HOME")
+    if homeDir and windowsPath:find("^" .. homeDir:gsub("/", "\\")) then
+        windowsPath = "Y:\\" .. windowsPath:sub(#homeDir + 2)
+    end
+
+    return windowsPath
+end
+-----------------------------------------------------------------
+function replaceWithOriginalsDir(path)
+    local os = reaper.GetOS()
+    local pattern, replacement
+
+    if os == "Win32" or os == "Win64" then
+        -- Windows path pattern
+        pattern = "(.+\\)[^\\]+$"
+        replacement = "%1Originals\\SFX"
+    else
+        -- Unix/Linux path pattern
+        pattern = "(.+)/[^/]+$"
+        replacement = "%1/Originals/SFX"
+    end
+
+    local newPath = path:gsub(pattern, replacement)
+    return newPath
+end
+-----------------------------------------------------------------
+function getAppropriateProjectPath(wwiseWinProjectPath)
+    if isMacOS() then
+        local wwiseMacProjectPath = convertToMacPath(wwiseWinProjectPath)
+        return replaceWithOriginalsDir(wwiseMacProjectPath)
+    else
+        return replaceWithOriginalsDir(wwiseWinProjectPath)
+    end
+end
+-----------------------------------------------------------------
+function getSelectedWwiseObject()
+    local selectedPath = nil -- Variable to store the selected path
+    if(reaper.AK_Waapi_Connect("127.0.0.1", 8080)) then
+        local fieldsToReturn = reaper.AK_AkJson_Array()
+        reaper.AK_AkJson_Array_Add(fieldsToReturn, reaper.AK_AkVariant_String("path"))
+
+        local options = reaper.AK_AkJson_Map()
+        reaper.AK_AkJson_Map_Set(options, "return", fieldsToReturn)
+
+        local result = reaper.AK_Waapi_Call("ak.wwise.ui.getSelectedObjects", 
+        reaper.AK_AkJson_Map(), options)
+
+        local status = reaper.AK_AkJson_GetStatus(result)
+
+        if(status) then
+            local objects = reaper.AK_AkJson_Map_Get(result, "objects")
+            local numObjects = reaper.AK_AkJson_Array_Size(objects)
+
+            if numObjects == 1 then
+                -- If only one object is selected, get its path
+                local item = reaper.AK_AkJson_Array_Get(objects, 0)
+                local path = reaper.AK_AkJson_Map_Get(item, "path")
+                selectedPath = reaper.AK_AkVariant_GetString(path)
+                --selectedPath = selectedPath:gsub("\\", "\\\\")
+            else
+                -- If more than one object is selected, show an error message
+                reaper.ShowConsoleMsg("Please select only one Wwise object.\n")
+                return
+            end
+        end
+
+        reaper.AK_AkJson_ClearAll()
+        reaper.AK_Waapi_Disconnect()
+    end
+    return selectedPath
+end
+-----------------------------------------------------------------
+function doubleBackslashes(inputString)
+    return string.gsub(inputString, "\\", "\\\\")
+end
+-----------------------------------------------------------------
+function handleWaapiCallError(result)
+    local errorMessage = reaper.AK_AkJson_Map_Get(result, "message")
+    local errorMessageStr = reaper.AK_AkVariant_GetString(errorMessage)
+    reaper.ShowConsoleMsg("Import failed: " .. errorMessageStr .. "\n")
+
+    local details = reaper.AK_AkJson_Map_Get(result, "details")
+    local log = reaper.AK_AkJson_Map_Get(details, "log")
+    local logSize = reaper.AK_AkJson_Array_Size(log)
+
+    for i = 0, logSize - 1 do
+        local logItem = reaper.AK_AkJson_Array_Get(log, i)
+        local logItemMessage = reaper.AK_AkJson_Map_Get(logItem, "message")
+        local logItemMessageStr = reaper.AK_AkVariant_GetString(logItemMessage)
+        reaper.ShowConsoleMsg("["..i.."]" .. logItemMessageStr .. "\n")
+    end
+end
+-----------------------------------------------------------------
+function importToWwise(movedFiles, selectedWwiseObject)
+    if(reaper.AK_Waapi_Connect("127.0.0.1", 8080)) then
+        local windows = string.find(reaper.GetOS(), "Win") ~= nil
+        local separator = windows and '\\' or '/'
+
+        local importDestination = selectedWwiseObject
+        if not importDestination or importDestination == "" then
+            reaper.ShowConsoleMsg("Import destination is empty or not specified.\n")
+            return
+        end
+    
+        -- import command --
+        local importCommand = "ak.wwise.core.audio.import"
+     
+        -- importOperation --
+        local importOperation = reaper.AK_AkVariant_String("replaceExisting")
+     
+        -- default --
+        local default = reaper.AK_AkJson_Map()
+        local importLanguage = reaper.AK_AkVariant_String("SFX")
+        reaper.AK_AkJson_Map_Set(default, "importLanguage", importLanguage)
+     
+        -- imports --
+        local imports = reaper.AK_AkJson_Array()
+     
+        -- autoAddToSourceControl --
+        local autoAddToSourceControl = reaper.AK_AkVariant_Bool(true)
+     
+        -- arguments --
+        local arguments = reaper.AK_AkJson_Map()
+        reaper.AK_AkJson_Map_Set(arguments, "importOperation", importOperation)
+        reaper.AK_AkJson_Map_Set(arguments, "default", default)
+        reaper.AK_AkJson_Map_Set(arguments, "imports", imports)
+        reaper.AK_AkJson_Map_Set(arguments, "autoAddToSourceControl",
+            autoAddToSourceControl)
+
+        local containerTypeMappings = {
+            [1] = false,                   -- No container
+            [2] = "RandomSequenceContainer",
+            [3] = "SwitchContainer",
+            [4] = "BlendContainer",
+            [5] = "ActorMixer",
+            [6] = "WorkUnit",
+            [7] = "Folder"
+        }
+        
+        local userContainerChoice = dpWwise:val()
+        local shouldWwiseContainer = true
+        local containerType = containerTypeMappings[userContainerChoice] or false
+        
+        if userContainerChoice == 1 then
+            shouldWwiseContainer = false
+        end
+     
+        -- Build import request from movedFiles
+        for _, filePath in ipairs(movedFiles) do
+            local fileNameWithExtension = filePath:match("([^\\]+)%.wav$")
+            local baseFileName = fileNameWithExtension and fileNameWithExtension:match("(.+)_[^_]+") or fileNameWithExtension
+
+            if shouldWwiseContainer then
+                -- Define the Random Container Name and Path
+                local containerName = baseFileName
+                local randomContainerPath = selectedWwiseObject .. "\\" .. containerName
+
+                -- Try to create the Random Container
+                local createArguments = reaper.AK_AkJson_Map()
+                reaper.AK_AkJson_Map_Set(createArguments, "parent", reaper.AK_AkVariant_String(selectedWwiseObject))
+                reaper.AK_AkJson_Map_Set(createArguments, "type", reaper.AK_AkVariant_String(containerType))
+                reaper.AK_AkJson_Map_Set(createArguments, "name", reaper.AK_AkVariant_String(containerName))
+                reaper.AK_AkJson_Map_Set(createArguments, "onNameConflict", reaper.AK_AkVariant_String("merge"))
+                local options = reaper.AK_AkJson_Map()  -- Creating an empty JSON Map for options
+                local createResult = reaper.AK_Waapi_Call("ak.wwise.core.object.create", createArguments, options)
+
+                -- Check if the container was created or already exists
+                if not createResult then
+                    reaper.ShowConsoleMsg("Failed to create or access Random Container.\n")
+                    return
+                end
+                wwiseObjectPath = importDestination .. "\\" .. baseFileName .. "\\<Sound SFX>" .. filePath:match("([^\\]+)%.wav$")
+            else
+                wwiseObjectPath = importDestination .. "\\<Sound SFX>" .. filePath:match("([^\\]+)%.wav$")
+            end
+
+            local importItem = reaper.AK_AkJson_Map()
+            reaper.AK_AkJson_Map_Set(importItem, "audioFile", reaper.AK_AkVariant_String(filePath))
+            reaper.AK_AkJson_Map_Set(importItem, "objectPath", reaper.AK_AkVariant_String(wwiseObjectPath))
+            reaper.AK_AkJson_Map_Set(importItem, "originalsSubFolder", reaper.AK_AkVariant_String(""))
+            reaper.AK_AkJson_Array_Add(imports, importItem)
+        end
+
+        -- Execute the import if there are files
+        local numFilesToImport = reaper.AK_AkJson_Array_Size(imports)
+        if numFilesToImport > 0 then
+            local options = reaper.AK_AkJson_Map()  -- Creating a JSON Map for options
+            local result = reaper.AK_Waapi_Call(importCommand, arguments, options)
+            local status = reaper.AK_AkJson_GetStatus(result)
+        
+            if status then
+                --reaper.ShowConsoleMsg("Successfully imported " .. numFilesToImport .. " audio files\n")
+            else
+                handleWaapiCallError(result)
+            end
+        else
+            reaper.ShowConsoleMsg("No audio files detected to import.")
+        end
+
+        reaper.AK_AkJson_ClearAll()
+        reaper.AK_Waapi_Disconnect()
+    else
+        reaper.ShowConsoleMsg("Failed to connect to Wwise via WAAPI.")
+    end
+end
+-----------------------------------------------------------------
+function onClickToWwise()
+    local wwiseWinProjectPath, err = getWwiseProjectPath()
+    if wwiseWinProjectPath then
+        local wwiseRenderPath = getAppropriateProjectPath(wwiseWinProjectPath)
+        local sampleRate, out_str, channels = processRenderSettings()
+        local orderedKeywords = processKeywords(myTextbox:val())
+        local num_markers, num_regions = processMarkersAndRegions(orderedKeywords)
+        --reaper.ShowConsoleMsg("Render path : " .. wwiseRenderPath)
+        movedFiles = executeNestedRendering(sampleRate, out_str, channels, wwiseRenderPath, num_markers, num_regions)
+            for i, path in ipairs(movedFiles) do
+                movedFiles[i] = convertToWindowsPath(path)
+            end
+        selectedWwiseObject = getSelectedWwiseObject()
+        importToWwise(movedFiles, selectedWwiseObject)
+    else
+        reaper.ShowConsoleMsg("Error: " .. err .. "\n")
     end
 end
 -----------------------------------------------------------------
@@ -1223,7 +1553,7 @@ layers[3]:addElements(btnItemTrack, btnSelectedTrack, btnFixIncrements, btnToggl
 btnRenderToNested = Button:new{
     name = "Render to folder nested",
     type = "Button",
-    x = halfGuiWidth - 100,
+    x = halfGuiWidth - 220,
     y = 420,
     w = 90,
     h = 45,
@@ -1236,7 +1566,7 @@ btnRenderToNested = Button:new{
 btnRenderToSimple = Button:new{
     name = "Render to folder simple",
     type = "Button",
-    x = halfGuiWidth + 10,
+    x = halfGuiWidth - 110,
     y = 420,
     w = 90,
     h = 45,
@@ -1245,6 +1575,19 @@ btnRenderToSimple = Button:new{
     textColor = uiBgColorLighter,
     font = { table.unpack(fontPresets["smallImpact"]) },
     func = onClickToSimple
+}
+btnRenderToWwise = Button:new{
+    name = "To Wwise",
+    type = "Button",
+    x = guiWidth - 75,
+    y = 420,
+    w = 45,
+    h = 45,
+    caption = "Go",
+    fillColor = uiButtonColor,
+    textColor = uiBgColorLighter,
+    font = { table.unpack(fontPresets["smallImpact"]) },
+    func = onClickToWwise
 }
 btnToRegionMatrix = Button:new{
     name = "To Matrix",
@@ -1274,13 +1617,24 @@ btnResetMatrix = Button:new{
 }
 
 layers[4]:addElements( GUI.createElements(
-    btnRenderToNested, btnToRegionMatrix, btnResetMatrix, btnRenderToSimple,
+    btnRenderToNested, btnToRegionMatrix, btnResetMatrix, btnRenderToSimple, btnRenderToWwise,
     {
         name = "renders",
         type = "Label",
-        x = 215,
+        x = 95,
         y = 400,
         caption = "To Folder",
+        color = uiTxtColor,
+        font = { table.unpack(fontPresets["smallMonaco"]) },
+        shadow = true,
+        bg = uiBgColor
+    },
+    {
+        name = "towwise",
+        type = "Label",
+        x = 280,
+        y = 400,
+        caption = "To selected Wwise object",
         color = uiTxtColor,
         font = { table.unpack(fontPresets["smallMonaco"]) },
         shadow = true,
