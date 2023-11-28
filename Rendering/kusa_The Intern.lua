@@ -1380,8 +1380,6 @@ function onClickToWwise()
         for i, path in ipairs(movedFiles) do
             movedFiles[i] = convertToWindowsPath(path)
         end
-        string = tableToString(movedFiles)
-        reaper.ShowConsoleMsg(string)
         selectedWwiseObject = getSelectedWwiseObject()
         importToWwise(movedFiles, selectedWwiseObject)
     else
