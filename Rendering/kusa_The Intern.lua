@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.5
+-- @version 1.5.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -1149,6 +1149,8 @@ function convertToMacPath(windowsPath)
         if homeDir then
             macPath = homeDir .. "/" .. macPath:sub(4)
         end
+    elseif macPath:find("^Z:/") then
+        macPath = macPath:sub(3)
     end
 
     return macPath
@@ -1156,9 +1158,15 @@ end
 -----------------------------------------------------------------
 function convertToWindowsPath(macPath)
     local windowsPath = macPath:gsub("/", "\\")
+
     local homeDir = os.getenv("HOME")
-    if homeDir and windowsPath:find("^" .. homeDir:gsub("/", "\\")) then
+    if homeDir then
+        homeDir = homeDir:gsub("/", "\\")
+    end
+    if homeDir and windowsPath:find("^" .. homeDir) then
         windowsPath = "Y:\\" .. windowsPath:sub(#homeDir + 2)
+    elseif windowsPath:find("^\\Volumes\\") then
+        windowsPath = "Z:" .. windowsPath
     end
 
     return windowsPath
@@ -1309,11 +1317,9 @@ function importToWwise(movedFiles, selectedWwiseObject)
             local baseFileName = fileNameWithExtension and fileNameWithExtension:match("(.+)_[^_]+") or fileNameWithExtension
 
             if shouldWwiseContainer then
-                -- Define the Random Container Name and Path
                 local containerName = baseFileName
                 local randomContainerPath = selectedWwiseObject .. "\\" .. containerName
 
-                -- Try to create the Random Container
                 local createArguments = reaper.AK_AkJson_Map()
                 reaper.AK_AkJson_Map_Set(createArguments, "parent", reaper.AK_AkVariant_String(selectedWwiseObject))
                 reaper.AK_AkJson_Map_Set(createArguments, "type", reaper.AK_AkVariant_String(containerType))
@@ -1371,9 +1377,11 @@ function onClickToWwise()
         local num_markers, num_regions = processMarkersAndRegions(orderedKeywords)
         --reaper.ShowConsoleMsg("Render path : " .. wwiseRenderPath)
         movedFiles = executeNestedRendering(sampleRate, out_str, channels, wwiseRenderPath, num_markers, num_regions)
-            for i, path in ipairs(movedFiles) do
-                movedFiles[i] = convertToWindowsPath(path)
-            end
+        for i, path in ipairs(movedFiles) do
+            movedFiles[i] = convertToWindowsPath(path)
+        end
+        string = tableToString(movedFiles)
+        reaper.ShowConsoleMsg(string)
         selectedWwiseObject = getSelectedWwiseObject()
         importToWwise(movedFiles, selectedWwiseObject)
     else
