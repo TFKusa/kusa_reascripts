@@ -23,7 +23,7 @@ THE INTERN - DOCUMENTATION
 
         What is The Intern
 
-The Intern is a ReaScript that enhances region and rendering management. It utilizes Track Folder hierarchy for naming regions and supports filtering for rendering processes.
+The Intern is a ReaScript that enhances region and rendering management. It utilizes Track Folder hierarchy for naming regions and supports filtering for rendering processes. It also supports WAAPI for imports straight into Wwise.
 
 
 
@@ -35,9 +35,19 @@ items :
 regions :
 - Removes all existing regions in the project.
 
+        Based on track folder hierarchy :
 Item's track :
 - Creates an individual region for each selected item based on item length. If regions overlap (if the asset is made of multiple items on different tracks for example), it will merge the overlapping regions into one.
 - Names regions based on the Track Folder hierarchy, ending with the track holding the item. If a track in the hierarchy has no name, it is not used.
+
+Selected Track :
+- Creates an individual region for each selected item based on item length. If regions overlap (if the asset is made of multiple items on different tracks for example), it will merge the overlapping regions into one.
+- Similar to 'Item's track', but uses the currently selected track for naming.
+
+        Based on single track :
+Item's track :
+- Creates an individual region for each selected item based on item length. If regions overlap (if the asset is made of multiple items on different tracks for example), it will merge the overlapping regions into one.
+- Names regions based on the Track holding the item.
 
 Selected Track :
 - Creates an individual region for each selected item based on item length. If regions overlap (if the asset is made of multiple items on different tracks for example), it will merge the overlapping regions into one.
@@ -64,7 +74,7 @@ To Region Matrix :
 - Configures regions to "Master Mix" in the Matrix, considering the specified keywords.
 
 Master folder :
-- Whether the script needs to create a "MyProjectName_Export" folder within the directory selected by the user
+- Whether the script needs to create a "MyProjectName_Export" folder within the directory selected by the user.
 
 Nested :
 - Prompts for a directory and creates a nested folder hierarchy based on region names for rendering.
@@ -81,3 +91,17 @@ Render to Wwise :
 
 Precisions : It will create a nested folder hierarchy with the assets in pathToYourWwiseProjectFolder/Originals/SFX.
 It will also group assets that have the same base name (name without the incrementing number) in the same container, if a container is selected in the dropdown menu.
+
+
+
+        How to send from mac to pc :
+
+- Get the IP address of both your Mac and your PC.
+- Setup file sharing between your computers. You need to share your Windows "Wwise Projects" and "User" folder (the latter should be shared by default).
+- On Windows, open up Wwise. Go to Project -> User Preferences. Under "Allow connections from:" type your Mac IP address.
+- On Mac, with the Finder on focus, press cmd+K. Type "smb://Your.Win.IP.Address". Mount the shared folders by opening them.
+- You can now enter your PC IP address in The Intern's options tab, and transfer effortlessly your awesome designs.
+
+You can save your PC IP address by clicking on the "Save" button. "local" and "saved" are recall buttons to easily switch between configurations.
+When an address is saved, it becomes the default address when the script is launched.
+
