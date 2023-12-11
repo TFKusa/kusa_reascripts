@@ -89,7 +89,7 @@ Render to Wwise :
 
         !! MAKE SURE THAT REAPER HAS FOCUS WHEN RENDERING. If it doesn't have focus, the items will be offline and it will create blank files (this behaviour can be changed in the Reaper preferences) !!
 
-Precisions : It will create a nested folder hierarchy with the assets in pathToYourWwiseProjectFolder/Originals/SFX.
+Precisions : It will create a nested folder hierarchy with the assets in pathToYourWwiseProjectFolder/Originals/.
 It will also group assets that have the same base name (name without the incrementing number) in the same container, if a container is selected in the dropdown menu.
 
 
