@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 1.5.1
+-- @version 2.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -38,6 +38,7 @@ local guiWidth = 500
 local guiHeight = 500
 local halfGuiWidth = guiWidth / 2
 local layers
+local buttonHeight = 45
 
 -- REGIONS
 local num_markers, num_regions
@@ -100,6 +101,12 @@ else
     uiBgColor = clrDefaultBg
 end
 
+local loadedIp = reaper.GetExtState("The Intern", "buttonIP")
+if loadedIp and loadedIp ~= "" then
+    userIPSetting = loadedIp
+else
+    userIPSetting = "127.0.0.1"
+end
 
 -----------------------------------------------------------------
 ---------------------SETUP BG COLORS-----------------------------
@@ -329,6 +336,27 @@ layers[2]:addElements( GUI.createElement(
     }
 ))
 
+-----------------------------------------------------------------
+---------------------TAB 3 USER PROMPTS--------------------------
+-----------------------------------------------------------------
+
+
+txtRemotePcIp = Textbox:new{
+    name = "Remote IP",
+    type = "Textbox",
+    x = (guiWidth / 2) - 120,
+    y = 245,
+    w = 150,
+    h = 30,
+    color = uiTxtColor,
+    captionFont = { table.unpack(fontPresets["smallMonaco"]) },
+    captionPosition = "left",
+    caption = "Remote PC IP ",
+    retval = userIPSetting,
+    bg = uiBgColor
+}
+
+layers[5]:addElements(txtRemotePcIp)
 
 -----------------------------------------------------------------
 ---------------------TAB 2 USER PROMPTS--------------------------
@@ -643,11 +671,22 @@ function getHierarchicalTrackNames(track)
     return table.concat(reversedTrackNames, "_")
 end
 -----------------------------------------------------------------
-function determineNamingMethod(useSelectedTrack, selectedItem)
+function getTrackName(track)
+    local _, trackName = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    return trackName
+end
+-----------------------------------------------------------------
+function determineNamingMethod(useSelectedTrackHierarchy, selectedItem, useSelectedTrackSimple, useItemTrackSimple)
     local regionName
-    if useSelectedTrack then
+    if useSelectedTrackHierarchy then
         local parentTrackFromItem = reaper.GetMediaItemTrack(selectedItem)
         regionName = getHierarchicalTrackNames(parentTrackFromItem)
+    elseif useItemTrackSimple then
+        local parentTrackFromItem = reaper.GetMediaItemTrack(selectedItem)
+        regionName = getTrackName(parentTrackFromItem)        
+    elseif useSelectedTrackSimple then
+        local selectedTrack = reaper.GetSelectedTrack(0, 0)
+        regionName = getTrackName(selectedTrack)
     else
         local selectedTrack = reaper.GetSelectedTrack(0, 0)
         regionName = getHierarchicalTrackNames(selectedTrack)
@@ -655,12 +694,12 @@ function determineNamingMethod(useSelectedTrack, selectedItem)
     return regionName
 end
 -----------------------------------------------------------------
-function storeAndSortRegionsData(items, useSelectedTrack)
+function storeAndSortRegionsData(items, useSelectedTrackHierarchy, useSelectedTrackSimple, useItemTrackSimple)
     local regionData = {}
     for _, selectedItem in ipairs(items) do
         local itemPosition = reaper.GetMediaItemInfo_Value(selectedItem, "D_POSITION")
         local itemEndPosition = itemPosition + reaper.GetMediaItemInfo_Value(selectedItem, "D_LENGTH")
-        local regionName = determineNamingMethod(useSelectedTrack, selectedItem)
+        local regionName = determineNamingMethod(useSelectedTrackHierarchy, selectedItem, useSelectedTrackSimple, useItemTrackSimple)
         table.insert(regionData, { name = regionName, startPos = itemPosition, endPos = itemEndPosition })
     end
 
@@ -734,10 +773,10 @@ function mergeAndCreateRegions(project, regionData)
     reaper.UpdateArrange()
 end
 -----------------------------------------------------------------
-function processRegionsAccordingToUser(useSelectedTrack)
+function processRegionsAccordingToUser(useSelectedTrackHierarchy, useSelectedTrackSimple, useItemTrackSimple)
     local project = getCurrentProject()
     local items = countAndLoopThroughSelectedItems(project)
-    local regionData = storeAndSortRegionsData(items, useSelectedTrack)
+    local regionData = storeAndSortRegionsData(items, useSelectedTrackHierarchy, useSelectedTrackSimple, useItemTrackSimple)
     mergeAndCreateRegions(project, regionData)
 end
 -----------------------------------------------------------------
@@ -841,7 +880,26 @@ local function processRenderSettings()
     end
     return sampleRate, out_str, channels
 end
+-----------------------------------------------------------------
+function checkActiveRegionInRenderMatrix()
+    local project = reaper.EnumProjects(-1, "")
+    local regionCount, markerCount = reaper.CountProjectMarkers(project)
+    local trackCount = reaper.CountTracks(project)
 
+    for i = 0, regionCount + markerCount - 1 do
+        local _, isRegion, _, _, _, markrgnindexnumber = reaper.EnumProjectMarkers(i)
+        if isRegion then
+            for trackIdx = 0, trackCount - 1 do
+                local track = reaper.EnumRegionRenderMatrix(project, markrgnindexnumber, trackIdx)
+                if track ~= nil then
+                    return true
+                end
+            end
+        end
+    end
+
+    return false
+end
 
 -----------------------------------------------------------------
 ------------------------CHECK BOX--------------------------------
@@ -885,7 +943,7 @@ dpWwise = GUI.createElement({
     retval = 1,
     captionFont = { table.unpack(fontPresets["medMonaco"]) },
     textFont = { table.unpack(fontPresets["smallMonaco"]) },
-    options = {"No container","Random/Sequence", "Switch", "Blend", "Actor-Mixer", "Work Unit", "Folder"},
+    options = {"Random/Sequence", "Switch", "Blend", "Actor-Mixer", "Work Unit", "Folder", "No container"},
     bg = uiBgColor
 })
 
@@ -974,11 +1032,27 @@ function onClickItemTrack()
     end
 end
 -----------------------------------------------------------------
+function onClickItemTrackSimple()
+    local project = getCurrentProject()
+    local _, items = countAndLoopThroughSelectedItems(project)
+    if items > 0 then
+    processRegionsAccordingToUser(false, false, true)
+    end
+end
+-----------------------------------------------------------------
 function onClickSelectedTrack()
     local project = getCurrentProject()
     local _, items = countAndLoopThroughSelectedItems(project)
     if items > 0 then
     processRegionsAccordingToUser()
+    end
+end
+-----------------------------------------------------------------
+function onClickSelectedTrackSimple()
+    local project = getCurrentProject()
+    local _, items = countAndLoopThroughSelectedItems(project)
+    if items > 0 then
+    processRegionsAccordingToUser(false, true, false)
     end
 end
 -----------------------------------------------------------------
@@ -1002,10 +1076,8 @@ function removeDirectory(path)
     local command
 
     if os == "Win32" or os == "Win64" then
-        -- Windows command to remove directory
         command = 'rmdir /s /q "' .. path .. '"'
     else
-        -- Unix/Linux command to remove directory
         command = 'rm -r "' .. path .. '"'
     end
 
@@ -1118,15 +1190,38 @@ local function executeNestedRendering(sampleRate, out_str, channels, projectExpo
 end
 -----------------------------------------------------------------
 function onClickToNested()
-    local sampleRate, out_str, channels = processRenderSettings()
-    local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
-    if not retval or exportPath == "" then return end
+    shouldContinueProcess = checkActiveRegionInRenderMatrix()
+    if not shouldContinueProcess then reaper.ShowConsoleMsg("No set region in the matrix \n") return       
+    else
+        local sampleRate, out_str, channels = processRenderSettings()
+        local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
+        if not retval or exportPath == "" then return end
 
-    executeNestedRendering(sampleRate, out_str, channels, projectExportPath, num_markers, num_regions)
+        executeNestedRendering(sampleRate, out_str, channels, projectExportPath, num_markers, num_regions)      
+    end
+end
+-----------------------------------------------------------------
+function convertFromRemotePcPath(winPath)
+    local driveLetter = winPath:match("^(%a):")
+    local macPath = winPath:gsub("^%a:", "/Volumes")
+    return macPath, driveLetter
+end
+-----------------------------------------------------------------
+function convertToRemotePcPath(macPath, driveLetter)
+    if not driveLetter:match(":$") then
+        driveLetter = driveLetter .. ":"
+    end
+
+    local winPath = macPath:gsub("^/Volumes", driveLetter)
+
+    winPath = winPath:gsub("/", "\\")
+
+    return winPath
 end
 -----------------------------------------------------------------
 function getWwiseProjectPath()
-    if(reaper.AK_Waapi_Connect("127.0.0.1", 8080)) then
+    local userIPSetting = txtRemotePcIp:val()
+    if(reaper.AK_Waapi_Connect(userIPSetting, 8080)) then
         local result = reaper.AK_Waapi_Call("ak.wwise.core.getProjectInfo", reaper.AK_AkJson_Map(), reaper.AK_AkJson_Map())
         if result then
             local projectPathVariant = reaper.AK_AkJson_Map_Get(result, "path")
@@ -1177,13 +1272,11 @@ function replaceWithOriginalsDir(path)
     local pattern, replacement
 
     if os == "Win32" or os == "Win64" then
-        -- Windows path pattern
         pattern = "(.+\\)[^\\]+$"
-        replacement = "%1Originals\\SFX"
+        replacement = "%1Originals"
     else
-        -- Unix/Linux path pattern
         pattern = "(.+)/[^/]+$"
-        replacement = "%1/Originals/SFX"
+        replacement = "%1/Originals"
     end
 
     local newPath = path:gsub(pattern, replacement)
@@ -1199,9 +1292,9 @@ function getAppropriateProjectPath(wwiseWinProjectPath)
     end
 end
 -----------------------------------------------------------------
-function getSelectedWwiseObject()
-    local selectedPath = nil -- Variable to store the selected path
-    if(reaper.AK_Waapi_Connect("127.0.0.1", 8080)) then
+function getSelectedWwiseObject(userIPSetting)
+    local selectedPath = nil
+    if(reaper.AK_Waapi_Connect(userIPSetting, 8080)) then
         local fieldsToReturn = reaper.AK_AkJson_Array()
         reaper.AK_AkJson_Array_Add(fieldsToReturn, reaper.AK_AkVariant_String("path"))
 
@@ -1218,13 +1311,10 @@ function getSelectedWwiseObject()
             local numObjects = reaper.AK_AkJson_Array_Size(objects)
 
             if numObjects == 1 then
-                -- If only one object is selected, get its path
                 local item = reaper.AK_AkJson_Array_Get(objects, 0)
                 local path = reaper.AK_AkJson_Map_Get(item, "path")
                 selectedPath = reaper.AK_AkVariant_GetString(path)
-                --selectedPath = selectedPath:gsub("\\", "\\\\")
             else
-                -- If more than one object is selected, show an error message
                 reaper.ShowConsoleMsg("Please select only one Wwise object.\n")
                 return
             end
@@ -1257,8 +1347,8 @@ function handleWaapiCallError(result)
     end
 end
 -----------------------------------------------------------------
-function importToWwise(movedFiles, selectedWwiseObject)
-    if(reaper.AK_Waapi_Connect("127.0.0.1", 8080)) then
+function importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
+    if(reaper.AK_Waapi_Connect(userIPSetting, 8080)) then
         local windows = string.find(reaper.GetOS(), "Win") ~= nil
         local separator = windows and '\\' or '/'
 
@@ -1268,24 +1358,18 @@ function importToWwise(movedFiles, selectedWwiseObject)
             return
         end
     
-        -- import command --
         local importCommand = "ak.wwise.core.audio.import"
      
-        -- importOperation --
         local importOperation = reaper.AK_AkVariant_String("replaceExisting")
      
-        -- default --
         local default = reaper.AK_AkJson_Map()
         local importLanguage = reaper.AK_AkVariant_String("SFX")
         reaper.AK_AkJson_Map_Set(default, "importLanguage", importLanguage)
      
-        -- imports --
         local imports = reaper.AK_AkJson_Array()
      
-        -- autoAddToSourceControl --
         local autoAddToSourceControl = reaper.AK_AkVariant_Bool(true)
      
-        -- arguments --
         local arguments = reaper.AK_AkJson_Map()
         reaper.AK_AkJson_Map_Set(arguments, "importOperation", importOperation)
         reaper.AK_AkJson_Map_Set(arguments, "default", default)
@@ -1294,24 +1378,23 @@ function importToWwise(movedFiles, selectedWwiseObject)
             autoAddToSourceControl)
 
         local containerTypeMappings = {
-            [1] = false,                   -- No container
-            [2] = "RandomSequenceContainer",
-            [3] = "SwitchContainer",
-            [4] = "BlendContainer",
-            [5] = "ActorMixer",
-            [6] = "WorkUnit",
-            [7] = "Folder"
+            [1] = "RandomSequenceContainer",
+            [2] = "SwitchContainer",
+            [3] = "BlendContainer",
+            [4] = "ActorMixer",
+            [5] = "WorkUnit",
+            [6] = "Folder",
+            [7] = false
         }
         
         local userContainerChoice = dpWwise:val()
         local shouldWwiseContainer = true
         local containerType = containerTypeMappings[userContainerChoice] or false
         
-        if userContainerChoice == 1 then
+        if userContainerChoice == 7 then
             shouldWwiseContainer = false
         end
      
-        -- Build import request from movedFiles
         for _, filePath in ipairs(movedFiles) do
             local fileNameWithExtension = filePath:match("([^\\]+)%.wav$")
             local baseFileName = fileNameWithExtension and fileNameWithExtension:match("(.+)_[^_]+") or fileNameWithExtension
@@ -1325,10 +1408,9 @@ function importToWwise(movedFiles, selectedWwiseObject)
                 reaper.AK_AkJson_Map_Set(createArguments, "type", reaper.AK_AkVariant_String(containerType))
                 reaper.AK_AkJson_Map_Set(createArguments, "name", reaper.AK_AkVariant_String(containerName))
                 reaper.AK_AkJson_Map_Set(createArguments, "onNameConflict", reaper.AK_AkVariant_String("merge"))
-                local options = reaper.AK_AkJson_Map()  -- Creating an empty JSON Map for options
+                local options = reaper.AK_AkJson_Map()
                 local createResult = reaper.AK_Waapi_Call("ak.wwise.core.object.create", createArguments, options)
 
-                -- Check if the container was created or already exists
                 if not createResult then
                     reaper.ShowConsoleMsg("Failed to create or access Random Container.\n")
                     return
@@ -1345,16 +1427,13 @@ function importToWwise(movedFiles, selectedWwiseObject)
             reaper.AK_AkJson_Array_Add(imports, importItem)
         end
 
-        -- Execute the import if there are files
         local numFilesToImport = reaper.AK_AkJson_Array_Size(imports)
         if numFilesToImport > 0 then
-            local options = reaper.AK_AkJson_Map()  -- Creating a JSON Map for options
+            local options = reaper.AK_AkJson_Map()
             local result = reaper.AK_Waapi_Call(importCommand, arguments, options)
             local status = reaper.AK_AkJson_GetStatus(result)
         
-            if status then
-                --reaper.ShowConsoleMsg("Successfully imported " .. numFilesToImport .. " audio files\n")
-            else
+            if not status then
                 handleWaapiCallError(result)
             end
         else
@@ -1369,49 +1448,67 @@ function importToWwise(movedFiles, selectedWwiseObject)
 end
 -----------------------------------------------------------------
 function onClickToWwise()
-    local wwiseWinProjectPath, err = getWwiseProjectPath()
-    if wwiseWinProjectPath then
-        local wwiseRenderPath = getAppropriateProjectPath(wwiseWinProjectPath)
-        local sampleRate, out_str, channels = processRenderSettings()
-        local orderedKeywords = processKeywords(myTextbox:val())
-        local num_markers, num_regions = processMarkersAndRegions(orderedKeywords)
-        --reaper.ShowConsoleMsg("Render path : " .. wwiseRenderPath)
-        movedFiles = executeNestedRendering(sampleRate, out_str, channels, wwiseRenderPath, num_markers, num_regions)
-        for i, path in ipairs(movedFiles) do
-            movedFiles[i] = convertToWindowsPath(path)
-        end
-        selectedWwiseObject = getSelectedWwiseObject()
-        importToWwise(movedFiles, selectedWwiseObject)
+    shouldContinueProcess = checkActiveRegionInRenderMatrix()
+    if not shouldContinueProcess then reaper.ShowConsoleMsg("No set region in the matrix \n") return       
     else
-        reaper.ShowConsoleMsg("Error: " .. err .. "\n")
+        local userIPSetting = txtRemotePcIp:val()
+        local wwiseWinProjectPath, err = getWwiseProjectPath()
+        if wwiseWinProjectPath then
+            local wwiseRenderPath = getAppropriateProjectPath(wwiseWinProjectPath)
+            if userIPSetting ~= "127.0.0.1" then
+                wwiseRenderPath, driveLetter = convertFromRemotePcPath(wwiseRenderPath)
+            end
+            local sampleRate, out_str, channels = processRenderSettings()
+            local orderedKeywords = processKeywords(myTextbox:val())
+            local num_markers, num_regions = processMarkersAndRegions(orderedKeywords)
+            movedFiles = executeNestedRendering(sampleRate, out_str, channels, wwiseRenderPath, num_markers, num_regions)
+            if userIPSetting == "127.0.0.1" then
+                for i, path in ipairs(movedFiles) do
+                    movedFiles[i] = convertToWindowsPath(path)
+                end
+            else
+                for i, path in ipairs(movedFiles) do
+                    movedFiles[i] = convertToRemotePcPath(path, driveLetter)
+                end
+            end
+            selectedWwiseObject = getSelectedWwiseObject(userIPSetting)
+            importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
+        else
+            reaper.ShowConsoleMsg("Error: " .. err .. "\n")
+        end
     end
 end
 -----------------------------------------------------------------
 function onClickToSimple()
-    local sampleRate, out_str, channels = processRenderSettings()
-    local retval, exportPath = reaper.JS_Dialog_BrowseForFolder("Select export directory", "")
-    if not retval or exportPath == "" then return end
-    isMasterFolderChecked = checkMasterFolder:val(nil, true)
-    if isMasterFolderChecked then
-        local projectName = getProjectName()
-        projectExportPath = exportPath .. "/" .. projectName .. "_Export"
-        createDirectory(projectExportPath)
+    shouldContinueProcess = checkActiveRegionInRenderMatrix()
+    if not shouldContinueProcess then reaper.ShowConsoleMsg("No set region in the matrix \n") return       
     else
-        projectExportPath = exportPath
-    end
-    
-    reaper.GetSetProjectInfo(0, 'RENDER_SETTINGS', 8, true)
-    reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
-    reaper.GetSetProjectInfo(0, "RENDER_SRATE", sampleRate, true)
-    reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
-    reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)   
-    reaper.GetSetProjectInfo_String(0, "RENDER_FILE", projectExportPath, true)
-    reaper.Main_OnCommand(42230, 0)
-    if isDirectoryEmpty(projectExportPath) then
-        removeDirectory(projectExportPath)
+        local sampleRate, out_str, channels = processRenderSettings()
+        local retval, exportPath = reaper.JS_Dialog_BrowseForFolder("Select export directory", "")
+        if not retval or exportPath == "" then return end
+        isMasterFolderChecked = checkMasterFolder:val(nil, true)
+        if isMasterFolderChecked then
+            local projectName = getProjectName()
+            projectExportPath = exportPath .. "/" .. projectName .. "_Export"
+            createDirectory(projectExportPath)
+        else
+            projectExportPath = exportPath
+        end
+        
+        reaper.GetSetProjectInfo(0, 'RENDER_SETTINGS', 8, true)
+        reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", "$region", true)
+        reaper.GetSetProjectInfo(0, "RENDER_SRATE", sampleRate, true)
+        reaper.GetSetProjectInfo(0, "RENDER_CHANNELS", channels, true)
+        reaper.GetSetProjectInfo_String(0, "RENDER_FORMAT", enc('evaw'..out_str), true)   
+        reaper.GetSetProjectInfo_String(0, "RENDER_FILE", projectExportPath, true)
+        reaper.Main_OnCommand(42230, 0)
+        if isDirectoryEmpty(projectExportPath) then
+            removeDirectory(projectExportPath)
+        end
     end
 end
 -----------------------------------------------------------------
+
 function editMatrix(setMatrix)
     local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
     local orderedKeywords = processKeywords(myTextbox:val())
@@ -1458,31 +1555,57 @@ end
 -----------------------------------------------------------------
 
 
-btnItemTrack = Button:new{
-    name = "itemTrack",
+btnItemTrackHierarchy = Button:new{
+    name = "itemTrackHierarchy",
     type = "Button",
     x = halfGuiWidth - 100,
-    y = 320,
+    y = 140,
     w = 200,
-    h = 45,
+    h = buttonHeight,
     caption = "Item's track",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
     font = { table.unpack(fontPresets["smallImpact"]) },
     func = onClickItemTrack
 }
-btnSelectedTrack = Button:new{
-    name = "selectedTrack",
+btnSelectedTrackHierarchy = Button:new{
+    name = "selectedTrackHierarchy",
     type = "Button",
     x = halfGuiWidth - 100,
-    y = 370,
+    y = 190,
     w = 200,
-    h = 45,
+    h = buttonHeight,
     caption = "Selected track",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
     font = { table.unpack(fontPresets["smallImpact"]) },
     func = onClickSelectedTrack,
+}
+btnItemTrackSimple = Button:new{
+    name = "itemTrackSimple",
+    type = "Button",
+    x = halfGuiWidth - 100,
+    y = 290,
+    w = 200,
+    h = buttonHeight,
+    caption = "Item's track",
+    fillColor = uiButtonColor,
+    textColor = uiBgColorLighter,
+    font = { table.unpack(fontPresets["smallImpact"]) },
+    func = onClickItemTrackSimple
+}
+btnSelectedTrackSimple = Button:new{
+    name = "selectedTrackSimple",
+    type = "Button",
+    x = halfGuiWidth - 100,
+    y = 340,
+    w = 200,
+    h = buttonHeight,
+    caption = "Selected track",
+    fillColor = uiButtonColor,
+    textColor = uiBgColorLighter,
+    font = { table.unpack(fontPresets["smallImpact"]) },
+    func = onClickSelectedTrackSimple,
 }
 btnFixIncrements = Button:new{
     name = "Fix Increments",
@@ -1490,7 +1613,7 @@ btnFixIncrements = Button:new{
     x = halfGuiWidth - 100,
     y = 420,
     w = 200,
-    h = 45,
+    h = buttonHeight,
     caption = "Fix Increments",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
@@ -1503,7 +1626,7 @@ btnToggleSelectAllItems = Button:new{
     x = 30,
     y = 370,
     w = 55,
-    h = 45,
+    h = buttonHeight,
     caption = "items",
     font = smallMonaco,
     textColor = uiBgColorLighter,
@@ -1516,7 +1639,7 @@ btnDeleteAllRegions = Button:new{
     x = guiWidth - 80,
     y = 370,
     w = 55,
-    h = 45,
+    h = buttonHeight,
     caption = "regions",
     font = smallMonaco,
     textColor = uiBgColorLighter,
@@ -1524,7 +1647,7 @@ btnDeleteAllRegions = Button:new{
     func = onClickDeleteAllRegions
 }
 -----------------------------------------------------------------
-local descriptionToggle,descriptionDeleteRegions = GUI.createElements(
+local descriptionToggle,descriptionDeleteRegions, descriptionRegionHierarchy, descriptionRegionSimple = GUI.createElements(
     {
         name = "Descriptiontoggle",
         type = "Label",
@@ -1546,9 +1669,31 @@ local descriptionToggle,descriptionDeleteRegions = GUI.createElements(
         font = { table.unpack(fontPresets["smallMonaco"]) },
         shadow = true,
         bg = uiBgColor
+    },
+    {
+        name = "DescriptionRegionHierarchy",
+        type = "Label",
+        x = halfGuiWidth - 145,
+        y = 110,
+        caption = "Name based on track folder hierarchy",
+        color = uiTxtColor,
+        font = { table.unpack(fontPresets["medMonaco"]) },
+        shadow = true,
+        bg = uiBgColor
+    },
+    {
+        name = "DescriptionRegionSimple",
+        type = "Label",
+        x = halfGuiWidth - 103,
+        y = 260,
+        caption = "Name based on single track",
+        color = uiTxtColor,
+        font = { table.unpack(fontPresets["medMonaco"]) },
+        shadow = true,
+        bg = uiBgColor
     }
 )
-layers[3]:addElements(btnItemTrack, btnSelectedTrack, btnFixIncrements, btnToggleSelectAllItems, btnDeleteAllRegions, descriptionToggle, descriptionDeleteRegions)
+layers[3]:addElements(btnItemTrackHierarchy, btnSelectedTrackHierarchy, btnItemTrackSimple, btnSelectedTrackSimple, btnFixIncrements, btnToggleSelectAllItems, btnDeleteAllRegions, descriptionToggle, descriptionDeleteRegions, descriptionRegionHierarchy, descriptionRegionSimple)
 
 
 -----------------------------------------------------------------
@@ -1562,7 +1707,7 @@ btnRenderToNested = Button:new{
     x = halfGuiWidth - 220,
     y = 420,
     w = 90,
-    h = 45,
+    h = buttonHeight,
     caption = "Nested",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
@@ -1575,7 +1720,7 @@ btnRenderToSimple = Button:new{
     x = halfGuiWidth - 110,
     y = 420,
     w = 90,
-    h = 45,
+    h = buttonHeight,
     caption = "Simple",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
@@ -1588,7 +1733,7 @@ btnRenderToWwise = Button:new{
     x = guiWidth - 75,
     y = 420,
     w = 45,
-    h = 45,
+    h = buttonHeight,
     caption = "Go",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
@@ -1601,7 +1746,7 @@ btnToRegionMatrix = Button:new{
     x = 35,
     y = 320,
     w = 150,
-    h = 45,
+    h = buttonHeight,
     caption = "To Region Matrix",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
@@ -1614,7 +1759,7 @@ btnResetMatrix = Button:new{
     x = guiWidth * 5/8,
     y = 320,
     w = 150,
-    h = 45,
+    h = buttonHeight,
     caption = "Reset Matrix",
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
@@ -1673,6 +1818,27 @@ function saveButtonColor()
     window:close()
 end
 -----------------------------------------------------------------
+function saveButtonIp()
+    local buttonIpToSave = txtRemotePcIp:val()
+    reaper.SetExtState("The Intern", "buttonIp", buttonIpToSave, true)
+end
+-----------------------------------------------------------------
+function getLocalIp()
+    txtRemotePcIp:val("127.0.0.1")
+    txtRemotePcIp:recalculateWindow()
+end
+-----------------------------------------------------------------
+function getSavedIp()
+    local loadedIp = reaper.GetExtState("The Intern", "buttonIP")
+    if loadedIp and loadedIp ~= "" then
+        txtRemotePcIp:val(loadedIp)
+        txtRemotePcIp:recalculateWindow()
+    else
+        txtRemotePcIp:val("127.0.0.1")
+        txtRemotePcIp:recalculateWindow()
+    end
+end
+-----------------------------------------------------------------
 function onClickWebsite()
     openURL("https://thomashugofritz.wixsite.com/website")
 end
@@ -1702,10 +1868,49 @@ layers[5]:addElements( GUI.createElements(
         func = saveButtonColor
     },
     {
+        name = "Apply IP",
+        type = "Button",
+        x = guiWidth * 4/7,
+        y = 245,
+        w = 45,
+        h = 25,
+        caption = "Save",
+        fillColor = uiButtonColor,
+        textColor = uiBgColorLighter,
+        font = { table.unpack(fontPresets["smallMonaco"]) },
+        func = saveButtonIp
+    },
+    {
+        name = "GetLocalIP",
+        type = "Button",
+        x = guiWidth * 10/13,
+        y = 231,
+        w = 45,
+        h = 25,
+        caption = "local",
+        fillColor = uiButtonColor,
+        textColor = uiBgColorLighter,
+        font = { table.unpack(fontPresets["smallMonaco"]) },
+        func = getLocalIp
+    },
+    {
+        name = "SavedIP",
+        type = "Button",
+        x = guiWidth * 10/13,
+        y = 265,
+        w = 45,
+        h = 25,
+        caption = "saved",
+        fillColor = uiButtonColor,
+        textColor = uiBgColorLighter,
+        font = { table.unpack(fontPresets["smallMonaco"]) },
+        func = getSavedIp
+    },
+    {
         name = "ApplyColors",
         type = "Label",
         x = guiWidth * 1/2 - 60,
-        y = 180,
+        y = 185,
         caption = "Restart necessary",
         color = uiTxtColor,
         font = { table.unpack(fontPresets["smallMonaco"]) },
@@ -1721,6 +1926,14 @@ layers[5]:addElements( GUI.createElements(
         h = 1,
     },
     {
+        name = "Divider3",
+        type = "Frame",
+        x = 0,
+        y = 300,
+        w = window.w,
+        h = 1,
+    },
+    {
         name = "Description Title",
         type = "Label",
         x = 91,
@@ -1732,20 +1945,12 @@ layers[5]:addElements( GUI.createElements(
         bg = uiBgColor
     },
     {
-        name = "Divider3",
-        type = "Frame",
-        x = 0,
-        y = 340,
-        w = window.w,
-        h = 1,
-    },
-    {
         name = "portfolio",
         type = "Button",
         x = halfGuiWidth - 100,
-        y = 257,
+        y = 320,
         w = 200,
-        h = 45,
+        h = buttonHeight,
         caption = "Website",
         fillColor = uiButtonColor,
         textColor = uiBgColorLighter,
