@@ -85,6 +85,11 @@ Simple :
 Render to Wwise :
 - Set up in the Matrix the regions you want to export
 - Choose a container type (or no container at all)
+- Select the target destination in Wwise
+- Go !
+
+Get audio from Wwise :
+- Select the target Sound in Wwise
 - Go !
 
         !! MAKE SURE THAT REAPER HAS FOCUS WHEN RENDERING. If it doesn't have focus, the items will be offline and it will create blank files (this behaviour can be changed in the Reaper preferences) !!
