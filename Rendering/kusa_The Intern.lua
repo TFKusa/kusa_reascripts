@@ -1,5 +1,5 @@
 -- @description kusa_The Intern
--- @version 2.0
+-- @version 2.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -575,6 +575,10 @@ function enc(data)  -- THANK YOU MPL http://forum.cockos.com/showthread.php?t=18
       end)..({ '', '==', '=' })[#data%3+1])
 end
 -----------------------------------------------------------------
+function replaceBackslashWithForwardSlash(inputStr)
+    return string.gsub(inputStr, "\\", "/")
+end
+-----------------------------------------------------------------
 function getProjectName()
     local _, projectPath = reaper.EnumProjects(-1, "")
     if projectPath == "" or not projectPath:match("%.RPP$") then
@@ -934,8 +938,8 @@ dpWwise = GUI.createElement({
     name = "mnuWwise",
     type = "Menubox",
     x = guiWidth - 225,
-    y = 432,
-    w = 140,
+    y = 420,
+    w = 110,
     h = 20,
     caption = "",
     captionColor = uiTxtColor,
@@ -1292,11 +1296,11 @@ function getAppropriateProjectPath(wwiseWinProjectPath)
     end
 end
 -----------------------------------------------------------------
-function getSelectedWwiseObject(userIPSetting)
+function getSelectedWwiseObject(userIPSetting, data)
     local selectedPath = nil
     if(reaper.AK_Waapi_Connect(userIPSetting, 8080)) then
         local fieldsToReturn = reaper.AK_AkJson_Array()
-        reaper.AK_AkJson_Array_Add(fieldsToReturn, reaper.AK_AkVariant_String("path"))
+        reaper.AK_AkJson_Array_Add(fieldsToReturn, reaper.AK_AkVariant_String(data))
 
         local options = reaper.AK_AkJson_Map()
         reaper.AK_AkJson_Map_Set(options, "return", fieldsToReturn)
@@ -1312,7 +1316,7 @@ function getSelectedWwiseObject(userIPSetting)
 
             if numObjects == 1 then
                 local item = reaper.AK_AkJson_Array_Get(objects, 0)
-                local path = reaper.AK_AkJson_Map_Get(item, "path")
+                local path = reaper.AK_AkJson_Map_Get(item, data)
                 selectedPath = reaper.AK_AkVariant_GetString(path)
             else
                 reaper.ShowConsoleMsg("Please select only one Wwise object.\n")
@@ -1326,8 +1330,35 @@ function getSelectedWwiseObject(userIPSetting)
     return selectedPath
 end
 -----------------------------------------------------------------
+function selectedWwiseObjectIsValid(userIPSetting, valuesToCheck)
+    local selectedWwiseObjectType = getSelectedWwiseObject(userIPSetting, "type")
+
+    if type(valuesToCheck) ~= "table" then
+        valuesToCheck = {valuesToCheck}
+    end
+
+    for _, value in ipairs(valuesToCheck) do
+        if selectedWwiseObjectType == value then
+            return true
+        end
+    end
+
+    return false
+end
+-----------------------------------------------------------------
 function doubleBackslashes(inputString)
     return string.gsub(inputString, "\\", "\\\\")
+end
+-----------------------------------------------------------------
+function fixWwiseMacPath(wwiseMacPath)
+    local pattern = "/Volumes/Volumes/"
+    local replacement = "/Volumes/"
+
+    if string.find(wwiseMacPath, pattern) then
+        wwiseMacPath = string.gsub(wwiseMacPath, pattern, replacement, 1)
+    end
+
+    return wwiseMacPath
 end
 -----------------------------------------------------------------
 function handleWaapiCallError(result)
@@ -1452,30 +1483,70 @@ function onClickToWwise()
     if not shouldContinueProcess then reaper.ShowConsoleMsg("No set region in the matrix \n") return       
     else
         local userIPSetting = txtRemotePcIp:val()
-        local wwiseWinProjectPath, err = getWwiseProjectPath()
-        if wwiseWinProjectPath then
-            local wwiseRenderPath = getAppropriateProjectPath(wwiseWinProjectPath)
-            if userIPSetting ~= "127.0.0.1" then
-                wwiseRenderPath, driveLetter = convertFromRemotePcPath(wwiseRenderPath)
-            end
-            local sampleRate, out_str, channels = processRenderSettings()
-            local orderedKeywords = processKeywords(myTextbox:val())
-            local num_markers, num_regions = processMarkersAndRegions(orderedKeywords)
-            movedFiles = executeNestedRendering(sampleRate, out_str, channels, wwiseRenderPath, num_markers, num_regions)
-            if userIPSetting == "127.0.0.1" then
-                for i, path in ipairs(movedFiles) do
-                    movedFiles[i] = convertToWindowsPath(path)
+        local valuesToCheck = {"SwitchContainer", "RandomSequenceContainer", "BlendContainer", "WorkUnit", "Folder"}
+        local isValid = selectedWwiseObjectIsValid(userIPSetting, valuesToCheck)
+        if isValid then
+            local wwiseWinProjectPath, err = getWwiseProjectPath()
+            if wwiseWinProjectPath then
+                local wwiseRenderPath = getAppropriateProjectPath(wwiseWinProjectPath)
+                if userIPSetting ~= "127.0.0.1" then
+                    wwiseRenderPath, driveLetter = convertFromRemotePcPath(wwiseRenderPath)
                 end
+                local sampleRate, out_str, channels = processRenderSettings()
+                local orderedKeywords = processKeywords(myTextbox:val())
+                local num_markers, num_regions = processMarkersAndRegions(orderedKeywords)
+                movedFiles = executeNestedRendering(sampleRate, out_str, channels, wwiseRenderPath, num_markers, num_regions)
+                if userIPSetting == "127.0.0.1" then
+                    for i, path in ipairs(movedFiles) do
+                        movedFiles[i] = convertToWindowsPath(path)
+                    end
+                else
+                    for i, path in ipairs(movedFiles) do
+                        movedFiles[i] = convertToRemotePcPath(path, driveLetter)
+                    end
+                end
+                selectedWwiseObject = getSelectedWwiseObject(userIPSetting, "path")
+                importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
             else
-                for i, path in ipairs(movedFiles) do
-                    movedFiles[i] = convertToRemotePcPath(path, driveLetter)
-                end
+                reaper.ShowConsoleMsg("Error: " .. err .. "\n")
             end
-            selectedWwiseObject = getSelectedWwiseObject(userIPSetting)
-            importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
         else
-            reaper.ShowConsoleMsg("Error: " .. err .. "\n")
+            reaper.ShowConsoleMsg("Please select an appropriate Wwise object as target.")
         end
+    end
+end
+-----------------------------------------------------------------
+function importAudioFile(filePath)
+    if filePath == nil or filePath == '' then
+        return "Error: No file path provided"
+    end
+
+    local track = reaper.GetTrack(0, 0)
+    if track == nil then
+        reaper.InsertTrackAtIndex(0, true)
+        track = reaper.GetTrack(0, 0)
+    end
+
+    reaper.InsertMedia(filePath, 0)
+
+    return "Audio file imported successfully"
+end
+-----------------------------------------------------------------
+function onClickFromWwise()
+    local userIPSetting = txtRemotePcIp:val()    
+    local valuesToCheck = "Sound"
+    local isValid = selectedWwiseObjectIsValid(userIPSetting, valuesToCheck)
+    if isValid then
+        wwiseMacPath = getSelectedWwiseObject(userIPSetting, "sound:originalWavFilePath")
+        if isMacOS() then
+            wwiseMacPath, driveLetter = convertFromRemotePcPath(wwiseMacPath)
+            wwiseMacPath = replaceBackslashWithForwardSlash(wwiseMacPath)
+            wwiseMacPath = fixWwiseMacPath(wwiseMacPath)
+
+        end
+        importAudioFile(wwiseMacPath)
+    else
+        reaper.ShowConsoleMsg("Please select an appropriate Wwise object as target.")
     end
 end
 -----------------------------------------------------------------
@@ -1730,7 +1801,20 @@ btnRenderToSimple = Button:new{
 btnRenderToWwise = Button:new{
     name = "To Wwise",
     type = "Button",
-    x = guiWidth - 75,
+    x = guiWidth - 200,
+    y = 450,
+    w = 45,
+    h = buttonHeight - 20,
+    caption = "Go",
+    fillColor = uiButtonColor,
+    textColor = uiBgColorLighter,
+    font = { table.unpack(fontPresets["smallImpact"]) },
+    func = onClickToWwise
+}
+btnFromWwise = Button:new{
+    name = "From Wwise",
+    type = "Button",
+    x = guiWidth - 82,
     y = 420,
     w = 45,
     h = buttonHeight,
@@ -1738,7 +1822,7 @@ btnRenderToWwise = Button:new{
     fillColor = uiButtonColor,
     textColor = uiBgColorLighter,
     font = { table.unpack(fontPresets["smallImpact"]) },
-    func = onClickToWwise
+    func = onClickFromWwise
 }
 btnToRegionMatrix = Button:new{
     name = "To Matrix",
@@ -1768,7 +1852,7 @@ btnResetMatrix = Button:new{
 }
 
 layers[4]:addElements( GUI.createElements(
-    btnRenderToNested, btnToRegionMatrix, btnResetMatrix, btnRenderToSimple, btnRenderToWwise,
+    btnRenderToNested, btnToRegionMatrix, btnResetMatrix, btnRenderToSimple, btnRenderToWwise, btnFromWwise,
     {
         name = "renders",
         type = "Label",
@@ -1783,9 +1867,20 @@ layers[4]:addElements( GUI.createElements(
     {
         name = "towwise",
         type = "Label",
-        x = 280,
+        x = 296,
         y = 400,
-        caption = "To selected Wwise object",
+        caption = "To Wwise",
+        color = uiTxtColor,
+        font = { table.unpack(fontPresets["smallMonaco"]) },
+        shadow = true,
+        bg = uiBgColor
+    },
+    {
+        name = "fromwwiselabel",
+        type = "Label",
+        x = 405,
+        y = 400,
+        caption = "From Wwise",
         color = uiTxtColor,
         font = { table.unpack(fontPresets["smallMonaco"]) },
         shadow = true,
