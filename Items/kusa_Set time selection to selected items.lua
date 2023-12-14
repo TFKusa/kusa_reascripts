@@ -1,4 +1,4 @@
--- @description kusa_Set time selection to items, set repeat if time selection
+-- @description kusa_Set time selection to selected items, set repeat if time selection
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
