@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="545ee799736175b2d360deffebdb321713391109">
+<index version="1" name="kusa_reascripts" commit="b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -8,6 +8,26 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-11-06T15:56:43Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cfb0c62f9fecfd7aab26e26cc6d6fbde7e3bfbbc/FX/kusa_Setup%20Trackspacer%20from%20selected%20to%20hovered%20track.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Items">
+    <reapack name="kusa_Create fade in under mouse.lua" type="script" desc="kusa_Create fade in under mouse">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-14T19:57:48Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20in%20under%20mouse.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Create fade out under mouse.lua" type="script" desc="kusa_Create fade out under mouse">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-14T19:57:48Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20out%20under%20mouse.lua</source>
       </version>
     </reapack>
   </category>
