@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a">
+<index version="1" name="kusa_reascripts" commit="8d3b18d82f4eea07a093fa5da613399698eb10de">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -28,6 +28,15 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-14T19:57:48Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20out%20under%20mouse.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Set time selection to items.lua" type="script" desc="kusa_Set time selection to items, set repeat if time selection">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-14T20:00:11Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8d3b18d82f4eea07a093fa5da613399698eb10de/Items/kusa_Set%20time%20selection%20to%20items.lua</source>
       </version>
     </reapack>
   </category>
