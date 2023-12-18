@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="dfc40155d316ece4e1dafe6f09afaffce4eebdbf">
+<index version="1" name="kusa_reascripts" commit="8dcd1e813682dbfe27e493b317cb7d0594e1d0f9">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -37,6 +37,24 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-14T20:02:40Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/dfc40155d316ece4e1dafe6f09afaffce4eebdbf/Items/kusa_Set%20time%20selection%20to%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Strip silence - no prompt.lua" type="script" desc="kusa_Strip silence">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-18T14:54:55Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8dcd1e813682dbfe27e493b317cb7d0594e1d0f9/Items/kusa_Strip%20silence%20-%20no%20prompt.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Strip silence.lua" type="script" desc="kusa_Strip silence (no prompt)">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-18T14:54:55Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8dcd1e813682dbfe27e493b317cb7d0594e1d0f9/Items/kusa_Strip%20silence.lua</source>
       </version>
     </reapack>
   </category>
