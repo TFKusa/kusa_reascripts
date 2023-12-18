@@ -1,4 +1,4 @@
--- @description kusa_Strip silence (no prompt)
+-- @description kusa_Strip silence
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
