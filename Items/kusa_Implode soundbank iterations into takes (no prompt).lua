@@ -1,4 +1,4 @@
--- @description kusa_Implode soundbank iterations from block to takes
+-- @description kusa_Implode soundbank iterations from block to takes (no prompt)
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website

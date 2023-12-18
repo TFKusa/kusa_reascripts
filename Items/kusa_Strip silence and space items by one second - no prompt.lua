@@ -1,4 +1,4 @@
--- @description kusa_Strip silence and space items by one second
+-- @description kusa_Strip silence and space items by one second (no prompt)
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
