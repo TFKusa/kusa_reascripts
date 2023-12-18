@@ -1,4 +1,4 @@
--- @description kusa_Strip silence
+-- @description kusa_Strip silence and space items by one second
 -- @version 1.0
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
@@ -106,14 +106,30 @@ function addFades()
     end
 end
 
+function spaceSelectedItemsByOneSecond()
+    local itemCount = reaper.CountSelectedMediaItems(0)
+    if itemCount < 2 then return end
+
+    local prevItem = reaper.GetSelectedMediaItem(0, 0)
+    local prevItemEnd = reaper.GetMediaItemInfo_Value(prevItem, "D_LENGTH") + reaper.GetMediaItemInfo_Value(prevItem, "D_POSITION")
+
+    for i = 1, itemCount - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
+        local newPosition = prevItemEnd + 1
+        reaper.SetMediaItemPosition(item, newPosition, false)
+        prevItemEnd = reaper.GetMediaItemInfo_Value(item, "D_LENGTH") + newPosition
+    end
+end
+
 function main()
     reaper.Undo_BeginBlock()
     local item = reaper.GetSelectedMediaItem(0, 0)
     local minSilenceDuration = 0.2
-    local silenceThreshold = 0.002
+    local silenceThreshold = 0.004
     silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration)
     deleteSilencesFromItem(item, silences)
     addFades()
+    spaceSelectedItemsByOneSecond()
     reaper.Undo_EndBlock("Split and align to takes", -1)
     reaper.UpdateArrange()
 end
