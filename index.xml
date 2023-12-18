@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="c96c4b60cb82f7eb2288c8eeb397b09eeed2ed9e">
+<index version="1" name="kusa_reascripts" commit="6e15d038576485eecc41a14a836fab66458672f7">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -46,6 +46,15 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-18T14:54:55Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8dcd1e813682dbfe27e493b317cb7d0594e1d0f9/Items/kusa_Strip%20silence%20-%20no%20prompt.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Strip silence and space items by one second - no prompt.lua" type="script" desc="kusa_Strip silence and space items by one second">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-18T15:25:26Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/6e15d038576485eecc41a14a836fab66458672f7/Items/kusa_Strip%20silence%20and%20space%20items%20by%20one%20second%20-%20no%20prompt.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Strip silence.lua" type="script" desc="kusa_Strip silence (no prompt)">
