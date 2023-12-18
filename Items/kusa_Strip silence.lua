@@ -1,5 +1,5 @@
 -- @description kusa_Strip silence
--- @version 1.0
+-- @version 1.01
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
