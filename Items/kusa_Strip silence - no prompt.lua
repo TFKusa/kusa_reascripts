@@ -86,7 +86,6 @@ function deleteSilencesFromItem(item, silences)
       local silence = silences[i]
       local silenceStart = itemPosition + silence.start + 0.1
       local silenceEnd = itemPosition + silence["end"] - 0.1
-      reaper.ShowConsoleMsg(silence["end"] .. "\n")
 
       local splitItemEnd = reaper.SplitMediaItem(item, silenceEnd)
       
