@@ -1,5 +1,5 @@
 -- @description kusa_Implode soundbank iterations from block to takes (no prompt)
--- @version 1.01
+-- @version 1.02
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -108,24 +108,26 @@ function deleteSilencesFromItem(item, silences)
     end
 end
 
-function deleteShortItems(track)
-    local numItems = reaper.CountTrackMediaItems(track)
-    if numItems == 0 then return end
+function deleteShortItems()
+    local selectedItemsCount = reaper.CountSelectedMediaItems(0)
+    if selectedItemsCount == 0 then return end
 
     local totalLength = 0
-    for i = 0, numItems - 1 do
-        local item = reaper.GetTrackMediaItem(track, i)
+    for i = 0, selectedItemsCount - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
         local length = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
         totalLength = totalLength + length
     end
 
-    local averageLength = totalLength / numItems
-    local minLength = averageLength / 4
-    for i = numItems - 1, 0, -1 do
-        local item = reaper.GetTrackMediaItem(track, i)
+    local averageLength = totalLength / selectedItemsCount
+    local minLength = averageLength / 3
+
+    for i = selectedItemsCount - 1, 0, -1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
         local length = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
         
         if length < minLength then
+            local track = reaper.GetMediaItem_Track(item)
             reaper.DeleteTrackMediaItem(track, item)
         end
     end
@@ -223,39 +225,28 @@ function implodeToTakesKeepPosition()
     local selectedItemsCount = reaper.CountSelectedMediaItems(0)
     if selectedItemsCount < 1 then return end
 
-    local tracks = {}
-
     for i = 0, selectedItemsCount - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
         reaper.SetMediaItemInfo_Value(item, "B_LOOPSRC", 0)
-        local track = reaper.GetMediaItem_Track(item)
-        local trackGUID = reaper.GetTrackGUID(track)
 
-        if not tracks[trackGUID] then
-            tracks[trackGUID] = track
-        end
-    end
+        local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+        local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+        local itemEnd = itemPos + itemLength
 
-    for trackGUID, track in pairs(tracks) do
-        local itemCount = reaper.CountTrackMediaItems(track)
-        local minPos, maxEnd = nil, nil
+        local minPos, maxEnd = itemPos, itemEnd
+        for j = 0, selectedItemsCount - 1 do
+            if i ~= j then
+                local otherItem = reaper.GetSelectedMediaItem(0, j)
+                local otherItemPos = reaper.GetMediaItemInfo_Value(otherItem, "D_POSITION")
+                local otherItemLength = reaper.GetMediaItemInfo_Value(otherItem, "D_LENGTH")
+                local otherItemEnd = otherItemPos + otherItemLength
 
-        for j = 0, itemCount - 1 do
-            local item = reaper.GetTrackMediaItem(track, j)
-            local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-            local itemEnd = itemPos + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-
-            minPos = minPos and math.min(minPos, itemPos) or itemPos
-            maxEnd = maxEnd and math.max(maxEnd, itemEnd) or itemEnd
-        end
-
-        for j = 0, itemCount - 1 do
-            local item = reaper.GetTrackMediaItem(track, j)
-
-            if reaper.IsMediaItemSelected(item) then
-                reaper.BR_SetItemEdges(item, minPos, maxEnd)
+                minPos = math.min(minPos, otherItemPos)
+                maxEnd = math.max(maxEnd, otherItemEnd)
             end
         end
+
+        reaper.BR_SetItemEdges(item, minPos, maxEnd)
     end
 
     reaper.Main_OnCommand(40543, 0) -- Command ID for "Take: Implode items on same track into takes"
@@ -267,7 +258,7 @@ function main(silenceThreshold, minSilenceDuration)
     silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration)
     deleteSilencesFromItem(item, silences)
     local track = reaper.GetMediaItem_Track(item)
-    deleteShortItems(track)
+    deleteShortItems()
     alignItemsByPeakTime()
     implodeToTakesKeepPosition()
     reaper.Undo_EndBlock("Split and align to takes", -1)
