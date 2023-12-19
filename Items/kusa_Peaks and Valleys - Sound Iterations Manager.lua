@@ -1,5 +1,5 @@
--- @description kusa_Sound Iterations Manager
--- @version 1.11
+-- @description kusa_Peaks and Valleys - Sound Iterations Manager
+-- @version 1.12
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -430,13 +430,13 @@ end
 -------------------------------------------------------------------------------------------
 ---------------------------------------UI--------------------------------------------------
 -------------------------------------------------------------------------------------------
-local ctx = reaper.ImGui_CreateContext("kusa_Implode soundbank iterations into takes")
+local ctx = reaper.ImGui_CreateContext("Peaks and Valleys by Kusa")
 
 local silenceThreshold = 0.01
 local minSilenceDuration = 0.2
 
 function loop()
-    local visible, open = reaper.ImGui_Begin(ctx, "kusa_Implode soundbank iterations into takes", true)
+    local visible, open = reaper.ImGui_Begin(ctx, "Peaks and Valleys by Kusa", true)
     if visible then
         local selectedItem = reaper.GetSelectedMediaItem(0, 0)
         if not selectedItem then
