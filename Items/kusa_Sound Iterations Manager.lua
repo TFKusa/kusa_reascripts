@@ -1,21 +1,21 @@
 -- @description kusa_Sound Iterations Manager
--- @version 1.1
+-- @version 1.11
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 
-function showMessage(string, title)
-    reaper.MB(string, title, 0)
+function showMessage(message, title, errorType)
+    reaper.MB(message, title, errorType)
 end
 
 if not reaper.APIExists("CF_GetSWSVersion") then
-    showMessage("This script requires the SWS Extension to run.", "Error")
+    showMessage("This script requires the SWS Extension to run.", "Error", 0)
     return
 end
 
 if not reaper.APIExists("ImGui_GetVersion") then
-    showMessage("This script requires ReaImGui to run.", "Error")
+    showMessage("This script requires ReaImGui to run.", "Error", 0)
     return
 end
 
@@ -116,7 +116,7 @@ function findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downs
     local numSamplesProcessed = calculateProcessedSamples(totalNumSamples, downsamplingFactor)
 
     if isBufferTooLarge(numSamplesProcessed) then
-        showMessage("This item at its current Sample Rate is overflowing the processing buffer, please trim it down.", "Error")
+        showMessage("This item at its current Sample Rate is overflowing the processing buffer, please trim it down.", "Error", 0)
         return false
     end
 
@@ -449,7 +449,7 @@ function loop()
         if reaper.ImGui_Button(ctx, 'Takes (peak)') then
             local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
-                showMessage("No Item selected.", "Error")
+                showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
                 local track = reaper.GetMediaItem_Track(item)
@@ -462,7 +462,7 @@ function loop()
         if reaper.ImGui_Button(ctx, 'Takes (start)') then
             local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
-                showMessage("No Item selected.", "Error")
+                showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
                 local track = reaper.GetMediaItem_Track(item)
@@ -475,7 +475,7 @@ function loop()
         if reaper.ImGui_Button(ctx, 'Split and space items') then
             local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
-                showMessage("No Item selected.", "Error")
+                showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
                 local track = reaper.GetMediaItem_Track(item)
@@ -488,7 +488,7 @@ function loop()
         if reaper.ImGui_Button(ctx, 'Split') then
             local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
-                showMessage("No Item selected.", "Error")
+                showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
                 local track = reaper.GetMediaItem_Track(item)
@@ -508,7 +508,7 @@ function loop()
                     createSilenceItems(track, silences, itemPosition)
                 end
             else
-                showMessage("No item selected.", "Error")
+                showMessage("No item selected.", "Error", 0)
                 cleanup()
             end
         end
