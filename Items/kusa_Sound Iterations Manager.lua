@@ -269,8 +269,8 @@ function addFades()
     local numItems = reaper.CountSelectedMediaItems(0)
     for i = 0, numItems - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.1)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.01)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.00001)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.1)
     end
 end
 
@@ -406,6 +406,7 @@ function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
     deleteShortItems()
     if toBank then
         spaceSelectedItemsByOneSecond()
+        addFades()
         reaper.Undo_EndBlock("Split and align to takes", -1)
         reaper.UpdateArrange() 
         return
@@ -421,6 +422,7 @@ function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
     else
         alignItemsByStartPosition()
     end
+    addFades()
     implodeToTakesKeepPosition()
     reaper.Undo_EndBlock("Split and align to takes", -1)
     reaper.UpdateArrange()
