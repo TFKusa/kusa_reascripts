@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="5edbe706454327b6d732cf6c86b282a0625ea3b7">
+<index version="1" name="kusa_reascripts" commit="95b23ae6826bfbe8752f0f04a9663671f8c67a17">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -46,6 +46,9 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-18T16:49:57Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5a974caf4b586ab742b9b4dafc72dd7caac6fd42/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
+      </version>
+      <version name="1.01" author="Kusa" time="2023-12-19T01:41:15Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/95b23ae6826bfbe8752f0f04a9663671f8c67a17/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
