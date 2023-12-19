@@ -1,5 +1,5 @@
--- @description kusa_Implode soundbank iterations from block to takes - no prompt
--- @version 1.03
+-- @description kusa_Implode soundbank iterations from block to takes (peak) - no prompt
+-- @version 1.04
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
