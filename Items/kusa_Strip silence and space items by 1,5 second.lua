@@ -1,5 +1,5 @@
--- @description kusa_Strip silence
--- @version 1.03
+-- @description kusa_Strip silence and space items by 1.5 second
+-- @version 1.11
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -173,7 +173,6 @@ function deleteShortItems()
         end
     end
 end
-
 -------------------------------------------------------------------------------------------
 -----------------------------------SIMPLE FUNCTIONS----------------------------------------
 -------------------------------------------------------------------------------------------
@@ -225,6 +224,21 @@ end
 -------------------------------------------------------------------------------------------
 ------------------------------------FUNCTIONS----------------------------------------------
 -------------------------------------------------------------------------------------------
+function spaceSelectedItemsByOneSecond()
+    local itemCount = reaper.CountSelectedMediaItems(0)
+    if itemCount < 2 then return end
+
+    local prevItem = reaper.GetSelectedMediaItem(0, 0)
+    local prevItemEnd = reaper.GetMediaItemInfo_Value(prevItem, "D_LENGTH") + reaper.GetMediaItemInfo_Value(prevItem, "D_POSITION")
+
+    for i = 1, itemCount - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
+        local newPosition = prevItemEnd + 1.5
+        reaper.SetMediaItemPosition(item, newPosition, false)
+        prevItemEnd = reaper.GetMediaItemInfo_Value(item, "D_LENGTH") + newPosition
+    end
+end
+
 function createSilenceItems(track, silences, itemPosition)
     cleanup()
     lastTrack = track
@@ -245,7 +259,7 @@ function createSilenceItems(track, silences, itemPosition)
     end
 end
 
-function main(silenceThreshold, minSilenceDuration)
+function main(silenceThreshold, minSilenceDuration, toBank, split)
     reaper.Undo_BeginBlock()
     local item = reaper.GetSelectedMediaItem(0, 0)
     silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
@@ -254,19 +268,20 @@ function main(silenceThreshold, minSilenceDuration)
     local track = reaper.GetMediaItem_Track(item)
     deleteShortItems()
     addFades()
+    spaceSelectedItemsByOneSecond()
     reaper.Undo_EndBlock("Split and align to takes", -1)
     reaper.UpdateArrange()
 end
 -------------------------------------------------------------------------------------------
 ---------------------------------------UI--------------------------------------------------
 -------------------------------------------------------------------------------------------
-local ctx = reaper.ImGui_CreateContext("kusa_Strip silence")
+local ctx = reaper.ImGui_CreateContext("kusa_Strip silence and space items")
 
 local silenceThreshold = 0.01
 local minSilenceDuration = 0.2
 
 function loop()
-    local visible, open = reaper.ImGui_Begin(ctx, "kusa_Strip silence", true)
+    local visible, open = reaper.ImGui_Begin(ctx, "kusa_Strip silence and space items", true)
     if visible then
         local selectedItem = reaper.GetSelectedMediaItem(0, 0)
         if not selectedItem then
@@ -296,6 +311,9 @@ function loop()
                 local silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)        
                 cleanup()
                 createSilenceItems(track, silences, itemPosition)
+            else
+                showMessage("No item selected.", "Error")
+                cleanup()
             end
         end
 

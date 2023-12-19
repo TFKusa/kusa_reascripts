@@ -1,5 +1,5 @@
--- @description kusa_Strip silence
--- @version 1.03
+-- @description kusa_Strip silence and space items by one second - no prompt
+-- @version 1.01
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -173,7 +173,6 @@ function deleteShortItems()
         end
     end
 end
-
 -------------------------------------------------------------------------------------------
 -----------------------------------SIMPLE FUNCTIONS----------------------------------------
 -------------------------------------------------------------------------------------------
@@ -225,6 +224,21 @@ end
 -------------------------------------------------------------------------------------------
 ------------------------------------FUNCTIONS----------------------------------------------
 -------------------------------------------------------------------------------------------
+function spaceSelectedItemsByOneSecond()
+    local itemCount = reaper.CountSelectedMediaItems(0)
+    if itemCount < 2 then return end
+
+    local prevItem = reaper.GetSelectedMediaItem(0, 0)
+    local prevItemEnd = reaper.GetMediaItemInfo_Value(prevItem, "D_LENGTH") + reaper.GetMediaItemInfo_Value(prevItem, "D_POSITION")
+
+    for i = 1, itemCount - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
+        local newPosition = prevItemEnd + 1.5
+        reaper.SetMediaItemPosition(item, newPosition, false)
+        prevItemEnd = reaper.GetMediaItemInfo_Value(item, "D_LENGTH") + newPosition
+    end
+end
+
 function createSilenceItems(track, silences, itemPosition)
     cleanup()
     lastTrack = track
@@ -254,87 +268,9 @@ function main(silenceThreshold, minSilenceDuration)
     local track = reaper.GetMediaItem_Track(item)
     deleteShortItems()
     addFades()
+    spaceSelectedItemsByOneSecond()
     reaper.Undo_EndBlock("Split and align to takes", -1)
     reaper.UpdateArrange()
 end
--------------------------------------------------------------------------------------------
----------------------------------------UI--------------------------------------------------
--------------------------------------------------------------------------------------------
-local ctx = reaper.ImGui_CreateContext("kusa_Strip silence")
 
-local silenceThreshold = 0.01
-local minSilenceDuration = 0.2
-
-function loop()
-    local visible, open = reaper.ImGui_Begin(ctx, "kusa_Strip silence", true)
-    if visible then
-        local selectedItem = reaper.GetSelectedMediaItem(0, 0)
-        if not selectedItem then
-            cleanup()
-        end
-        local changed
-        thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
-        minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.0, 2.0, "%.3f")
-
-        if reaper.ImGui_Button(ctx, 'Go') then
-            local item = reaper.GetSelectedMediaItem(0, 0)
-            if not item then
-                showMessage("No Item selected.", "Error")
-                cleanup()
-            else
-                local track = reaper.GetMediaItem_Track(item)
-                cleanup()
-                main(silenceThreshold, minSilenceDuration)
-                reaper.UpdateArrange()
-            end
-        end
-        if thresholdChanged or minDurChanged then
-            local item = reaper.GetSelectedMediaItem(0, 0)
-            if item then
-                local track = reaper.GetMediaItem_Track(item)
-                local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-                local silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)        
-                cleanup()
-                createSilenceItems(track, silences, itemPosition)
-            end
-        end
-
-        -- Check if Enter key is pressed using ASCII code
-        if reaper.ImGui_IsKeyPressed(ctx, 13, false) then
-            local item = reaper.GetSelectedMediaItem(0, 0)
-            if not item then
-                showMessage("No Item selected.", "Error")
-                cleanup()
-            else
-                local track = reaper.GetMediaItem_Track(item)
-                cleanup()
-                main(silenceThreshold, minSilenceDuration)
-                reaper.UpdateArrange()
-            end
-        end
-
-        reaper.ImGui_End(ctx)
-    end
-
-    if open then
-        reaper.defer(loop)
-    else
-        local item = reaper.GetSelectedMediaItem(0, 0)
-        if not item then
-            cleanup()
-            reaper.ImGui_DestroyContext(ctx)
-            return 
-        end
-        local track = reaper.GetMediaItem_Track(item)
-        if not track then
-            cleanup()
-            reaper.ImGui_DestroyContext(ctx)
-            return    
-        end
-        cleanup()
-        reaper.UpdateArrange()
-    end
-end
-
-initParameters()
-reaper.defer(loop)
+main(0.01, 0.4)

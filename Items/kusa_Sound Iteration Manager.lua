@@ -1,9 +1,23 @@
 -- @description kusa_Sound Iteration Manager
--- @version 1.01
+-- @version 1.03
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
+
+function showMessage(string, title)
+    reaper.MB(string, title, 0)
+end
+
+if not reaper.APIExists("CF_GetSWSVersion") then
+    showMessage("This script requires the SWS Extension to run.", "Error")
+    return
+end
+
+if not reaper.APIExists("ImGui_GetVersion") then
+    showMessage("This script requires ReaImGui to run.", "Error")
+    return
+end
 
 local silenceItems = {}
 local lastTrack = nil
@@ -230,13 +244,9 @@ end
 -------------------------------------------------------------------------------------------
 -----------------------------------SIMPLE FUNCTIONS----------------------------------------
 -------------------------------------------------------------------------------------------
-function showMessage(string, title)
-    reaper.MB(string, title, 0)
-end
-
 function initParameters()
-    local silenceThreshold = 0.01
-    local minSilenceDuration = 0.2
+    local silenceThreshold = 0.001
+    local minSilenceDuration = 0.5
 end
 
 function getSampleRateOfSelectedItem(take)
@@ -259,7 +269,7 @@ function addFades()
     local numItems = reaper.CountSelectedMediaItems(0)
     for i = 0, numItems - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.1)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.01)
         reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.1)
     end
 end
@@ -382,6 +392,7 @@ function main(silenceThreshold, minSilenceDuration, toBank, split)
         return
     end 
     if split then
+        addFades()
         reaper.Undo_EndBlock("Split and align to takes", -1)
         reaper.UpdateArrange() 
         return
@@ -407,7 +418,7 @@ function loop()
             cleanup()
         end
         local changed
-        thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.0, 0.3, "%.3f")       
+        thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.0, 2.0, "%.3f")
 
         if reaper.ImGui_Button(ctx, 'To Takes') then
