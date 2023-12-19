@@ -210,46 +210,6 @@ function alignItemsByPeakTime()
     end
 end
 
-function padItemsToMatchLength()
-    local numItems = reaper.CountSelectedMediaItems(0)
-    if numItems < 2 then return end
-
-    local earliestStart = math.huge
-    local latestEnd = 0
-    local items = {}
-
-    for i = 0, numItems - 1 do
-        local item = reaper.GetSelectedMediaItem(0, i)
-        local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-        local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-        local itemEnd = itemStart + itemLength
-        table.insert(items, {start = itemStart, ["end"] = itemEnd})
-
-        if itemStart < earliestStart then earliestStart = itemStart end
-        if itemEnd > latestEnd then latestEnd = itemEnd end
-    end
-
-    table.sort(items, function(a, b) return a.start < b.start end)
-
-    for i = 1, #items - 1 do
-        local gapStart = items[i]["end"]
-        local gapEnd = items[i + 1].start
-        if gapEnd > gapStart then
-            local track = reaper.GetSelectedTrack(0, 0) 
-            local silenceItem = reaper.AddMediaItemToTrack(track)
-            reaper.SetMediaItemInfo_Value(silenceItem, "D_POSITION", gapStart)
-            reaper.SetMediaItemInfo_Value(silenceItem, "D_LENGTH", gapEnd - gapStart)
-
-            local take = reaper.AddTakeToMediaItem(silenceItem)
-            local PCM_source = reaper.PCM_Source_CreateFromFile("")
-            reaper.SetMediaItemTake_Source(take, PCM_source)
-        end
-    end
-
-    reaper.UpdateArrange()
-end
-
-
 function addFades()
     local numItems = reaper.CountSelectedMediaItems(0)
     for i = 0, numItems - 1 do
