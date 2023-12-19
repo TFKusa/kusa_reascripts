@@ -1,5 +1,5 @@
--- @description kusa_Sound Iteration Manager
--- @version 1.03
+-- @description kusa_Sound Iterations Manager
+-- @version 1.04
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
