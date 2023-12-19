@@ -1,5 +1,5 @@
 -- @description kusa_Sound Iterations Manager
--- @version 1.04
+-- @version 1.1
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -138,7 +138,7 @@ function deleteSilencesFromItem(item, silences)
     for i = #silences, 1, -1 do
         local silence = silences[i]
         local silenceStart = itemPosition + silence.start + 0.15
-        local silenceEnd = itemPosition + silence["end"] - 0.01
+        local silenceEnd = itemPosition + silence["end"]--[[  - 0.01 ]]
 
         local splitItemEnd = reaper.SplitMediaItem(item, silenceEnd)
         
@@ -269,8 +269,8 @@ function addFades()
     local numItems = reaper.CountSelectedMediaItems(0)
     for i = 0, numItems - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.01)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.1)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.1)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.01)
     end
 end
 
@@ -308,6 +308,25 @@ function alignItemsByPeakTime()
             local newPosition = itemPosition + offset
             reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPosition)
         end
+    end
+end
+
+function alignItemsByStartPosition()
+    local numItems = reaper.CountSelectedMediaItems(0)
+    if numItems < 2 then return end
+
+    local earliestStart = math.huge
+    for i = 0, numItems - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
+        local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+        if itemPosition < earliestStart then
+            earliestStart = itemPosition
+        end
+    end
+
+    for i = 0, numItems - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
+        reaper.SetMediaItemInfo_Value(item, "D_POSITION", earliestStart)
     end
 end
 
@@ -351,7 +370,7 @@ function spaceSelectedItemsByOneSecond()
 
     for i = 1, itemCount - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
-        local newPosition = prevItemEnd + 1.5
+        local newPosition = prevItemEnd + 1.0
         reaper.SetMediaItemPosition(item, newPosition, false)
         prevItemEnd = reaper.GetMediaItemInfo_Value(item, "D_LENGTH") + newPosition
     end
@@ -377,7 +396,7 @@ function createSilenceItems(track, silences, itemPosition)
     end
 end
 
-function main(silenceThreshold, minSilenceDuration, toBank, split)
+function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
     reaper.Undo_BeginBlock()
     local item = reaper.GetSelectedMediaItem(0, 0)
     silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
@@ -397,7 +416,11 @@ function main(silenceThreshold, minSilenceDuration, toBank, split)
         reaper.UpdateArrange() 
         return
     end
-    alignItemsByPeakTime()
+    if alignOnPeaks then
+        alignItemsByPeakTime()
+    else
+        alignItemsByStartPosition()
+    end
     implodeToTakesKeepPosition()
     reaper.Undo_EndBlock("Split and align to takes", -1)
     reaper.UpdateArrange()
@@ -421,20 +444,7 @@ function loop()
         thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.0, 2.0, "%.3f")
 
-        if reaper.ImGui_Button(ctx, 'To Takes') then
-            local item = reaper.GetSelectedMediaItem(0, 0)
-            if not item then
-                showMessage("No Item selected.", "Error")
-                cleanup()
-                return
-            end
-            local track = reaper.GetMediaItem_Track(item)
-            cleanup()
-            main(silenceThreshold, minSilenceDuration, false, false)
-            reaper.UpdateArrange()
-        end
-        reaper.ImGui_SameLine(ctx)
-        if reaper.ImGui_Button(ctx, 'To Bank') then
+        if reaper.ImGui_Button(ctx, 'Takes (peak)') then
             local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
                 showMessage("No Item selected.", "Error")
@@ -442,7 +452,33 @@ function loop()
             else
                 local track = reaper.GetMediaItem_Track(item)
                 cleanup()
-                main(silenceThreshold, minSilenceDuration, true, false)
+                main(silenceThreshold, minSilenceDuration, false, false, true)
+                reaper.UpdateArrange()
+            end
+        end
+        reaper.ImGui_SameLine(ctx)
+        if reaper.ImGui_Button(ctx, 'Takes (start)') then
+            local item = reaper.GetSelectedMediaItem(0, 0)
+            if not item then
+                showMessage("No Item selected.", "Error")
+                cleanup()
+            else
+                local track = reaper.GetMediaItem_Track(item)
+                cleanup()
+                main(silenceThreshold, minSilenceDuration, false, false, false)
+                reaper.UpdateArrange()
+            end
+        end
+        reaper.ImGui_SameLine(ctx)
+        if reaper.ImGui_Button(ctx, 'Split and space items') then
+            local item = reaper.GetSelectedMediaItem(0, 0)
+            if not item then
+                showMessage("No Item selected.", "Error")
+                cleanup()
+            else
+                local track = reaper.GetMediaItem_Track(item)
+                cleanup()
+                main(silenceThreshold, minSilenceDuration, true, false, false)
                 reaper.UpdateArrange()
             end
         end
@@ -452,12 +488,12 @@ function loop()
             if not item then
                 showMessage("No Item selected.", "Error")
                 cleanup()
-                return
+            else
+                local track = reaper.GetMediaItem_Track(item)
+                cleanup()
+                main(silenceThreshold, minSilenceDuration, false, true, false)
+                reaper.UpdateArrange()
             end
-            local track = reaper.GetMediaItem_Track(item)
-            cleanup()
-            main(silenceThreshold, minSilenceDuration, false, true)
-            reaper.UpdateArrange()
         end
         if thresholdChanged or minDurChanged then
             local item = reaper.GetSelectedMediaItem(0, 0)
@@ -474,7 +510,6 @@ function loop()
                 cleanup()
             end
         end
-
         reaper.ImGui_End(ctx)
     end
 
