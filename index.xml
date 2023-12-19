@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="d3e38643ab068f5c3892fd6a00b8286e9425bbc2">
+<index version="1" name="kusa_reascripts" commit="e62e95e0a6e508481efa6bb67c209421fd837d70">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -30,40 +30,22 @@
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20out%20under%20mouse.lua</source>
       </version>
     </reapack>
-    <reapack name="kusa_Implode soundbank iterations into takes - no prompt.lua" type="script" desc="kusa_Implode soundbank iterations from block to takes - no prompt">
+    <reapack name="kusa_Implode soundbank iterations into takes (peak) - no prompt.lua" type="script" desc="kusa_Implode soundbank iterations from block to takes (peak) - no prompt">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-12-18T16:59:11Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/f875fc9076964182eaefff5a965ef49400d7b356/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
-      </version>
-      <version name="1.01" author="Kusa" time="2023-12-19T01:55:11Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cc99f0e7b32a4fb06f4b25db4a33300d74330bb6/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
-      </version>
-      <version name="1.02" author="Kusa" time="2023-12-19T02:26:01Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8840f3109d53942498896b0bb36ca877fca39ed3/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
-      </version>
-      <version name="1.03" author="Kusa" time="2023-12-19T16:13:50Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
+      <version name="1.04" author="Kusa" time="2023-12-19T16:32:54Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/e62e95e0a6e508481efa6bb67c209421fd837d70/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20(peak)%20-%20no%20prompt.lua</source>
       </version>
     </reapack>
-    <reapack name="kusa_Implode soundbank iterations into takes.lua" type="script" desc="kusa_Implode soundbank iterations from block to takes">
+    <reapack name="kusa_Implode soundbank iterations into takes (peak).lua" type="script" desc="kusa_Implode soundbank iterations from block to takes (peak)">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-12-18T16:49:57Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5a974caf4b586ab742b9b4dafc72dd7caac6fd42/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
-      </version>
-      <version name="1.01" author="Kusa" time="2023-12-19T01:41:15Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/95b23ae6826bfbe8752f0f04a9663671f8c67a17/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
-      </version>
-      <version name="1.02" author="Kusa" time="2023-12-19T02:26:01Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8840f3109d53942498896b0bb36ca877fca39ed3/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
-      </version>
-      <version name="1.03" author="Kusa" time="2023-12-19T16:13:50Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
+      <version name="1.04" author="Kusa" time="2023-12-19T16:32:54Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/e62e95e0a6e508481efa6bb67c209421fd837d70/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20(peak).lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
