@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="cc99f0e7b32a4fb06f4b25db4a33300d74330bb6">
+<index version="1" name="kusa_reascripts" commit="8840f3109d53942498896b0bb36ca877fca39ed3">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -41,6 +41,9 @@
       <version name="1.01" author="Kusa" time="2023-12-19T01:55:11Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cc99f0e7b32a4fb06f4b25db4a33300d74330bb6/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
       </version>
+      <version name="1.02" author="Kusa" time="2023-12-19T02:26:01Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8840f3109d53942498896b0bb36ca877fca39ed3/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Implode soundbank iterations into takes.lua" type="script" desc="kusa_Implode soundbank iterations from block to takes">
       <metadata>
@@ -52,6 +55,9 @@
       </version>
       <version name="1.01" author="Kusa" time="2023-12-19T01:41:15Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/95b23ae6826bfbe8752f0f04a9663671f8c67a17/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
+      </version>
+      <version name="1.02" author="Kusa" time="2023-12-19T02:26:01Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8840f3109d53942498896b0bb36ca877fca39ed3/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
