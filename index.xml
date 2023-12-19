@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="875bbb712094a474a5b63a1709327f5e382fb268">
+<index version="1" name="kusa_reascripts" commit="22c85b7b23ae37960bb1aebabace073a651a4815">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -30,7 +30,7 @@
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20out%20under%20mouse.lua</source>
       </version>
     </reapack>
-    <reapack name="kusa_Implode soundbank iterations into takes - no prompt.lua" type="script" desc="kusa_Implode soundbank iterations from block to takes (no prompt)">
+    <reapack name="kusa_Implode soundbank iterations into takes - no prompt.lua" type="script" desc="kusa_Implode soundbank iterations from block to takes - no prompt">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
@@ -43,6 +43,9 @@
       </version>
       <version name="1.02" author="Kusa" time="2023-12-19T02:26:01Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8840f3109d53942498896b0bb36ca877fca39ed3/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
+      </version>
+      <version name="1.03" author="Kusa" time="2023-12-19T16:13:50Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Implode%20soundbank%20iterations%20into%20takes%20-%20no%20prompt.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Implode soundbank iterations into takes.lua" type="script" desc="kusa_Implode soundbank iterations from block to takes">
@@ -58,6 +61,9 @@
       </version>
       <version name="1.02" author="Kusa" time="2023-12-19T02:26:01Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8840f3109d53942498896b0bb36ca877fca39ed3/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
+      </version>
+      <version name="1.03" author="Kusa" time="2023-12-19T16:13:50Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Implode%20soundbank%20iterations%20into%20takes.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
@@ -80,14 +86,38 @@
       <version name="1.01" author="Kusa" time="2023-12-19T13:54:13Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/875bbb712094a474a5b63a1709327f5e382fb268/Items/kusa_Sound%20Iteration%20Manager.lua</source>
       </version>
+      <version name="1.03" author="Kusa" time="2023-12-19T16:13:50Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Sound%20Iteration%20Manager.lua</source>
+      </version>
     </reapack>
-    <reapack name="kusa_Strip silence - no prompt.lua" type="script" desc="kusa_Strip silence (no prompt)">
+    <reapack name="kusa_Strip silence - no prompt.lua" type="script" desc="kusa_Strip silence - no prompt">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-18T14:54:55Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8dcd1e813682dbfe27e493b317cb7d0594e1d0f9/Items/kusa_Strip%20silence%20-%20no%20prompt.lua</source>
+      </version>
+      <version name="1.03" author="Kusa" time="2023-12-19T16:13:50Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Strip%20silence%20-%20no%20prompt.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Strip silence and space items by 1,5 second - no prompt.lua" type="script" desc="kusa_Strip silence and space items by one second - no prompt">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.01" author="Kusa" time="2023-12-19T16:13:50Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Strip%20silence%20and%20space%20items%20by%201,5%20second%20-%20no%20prompt.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Strip silence and space items by 1,5 second.lua" type="script" desc="kusa_Strip silence and space items by 1.5 second">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.11" author="Kusa" time="2023-12-19T16:13:50Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Strip%20silence%20and%20space%20items%20by%201,5%20second.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Strip silence and space items by one second - no prompt.lua" type="script" desc="kusa_Strip silence and space items by one second - no prompt">
@@ -121,6 +151,9 @@
       </version>
       <version name="1.02" author="Kusa" time="2023-12-19T00:59:50Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5edbe706454327b6d732cf6c86b282a0625ea3b7/Items/kusa_Strip%20silence.lua</source>
+      </version>
+      <version name="1.03" author="Kusa" time="2023-12-19T16:13:50Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/22c85b7b23ae37960bb1aebabace073a651a4815/Items/kusa_Strip%20silence.lua</source>
       </version>
     </reapack>
   </category>
