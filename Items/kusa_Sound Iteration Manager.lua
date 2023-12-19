@@ -1,53 +1,63 @@
 -- @description kusa_Sound Iteration Manager
--- @version 1.0
+-- @version 1.01
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
-function showMessage(string, title)
-    reaper.MB(string, title, 0)
-end
--------------------------------------------------------------------------------------------
-function init()
-    local silenceThreshold = 0.01
-    local minSilenceDuration = 0.2
-    local item = reaper.GetSelectedMediaItem(0, 0)
-    if item then
-        local track = reaper.GetMediaItem_Track(item)
-        local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-        local silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration)
-        if not silences then return false end
-        
-        cleanup()
-        createSilenceItems(track, silences, itemPosition)
-        return true
-    end
-end
 
-function findAllSilencesInItem(item, silenceThreshold, minSilenceDuration)
+local silenceItems = {}
+local lastTrack = nil
+local downsamplingFactor = 4
+
+-------------------------------------------------------------------------------------------
+-----------------------------------FINDING SILENCES----------------------------------------
+-------------------------------------------------------------------------------------------
+function prepareAudioAccessor(item)
     local take = reaper.GetActiveTake(item)
     if not take then return nil end
-
     local accessor = reaper.CreateTakeAudioAccessor(take)
     local sampleRate = getSampleRateOfSelectedItem(take)
     local startTime = reaper.GetAudioAccessorStartTime(accessor)
     local endTime = reaper.GetAudioAccessorEndTime(accessor)
-    local numSamples = math.floor((endTime - startTime) * sampleRate)
-    if numSamples > 4000000 then
-        showMessage("This item at its current Sample Rate is overflowing the processing buffer, please trim it down.", "Error")
-        return false
+    return take, accessor, sampleRate, startTime, endTime
+end
+
+function calculateTotalSamples(startTime, endTime, sampleRate)
+    return math.floor((endTime - startTime) * sampleRate)
+end
+
+function calculateProcessedSamples(totalNumSamples, downsamplingFactor)
+    local numSamplesProcessed = math.floor(totalNumSamples / downsamplingFactor)
+    if totalNumSamples % downsamplingFactor > 0 then
+        numSamplesProcessed = numSamplesProcessed + 1
     end
+    return numSamplesProcessed
+end
 
-    local buffer = reaper.new_array(numSamples)
+function isBufferTooLarge(numSamplesProcessed)
+    return numSamplesProcessed > 4000000
+end
+
+function populateSilenceBuffer(accessor, sampleRate, startTime, numSamplesProcessed, downsamplingFactor)
+    local buffer = reaper.new_array(numSamplesProcessed)
     buffer.clear()
-    reaper.GetAudioAccessorSamples(accessor, sampleRate, 1, startTime, numSamples, buffer)
+    local tempBuffer = reaper.new_array(1)
+    tempBuffer.clear()
+    for i = 1, numSamplesProcessed do
+        local samplePosition = startTime + ((i - 1) * downsamplingFactor) / sampleRate
+        reaper.GetAudioAccessorSamples(accessor, sampleRate, 1, samplePosition, 1, tempBuffer)
+        buffer[i] = tempBuffer[1]
+    end
+    return buffer
+end
 
+function detectSilences(buffer, silenceThreshold, minSilenceDuration, sampleRate, downsamplingFactor)
     local silences = {}
     local silenceStartIndex = nil
     local currentSilenceDuration = 0
-    local minSilenceSamples = minSilenceDuration * sampleRate
+    local minSilenceSamples = minSilenceDuration * sampleRate / downsamplingFactor
 
-    for i = 1, numSamples do
+    for i = 1, #buffer do
         local sample = math.abs(buffer[i])
         local isSilent = sample <= silenceThreshold
 
@@ -70,16 +80,37 @@ function findAllSilencesInItem(item, silenceThreshold, minSilenceDuration)
         local silenceEndTimeIndex = silenceStartIndex + currentSilenceDuration - 1
         table.insert(silences, { start = silenceStartIndex, ["end"] = silenceEndTimeIndex })
     end
+    return silences
+end
 
-    reaper.DestroyAudioAccessor(accessor)
-
+function convertSilencesToTime(silences, startTime, sampleRate, downsamplingFactor)
     local silencesInTime = {}
+
     for _, silence in ipairs(silences) do
-        local startInTime = startTime + (silence.start - 1) / sampleRate
-        local endInTime = startTime + (silence["end"] - 1) / sampleRate
+        local startInTime = startTime + (silence.start * downsamplingFactor - downsamplingFactor) / sampleRate
+        local endInTime = startTime + (silence["end"] * downsamplingFactor - downsamplingFactor) / sampleRate
         table.insert(silencesInTime, { start = startInTime, ["end"] = endInTime })
     end
+    return silencesInTime
+end
 
+function findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
+    local take, accessor, sampleRate, startTime, endTime = prepareAudioAccessor(item)
+    if not take then return nil end
+
+    local totalNumSamples = calculateTotalSamples(startTime, endTime, sampleRate)
+    local numSamplesProcessed = calculateProcessedSamples(totalNumSamples, downsamplingFactor)
+
+    if isBufferTooLarge(numSamplesProcessed) then
+        showMessage("This item at its current Sample Rate is overflowing the processing buffer, please trim it down.", "Error")
+        return false
+    end
+
+    local buffer = populateSilenceBuffer(accessor, sampleRate, startTime, numSamplesProcessed, downsamplingFactor)
+    local silences = detectSilences(buffer, silenceThreshold, minSilenceDuration, sampleRate, downsamplingFactor)
+    local silencesInTime = convertSilencesToTime(silences, startTime, sampleRate, downsamplingFactor)
+
+    reaper.DestroyAudioAccessor(accessor)
     return silencesInTime
 end
 
@@ -129,6 +160,84 @@ function deleteShortItems()
         end
     end
 end
+-------------------------------------------------------------------------------------------
+-------------------------------------FINDING PEAKS-----------------------------------------
+-------------------------------------------------------------------------------------------
+function prepareItemAnalysis(item)
+    local take = reaper.GetActiveTake(item)
+    if not take then return end
+    local accessor = reaper.CreateTakeAudioAccessor(take)
+    local sampleRate = getSampleRateOfSelectedItem(take)
+    local numChannels = getChannelsOfSelectedItem(take)
+    local startTime = reaper.GetAudioAccessorStartTime(accessor)
+    local endTime = reaper.GetAudioAccessorEndTime(accessor)
+    return take, accessor, sampleRate, numChannels, startTime, endTime
+end
+
+function calculateTotalSamples(startTime, endTime, sampleRate)
+    return math.floor((endTime - startTime) * sampleRate)
+end
+
+function populatePeakBuffer(accessor, sampleRate, numChannels, startTime, numSamples)
+    local buffer = reaper.new_array(numSamples * numChannels)
+    buffer.clear()
+    reaper.GetAudioAccessorSamples(accessor, sampleRate, numChannels, startTime, numSamples, buffer)
+    return buffer
+end
+
+function findPeakInBuffer(buffer, numSamples, numChannels)
+    local peakValue = 0
+    local peakIndex = 0
+    for i = 1, numSamples do
+        for channel = 1, numChannels do
+            local sampleIndex = (i - 1) * numChannels + channel
+            local sample = math.abs(buffer[sampleIndex])
+            if sample > peakValue then
+                peakValue = sample
+                peakIndex = i
+            end
+        end
+    end
+    return peakValue, peakIndex
+end
+
+function calculatePeakTime(take, item, peakIndex, sampleRate)
+    local takeStartOffset = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+    local peakTimeRelativeToSource = takeStartOffset + (peakIndex / sampleRate)
+    local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    local peakTimeRelativeToProject = itemPosition + peakTimeRelativeToSource
+    local itemStartPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    local peakTime = itemStartPos + (peakIndex / sampleRate)
+
+    if peakTimeRelativeToSource < 0 then peakTimeRelativeToSource = 0 end
+    return peakTime
+end
+
+function processItemsForPeaks(item)
+    local take, accessor, sampleRate, numChannels, startTime, endTime = prepareItemAnalysis(item)
+    if not take then return end
+
+    local numSamples = calculateTotalSamples(startTime, endTime, sampleRate)
+    local buffer = populatePeakBuffer(accessor, sampleRate, numChannels, startTime, numSamples)
+
+    local peakValue, peakIndex = findPeakInBuffer(buffer, numSamples, numChannels)
+
+    local peakTime = calculatePeakTime(take, item, peakIndex, sampleRate)
+
+    reaper.DestroyAudioAccessor(accessor)
+    return peakTime
+end
+-------------------------------------------------------------------------------------------
+-----------------------------------SIMPLE FUNCTIONS----------------------------------------
+-------------------------------------------------------------------------------------------
+function showMessage(string, title)
+    reaper.MB(string, title, 0)
+end
+
+function initParameters()
+    local silenceThreshold = 0.01
+    local minSilenceDuration = 0.2
+end
 
 function getSampleRateOfSelectedItem(take)
     local source = reaper.GetMediaItemTake_Source(take)
@@ -146,50 +255,33 @@ function getChannelsOfSelectedItem(take)
     return channels
 end
 
-function processItemsForPeaks(item)
-    local take = reaper.GetActiveTake(item)
-    if not take then return end
-
-    local accessor = reaper.CreateTakeAudioAccessor(take)
-    local sampleRate = getSampleRateOfSelectedItem(take)
-    local numChannels = getChannelsOfSelectedItem(take)
-    local startTime = reaper.GetAudioAccessorStartTime(accessor)
-    local endTime = reaper.GetAudioAccessorEndTime(accessor)
-    local numSamples = math.floor((endTime - startTime) * sampleRate)
-
-    local buffer = reaper.new_array(numSamples * numChannels)
-    buffer.clear()
-    reaper.GetAudioAccessorSamples(accessor, sampleRate, numChannels, startTime, numSamples, buffer)
-
-    local peakValue = 0
-    local peakIndex = 0
-
-    for i = 1, numSamples do
-        for channel = 1, numChannels do
-            local sampleIndex = (i - 1) * numChannels + channel
-            local sample = math.abs(buffer[sampleIndex])
-
-            if sample > peakValue then
-                peakValue = sample
-                peakIndex = i
-            end
-        end
+function addFades()
+    local numItems = reaper.CountSelectedMediaItems(0)
+    for i = 0, numItems - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.1)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.1)
     end
-
-    local takeStartOffset = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
-    local peakTimeRelativeToSource = takeStartOffset + (peakIndex / sampleRate)
-    local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-    local peakTimeRelativeToProject = itemPosition + peakTimeRelativeToSource
-    local middleIndex = peakIndex
-    local itemStartPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-    local peakTime = itemStartPos + (middleIndex / sampleRate)
-
-    if peakTimeRelativeToSource < 0 then peakTimeRelativeToSource = 0 end
-
-    reaper.DestroyAudioAccessor(accessor)
-    return peakTime
 end
 
+function clearTemporaryItems(track)
+    for _, item in ipairs(silenceItems) do
+        if reaper.ValidatePtr(item, "MediaItem*") then
+            reaper.DeleteTrackMediaItem(track, item)
+        end
+    end
+    silenceItems = {}
+end
+
+function cleanup()
+    if lastTrack then
+        clearTemporaryItems(lastTrack)
+        reaper.UpdateArrange()
+    end
+end
+-------------------------------------------------------------------------------------------
+------------------------------------FUNCTIONS----------------------------------------------
+-------------------------------------------------------------------------------------------
 function alignItemsByPeakTime()
     local numItems = reaper.CountSelectedMediaItems(0)
     if numItems < 2 then return end
@@ -206,15 +298,6 @@ function alignItemsByPeakTime()
             local newPosition = itemPosition + offset
             reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPosition)
         end
-    end
-end
-
-function addFades()
-    local numItems = reaper.CountSelectedMediaItems(0)
-    for i = 0, numItems - 1 do
-        local item = reaper.GetSelectedMediaItem(0, i)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.1)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.1)
     end
 end
 
@@ -264,49 +347,6 @@ function spaceSelectedItemsByOneSecond()
     end
 end
 
-function main(silenceThreshold, minSilenceDuration, toBank, split)
-    reaper.Undo_BeginBlock()
-    local item = reaper.GetSelectedMediaItem(0, 0)
-    silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration)
-    deleteSilencesFromItem(item, silences)
-    local track = reaper.GetMediaItem_Track(item)
-    deleteShortItems()
-    if toBank then
-        spaceSelectedItemsByOneSecond()
-        reaper.Undo_EndBlock("Split and align to takes", -1)
-        reaper.UpdateArrange() 
-        return
-    end 
-    if split then
-        reaper.Undo_EndBlock("Split and align to takes", -1)
-        reaper.UpdateArrange() 
-        return
-    end
-    alignItemsByPeakTime()
-    implodeToTakesKeepPosition()
-    reaper.Undo_EndBlock("Split and align to takes", -1)
-    reaper.UpdateArrange()
-end
-
-local silenceItems = {}
-local lastTrack = nil
-
-function cleanup()
-    if lastTrack then
-        clearTemporaryItems(lastTrack)
-        reaper.UpdateArrange()
-    end
-end
-
-function clearTemporaryItems(track)
-    for _, item in ipairs(silenceItems) do
-        if reaper.ValidatePtr(item, "MediaItem*") then
-            reaper.DeleteTrackMediaItem(track, item)
-        end
-    end
-    silenceItems = {}
-end
-
 function createSilenceItems(track, silences, itemPosition)
     cleanup()
     lastTrack = track
@@ -327,6 +367,33 @@ function createSilenceItems(track, silences, itemPosition)
     end
 end
 
+function main(silenceThreshold, minSilenceDuration, toBank, split)
+    reaper.Undo_BeginBlock()
+    local item = reaper.GetSelectedMediaItem(0, 0)
+    silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
+    if not silences then return end
+    deleteSilencesFromItem(item, silences)
+    local track = reaper.GetMediaItem_Track(item)
+    deleteShortItems()
+    if toBank then
+        spaceSelectedItemsByOneSecond()
+        reaper.Undo_EndBlock("Split and align to takes", -1)
+        reaper.UpdateArrange() 
+        return
+    end 
+    if split then
+        reaper.Undo_EndBlock("Split and align to takes", -1)
+        reaper.UpdateArrange() 
+        return
+    end
+    alignItemsByPeakTime()
+    implodeToTakesKeepPosition()
+    reaper.Undo_EndBlock("Split and align to takes", -1)
+    reaper.UpdateArrange()
+end
+-------------------------------------------------------------------------------------------
+---------------------------------------UI--------------------------------------------------
+-------------------------------------------------------------------------------------------
 local ctx = reaper.ImGui_CreateContext("kusa_Implode soundbank iterations into takes")
 
 local silenceThreshold = 0.01
@@ -340,8 +407,7 @@ function loop()
             cleanup()
         end
         local changed
-        thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.0, 0.5, "%.3f")
-        
+        thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.0, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.0, 2.0, "%.3f")
 
         if reaper.ImGui_Button(ctx, 'To Takes') then
@@ -387,9 +453,11 @@ function loop()
             if item then
                 local track = reaper.GetMediaItem_Track(item)
                 local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-                local silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration)        
-                cleanup()
-                createSilenceItems(track, silences, itemPosition)
+                local silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
+                if silences then   
+                    cleanup()
+                    createSilenceItems(track, silences, itemPosition)
+                end
             else
                 showMessage("No item selected.", "Error")
                 cleanup()
@@ -419,5 +487,5 @@ function loop()
     end
 end
 
-init()
+initParameters()
 reaper.defer(loop)
