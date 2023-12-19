@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="b855aae18ccff9bcf9d594c3b674121e4b7f9635">
+<index version="1" name="kusa_reascripts" commit="858efc503d4452f65ded05e53a4cd0c151e58371">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -30,6 +30,15 @@
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20out%20under%20mouse.lua</source>
       </version>
     </reapack>
+    <reapack name="kusa_Peaks and Valleys - Sound Iterations Manager.lua" type="script" desc="kusa_Peaks and Valleys - Sound Iterations Manager">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.12" author="Kusa" time="2023-12-19T20:28:12Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/858efc503d4452f65ded05e53a4cd0c151e58371/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
@@ -37,21 +46,6 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-18T15:08:39Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/c96c4b60cb82f7eb2288c8eeb397b09eeed2ed9e/Items/kusa_Set%20time%20selection%20to%20selected%20items,%20set%20repeat%20if%20time%20selection.lua</source>
-      </version>
-    </reapack>
-    <reapack name="kusa_Sound Iterations Manager.lua" type="script" desc="kusa_Sound Iterations Manager">
-      <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
-        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
-      </metadata>
-      <version name="1.04" author="Kusa" time="2023-12-19T16:42:22Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/feff9e2b397f907b0e935802ce725c4eee09f663/Items/kusa_Sound%20Iterations%20Manager.lua</source>
-      </version>
-      <version name="1.1" author="Kusa" time="2023-12-19T17:19:13Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/880dc8324422ec185bd3860edac458880ab53219/Items/kusa_Sound%20Iterations%20Manager.lua</source>
-      </version>
-      <version name="1.11" author="Kusa" time="2023-12-19T18:32:44Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b855aae18ccff9bcf9d594c3b674121e4b7f9635/Items/kusa_Sound%20Iterations%20Manager.lua</source>
       </version>
     </reapack>
   </category>
