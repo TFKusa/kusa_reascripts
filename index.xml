@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="aaae4ac06714683ee0231fcfdcba18c98125daf1">
+<index version="1" name="kusa_reascripts" commit="875bbb712094a474a5b63a1709327f5e382fb268">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -76,6 +76,9 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-19T12:17:38Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/aaae4ac06714683ee0231fcfdcba18c98125daf1/Items/kusa_Sound%20Iteration%20Manager.lua</source>
+      </version>
+      <version name="1.01" author="Kusa" time="2023-12-19T13:54:13Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/875bbb712094a474a5b63a1709327f5e382fb268/Items/kusa_Sound%20Iteration%20Manager.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Strip silence - no prompt.lua" type="script" desc="kusa_Strip silence (no prompt)">
