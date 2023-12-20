@@ -4,6 +4,15 @@
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
+function showMessage(message, title, errorType)
+    reaper.MB(message, title, errorType)
+end
+
+if not reaper.APIExists("CF_GetSWSVersion") then
+    showMessage("This script requires the SWS Extension to run.", "Error", 0)
+    return
+end
+
 reaper.Main_OnCommand(40635, 0)
 reaper.Main_OnCommand(40290, 0)
 
