@@ -1,5 +1,5 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.20
+-- @version 1.21
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -304,7 +304,7 @@ function getDownsamplingFactor(item)
             end
             return downsamplingFactor
         else
-            showMessage("Could not retrieve current Audio device sample rate.")
+            showMessage("Could not retrieve current Audio device sample rate.", "Error", 0)
         end
     end
 end
@@ -427,13 +427,13 @@ function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
         deleteShortItems()
         spaceSelectedItemsByOneSecond()
         addFades()
-        reaper.Undo_EndBlock("Split and align to takes", -1)
+        reaper.Undo_EndBlock("Split and space items", -1)
         reaper.UpdateArrange() 
         return
     end 
     if split then
         addFades()
-        reaper.Undo_EndBlock("Split and align to takes", -1)
+        reaper.Undo_EndBlock("Split", -1)
         reaper.UpdateArrange() 
         return
     end
@@ -464,7 +464,8 @@ function loop()
         if not selectedItem then
             cleanup()
         end
-        local changed
+        local thresholdChanged
+        local minDurChanged
         thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.0, 2.0, "%.3f")
 
