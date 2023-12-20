@@ -1,16 +1,31 @@
 -- @description kusa_The Intern
--- @version 2.1
+-- @version 2.2
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 
 
+function showMessage(message, title, errorType)
+    reaper.MB(message, title, errorType)
+end
+
 local libPath = reaper.GetExtState("Scythe v3", "libPath")
 if not libPath or libPath == "" then
-    reaper.MB("Couldn't load the Scythe library. Please install 'Scythe library v3' from ReaPack, then run 'Script: Scythe_Set v3 library path.lua' in your Action List.", "Whoops!", 0)
+    showMessage("Couldn't load the Scythe library. Please install 'Scythe library v3' from ReaPack, then run 'Script: Scythe_Set v3 library path.lua' in your Action List.", "Whoops!", 0)
     return
 end
+
+if not reaper.APIExists("CF_GetSWSVersion") then
+    showMessage("This script requires the SWS Extension to run.", "Error", 0)
+    return
+end
+
+if not reaper.APIExists('JS_ReaScriptAPI_Version') then
+    showMessage("This script requires js_ReaScriptAPI to run.", "Error", 0)
+    return
+end
+
 
 
 loadfile(libPath .. "scythe.lua")()
@@ -1195,7 +1210,9 @@ end
 -----------------------------------------------------------------
 function onClickToNested()
     shouldContinueProcess = checkActiveRegionInRenderMatrix()
-    if not shouldContinueProcess then reaper.ShowConsoleMsg("No set region in the matrix \n") return       
+    if not shouldContinueProcess then
+        showMessage("No set region in the matrix.", "Whoops", 0)
+        return       
     else
         local sampleRate, out_str, channels = processRenderSettings()
         local projectExportPath, num_markers, num_regions, userKeywords, retval, exportPath = processDirectories()
@@ -1319,15 +1336,17 @@ function getSelectedWwiseObject(userIPSetting, data)
                 local path = reaper.AK_AkJson_Map_Get(item, data)
                 selectedPath = reaper.AK_AkVariant_GetString(path)
             else
-                reaper.ShowConsoleMsg("Please select only one Wwise object.\n")
+                showMessage("Please select only one Wwise object.", "Error", 0)
                 return
             end
         end
 
         reaper.AK_AkJson_ClearAll()
         reaper.AK_Waapi_Disconnect()
+        return selectedPath
+    else
+        showMessage("Could not connect to WAAPI.", "Error", 0)
     end
-    return selectedPath
 end
 -----------------------------------------------------------------
 function selectedWwiseObjectIsValid(userIPSetting, valuesToCheck)
@@ -1364,7 +1383,7 @@ end
 function handleWaapiCallError(result)
     local errorMessage = reaper.AK_AkJson_Map_Get(result, "message")
     local errorMessageStr = reaper.AK_AkVariant_GetString(errorMessage)
-    reaper.ShowConsoleMsg("Import failed: " .. errorMessageStr .. "\n")
+    showMessage("Import failed: " .. errorMessageStr, "Error", 0)
 
     local details = reaper.AK_AkJson_Map_Get(result, "details")
     local log = reaper.AK_AkJson_Map_Get(details, "log")
@@ -1374,7 +1393,7 @@ function handleWaapiCallError(result)
         local logItem = reaper.AK_AkJson_Array_Get(log, i)
         local logItemMessage = reaper.AK_AkJson_Map_Get(logItem, "message")
         local logItemMessageStr = reaper.AK_AkVariant_GetString(logItemMessage)
-        reaper.ShowConsoleMsg("["..i.."]" .. logItemMessageStr .. "\n")
+        showMessage("["..i.."]" .. logItemMessageStr, "Error", 0)
     end
 end
 -----------------------------------------------------------------
@@ -1385,7 +1404,7 @@ function importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
 
         local importDestination = selectedWwiseObject
         if not importDestination or importDestination == "" then
-            reaper.ShowConsoleMsg("Import destination is empty or not specified.\n")
+            showMessage("Import destination is empty or not specified.", "Error", 0)
             return
         end
     
@@ -1443,7 +1462,7 @@ function importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
                 local createResult = reaper.AK_Waapi_Call("ak.wwise.core.object.create", createArguments, options)
 
                 if not createResult then
-                    reaper.ShowConsoleMsg("Failed to create or access Random Container.\n")
+                    showMessage("Failed to create or access Container.", "Error", 0)
                     return
                 end
                 wwiseObjectPath = importDestination .. "\\" .. baseFileName .. "\\<Sound SFX>" .. filePath:match("([^\\]+)%.wav$")
@@ -1468,19 +1487,21 @@ function importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
                 handleWaapiCallError(result)
             end
         else
-            reaper.ShowConsoleMsg("No audio files detected to import.")
+            showMessage("No audio files detected to import.", "Error", 0)
         end
 
         reaper.AK_AkJson_ClearAll()
         reaper.AK_Waapi_Disconnect()
     else
-        reaper.ShowConsoleMsg("Failed to connect to Wwise via WAAPI.")
+        showMessage("Failed to connect to Wwise via WAAPI.", "Error", 0)
     end
 end
 -----------------------------------------------------------------
 function onClickToWwise()
     shouldContinueProcess = checkActiveRegionInRenderMatrix()
-    if not shouldContinueProcess then reaper.ShowConsoleMsg("No set region in the matrix \n") return       
+    if not shouldContinueProcess then
+        showMessage("No set region in the matrix.", "Whoops", 0)
+        return       
     else
         local userIPSetting = txtRemotePcIp:val()
         local valuesToCheck = {"SwitchContainer", "RandomSequenceContainer", "BlendContainer", "WorkUnit", "Folder"}
@@ -1508,10 +1529,10 @@ function onClickToWwise()
                 selectedWwiseObject = getSelectedWwiseObject(userIPSetting, "path")
                 importToWwise(movedFiles, selectedWwiseObject, userIPSetting)
             else
-                reaper.ShowConsoleMsg("Error: " .. err .. "\n")
+                showMessage("Error: " .. err, "Error", 0)
             end
         else
-            reaper.ShowConsoleMsg("Please select an appropriate Wwise object as target.")
+            showMessage("Please select an appropriate Wwise object as target.", "Error", 0)
         end
     end
 end
@@ -1546,13 +1567,15 @@ function onClickFromWwise()
         end
         importAudioFile(wwiseMacPath)
     else
-        reaper.ShowConsoleMsg("Please select an appropriate Wwise object as target.")
+        showMessage("Please select an appropriate Wwise object as target.", "Error", 0)
     end
 end
 -----------------------------------------------------------------
 function onClickToSimple()
     shouldContinueProcess = checkActiveRegionInRenderMatrix()
-    if not shouldContinueProcess then reaper.ShowConsoleMsg("No set region in the matrix \n") return       
+    if not shouldContinueProcess then
+        showMessage("No set region in the matrix.", "Whoops", 0)
+        return       
     else
         local sampleRate, out_str, channels = processRenderSettings()
         local retval, exportPath = reaper.JS_Dialog_BrowseForFolder("Select export directory", "")
