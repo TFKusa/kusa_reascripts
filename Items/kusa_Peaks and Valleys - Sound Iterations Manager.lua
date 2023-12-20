@@ -4,7 +4,6 @@
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
-
 function showMessage(message, title, errorType)
     reaper.MB(message, title, errorType)
 end
