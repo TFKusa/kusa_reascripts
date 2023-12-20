@@ -1,5 +1,5 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.12
+-- @version 1.2
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -21,7 +21,6 @@ end
 
 local silenceItems = {}
 local lastTrack = nil
-local downsamplingFactor = 4
 
 -------------------------------------------------------------------------------------------
 -----------------------------------FINDING SILENCES----------------------------------------
@@ -289,6 +288,27 @@ function cleanup()
         reaper.UpdateArrange()
     end
 end
+
+function getDownsamplingFactor(item)
+    if item then
+        local take = reaper.GetActiveTake(item)
+        local retval, currentSampleRate = reaper.GetAudioDeviceInfo("SRATE")
+        currentSampleRate = tonumber(currentSampleRate)
+        if retval then
+            local downsamplingFactor
+            if currentSampleRate < 48001 then
+                downsamplingFactor = 2
+            elseif currentSampleRate >= 48001 and currentSampleRate < 96001 then
+                downsamplingFactor = 4
+            elseif currentSampleRate >= 96001 then
+                downsamplingFactor = 8
+            end
+            return downsamplingFactor
+        else
+            showMessage("Could not retrieve current Audio device sample rate.")
+        end
+    end
+end
 -------------------------------------------------------------------------------------------
 ------------------------------------FUNCTIONS----------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -399,12 +419,13 @@ end
 function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
     reaper.Undo_BeginBlock()
     local item = reaper.GetSelectedMediaItem(0, 0)
+    downsamplingFactor = getDownsamplingFactor(item)
     silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
     if not silences then return end
     deleteSilencesFromItem(item, silences)
     local track = reaper.GetMediaItem_Track(item)
-    deleteShortItems()
     if toBank then
+        deleteShortItems()
         spaceSelectedItemsByOneSecond()
         addFades()
         reaper.Undo_EndBlock("Split and align to takes", -1)
@@ -418,8 +439,10 @@ function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
         return
     end
     if alignOnPeaks then
+        deleteShortItems()
         alignItemsByPeakTime()
     else
+        deleteShortItems()
         alignItemsByStartPosition()
     end
     addFades()
@@ -502,6 +525,7 @@ function loop()
             if item then
                 local track = reaper.GetMediaItem_Track(item)
                 local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                downsamplingFactor = getDownsamplingFactor(item)
                 local silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
                 if silences then   
                     cleanup()
