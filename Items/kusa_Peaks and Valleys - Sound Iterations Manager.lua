@@ -1,5 +1,5 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.2
+-- @version 1.20
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
