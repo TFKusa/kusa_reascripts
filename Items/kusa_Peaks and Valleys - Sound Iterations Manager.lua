@@ -1,9 +1,9 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.31
+-- @version 1.32
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog + Adds a Checkbox that allows to align the imploded item with a Marker.
+-- @changelog Better error handling
 
 
 function showMessage(message, title, errorType)
@@ -507,7 +507,11 @@ function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks,
 
     if shouldAlignToMarker then
         local userMarkerChoice = promptUserForNumber("Align with marker", "Please enter the Marker ID")
-        alignItemWithMarker(userMarkerChoice, firstPeakTime, alignOnStart)
+        if firstPeakTime ~= nil then
+            alignItemWithMarker(userMarkerChoice, firstPeakTime, alignOnStart)
+        else
+            showMessage("Could not retrieve Peak Amplitude. Is the item already collapsed ?", "Whoops!", 0)
+        end
     end
     reaper.Undo_EndBlock("Split and align to takes", -1)
     reaper.UpdateArrange()
