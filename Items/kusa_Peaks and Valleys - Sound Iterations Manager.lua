@@ -1,8 +1,13 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.21
+-- @version 1.30
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog
+-- + Align to marker option.
+-- If imploding item into takes (start), the start of the final item will be aligned with the selected Marker.
+-- If imploding item into takes (peak), the peak of the final item will be aligned with the selected Marker.
+
 
 function showMessage(message, title, errorType)
     reaper.MB(message, title, errorType)
@@ -328,6 +333,7 @@ function alignItemsByPeakTime()
             reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPosition)
         end
     end
+    return firstPeakTime
 end
 
 function alignItemsByStartPosition()
@@ -347,6 +353,7 @@ function alignItemsByStartPosition()
         local item = reaper.GetSelectedMediaItem(0, i)
         reaper.SetMediaItemInfo_Value(item, "D_POSITION", earliestStart)
     end
+    return earliestStart
 end
 
 function implodeToTakesKeepPosition()
@@ -415,8 +422,54 @@ function createSilenceItems(track, silences, itemPosition)
     end
 end
 
-function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
+function alignItemWithMarker(markerId, peakTime, alignOnStart)
+    local retval, isRegion, position, rgnEnd, name, markrgnIdxNumber, color
+    local idx = 0
+    local found = false
+
+    repeat
+        retval, isRegion, position, rgnEnd, name, markrgnIdxNumber, color = reaper.EnumProjectMarkers3(0, idx)
+        if retval and not isRegion and markrgnIdxNumber == markerId then
+            found = true
+            break
+        end
+        idx = idx + 1
+    until not retval
+
+    if found then
+        local selectedItem = reaper.GetSelectedMediaItem(0, 0)
+        if selectedItem then
+            if alignOnStart then
+                reaper.SetMediaItemInfo_Value(selectedItem, "D_POSITION", position)
+            else
+                local selectedItemPosition = reaper.GetMediaItemInfo_Value(selectedItem, "D_POSITION")
+                local peakOffset = peakTime - selectedItemPosition
+                reaper.SetMediaItemInfo_Value(selectedItem, "D_POSITION", position - peakOffset)
+            end
+        end
+    else
+        showMessage("Marker with ID " .. markerId .. " not found.", "Error", 0)
+    end
+end
+
+
+
+function promptUserForNumber(promptTitle, fieldName)
+    local userInputsOK, userInput = reaper.GetUserInputs(promptTitle, 1, fieldName, "")
+    if userInputsOK then
+        local numberInput = tonumber(userInput)
+        if numberInput then
+            return numberInput
+        else
+            showMessage("Please enter a valid number.", "Invalid Input", 0)
+        end
+    end
+    return nil
+end
+
+function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks, alignOnStart)
     reaper.Undo_BeginBlock()
+
     local item = reaper.GetSelectedMediaItem(0, 0)
     downsamplingFactor = getDownsamplingFactor(item)
     silences = findAllSilencesInItem(item, silenceThreshold, minSilenceDuration, downsamplingFactor)
@@ -437,15 +490,23 @@ function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks)
         reaper.UpdateArrange() 
         return
     end
+
+    offset = 0
     if alignOnPeaks then
         deleteShortItems()
-        alignItemsByPeakTime()
-    else
+        firstPeakTime = alignItemsByPeakTime()
+    end
+    if alignOnStart then
         deleteShortItems()
         alignItemsByStartPosition()
     end
     addFades()
     implodeToTakesKeepPosition()
+
+    if shouldAlignToMarker then
+        local userMarkerChoice = promptUserForNumber("Align with marker", "Please enter the Marker ID")
+        alignItemWithMarker(userMarkerChoice, firstPeakTime, alignOnStart)
+    end
     reaper.Undo_EndBlock("Split and align to takes", -1)
     reaper.UpdateArrange()
 end
@@ -466,9 +527,11 @@ function loop()
         end
         local thresholdChanged
         local minDurChanged
+        local alignToMarkerChanged = false
         thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.0, 2.0, "%.3f")
-
+        alignToMarkerChanged, shouldAlignToMarker = reaper.ImGui_Checkbox(ctx, "Align to marker", shouldAlignToMarker)
+        reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Takes (peak)') then
             local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
@@ -477,7 +540,7 @@ function loop()
             else
                 local track = reaper.GetMediaItem_Track(item)
                 cleanup()
-                main(silenceThreshold, minSilenceDuration, false, false, true)
+                main(silenceThreshold, minSilenceDuration, false, false, true, false)
                 reaper.UpdateArrange()
             end
         end
@@ -490,7 +553,7 @@ function loop()
             else
                 local track = reaper.GetMediaItem_Track(item)
                 cleanup()
-                main(silenceThreshold, minSilenceDuration, false, false, false)
+                main(silenceThreshold, minSilenceDuration, false, false, false, true)
                 reaper.UpdateArrange()
             end
         end
@@ -503,7 +566,7 @@ function loop()
             else
                 local track = reaper.GetMediaItem_Track(item)
                 cleanup()
-                main(silenceThreshold, minSilenceDuration, true, false, false)
+                main(silenceThreshold, minSilenceDuration, true, false, false, false)
                 reaper.UpdateArrange()
             end
         end
@@ -516,10 +579,11 @@ function loop()
             else
                 local track = reaper.GetMediaItem_Track(item)
                 cleanup()
-                main(silenceThreshold, minSilenceDuration, false, true, false)
+                main(silenceThreshold, minSilenceDuration, false, true, false, false)
                 reaper.UpdateArrange()
             end
         end
+
         if thresholdChanged or minDurChanged then
             local item = reaper.GetSelectedMediaItem(0, 0)
             if item then
