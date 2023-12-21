@@ -1,22 +1,27 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.32
+-- @version 1.33
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog Better error handling
 
 
-function showMessage(message, title, errorType)
-    reaper.MB(message, title, errorType)
+function showMessage(string, title, errType)
+    local userChoice = reaper.MB(string, title, errType)
+    return userChoice
 end
 
 if not reaper.APIExists("CF_GetSWSVersion") then
-    showMessage("This script requires the SWS Extension to run.", "Error", 0)
-    return
+    local userChoice = showMessage("This script requires the SWS Extension to run. Would you like to download it ?", "Error", 4)
+    if userChoice == 6 then
+        openURL("https://www.sws-extension.org/")
+    else
+        return
+    end
 end
 
 if not reaper.APIExists("ImGui_GetVersion") then
-    showMessage("This script requires ReaImGui to run.", "Error", 0)
+    showMessage("This script requires ReaImGui to run. Please install it with ReaPack.", "Error", 0)
     return
 end
 
@@ -510,7 +515,7 @@ function main(silenceThreshold, minSilenceDuration, toBank, split, alignOnPeaks,
         if firstPeakTime ~= nil then
             alignItemWithMarker(userMarkerChoice, firstPeakTime, alignOnStart)
         else
-            showMessage("Could not retrieve Peak Amplitude. Is the item already collapsed ?", "Whoops!", 0)
+            showMessage("Could not retrieve Peak Amplitude. Was the item already collapsed ?", "Whoops!", 0)
         end
     end
     reaper.Undo_EndBlock("Split and align to takes", -1)
