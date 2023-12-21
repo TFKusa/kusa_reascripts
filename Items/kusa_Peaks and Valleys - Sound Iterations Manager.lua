@@ -4,7 +4,9 @@
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog
--- - Align to marker option.
+--
+-- Changelog:
+-- - Add checkbox to align imploded items with Marker.
 
 
 function showMessage(message, title, errorType)
