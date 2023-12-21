@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="bff1468db646923016375f95778f0ecef39cf9c7">
+<index version="1" name="kusa_reascripts" commit="44d7619ec21b19f9dc0caf24e8e06cbb25cf71f8">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -80,6 +80,23 @@
     </reapack>
   </category>
   <category name="Navigation">
+    <reapack name="kusa_Tab like Pro Tools - Main Backwards.lua" type="script" desc="kusa_Tab like Pro Tools - Main Backwards">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md\par}
+}
+]]></description>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2023-12-21T22:39:18Z">
+        <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/44d7619ec21b19f9dc0caf24e8e06cbb25cf71f8/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main%20Backwards.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_Tab like Pro Tools - Main.lua" type="script" desc="kusa_Tab like Pro Tools - Main">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
