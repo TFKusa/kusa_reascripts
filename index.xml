@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="3d16195a5d9d4eeef781065d6d677ff1300816cb">
+<index version="1" name="kusa_reascripts" commit="1ccdf4ae660921f5eb7105b21fb890e8ddc18bda">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -91,6 +91,10 @@
       <version name="1.00" author="Kusa" time="2023-12-21T21:20:00Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/3d16195a5d9d4eeef781065d6d677ff1300816cb/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-21T21:34:20Z">
+        <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/1ccdf4ae660921f5eb7105b21fb890e8ddc18bda/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Tab like Pro Tools - Toggle.lua" type="script" desc="kusa_Tab like Pro Tools - Toggle">
       <metadata>
@@ -106,6 +110,10 @@
       </metadata>
       <version name="1.00" author="Kusa" time="2023-12-21T21:20:00Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/3d16195a5d9d4eeef781065d6d677ff1300816cb/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Toggle.lua</source>
+      </version>
+      <version name="1.01" author="Kusa" time="2023-12-21T21:34:20Z">
+        <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/1ccdf4ae660921f5eb7105b21fb890e8ddc18bda/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Toggle.lua</source>
       </version>
     </reapack>
   </category>
