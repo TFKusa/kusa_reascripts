@@ -1,9 +1,10 @@
 -- @description kusa_Tab like Pro Tools - Main
--- @version 1.00
+-- @version 1.01
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @about : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
+-- @changelog Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
 
 
 local function showMessage(string, title, errType)
