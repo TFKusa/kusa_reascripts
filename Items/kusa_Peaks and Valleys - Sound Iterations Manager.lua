@@ -5,8 +5,9 @@
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog
 -- + Align to marker option.
--- If imploding item into takes (start), the start of the final item will be aligned with the selected Marker.
--- If imploding item into takes (peak), the peak of the final item will be aligned with the selected Marker.
+
+-- Changelog:
+--   Added "Align to marker" checkbox
 
 
 function showMessage(message, title, errorType)
