@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="92307eba604395c7b46ed4642d92f3e5d08c1992">
+<index version="1" name="kusa_reascripts" commit="5023270accc79e6066510c6cb45a4221bebabe6a">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -59,6 +59,10 @@
       <version name="1.30" author="Kusa" time="2023-12-21T15:40:23Z">
         <changelog><![CDATA[+ Adds a Checkbox that allows to align the imploded item with a Marker.]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/92307eba604395c7b46ed4642d92f3e5d08c1992/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
+      <version name="1.31" author="Kusa" time="2023-12-21T15:47:52Z">
+        <changelog><![CDATA[+ Adds a Checkbox that allows to align the imploded item with a Marker.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5023270accc79e6066510c6cb45a4221bebabe6a/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
