@@ -1,5 +1,5 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.30
+-- @version 1.31
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -420,6 +420,7 @@ function createSilenceItems(track, silences, itemPosition)
 end
 
 function alignItemWithMarker(markerId, peakTime, alignOnStart)
+    local MAX_SEARCH_ITERATIONS = 1000
     local retval, isRegion, position, rgnEnd, name, markrgnIdxNumber, color
     local idx = 0
     local found = false
@@ -431,6 +432,10 @@ function alignItemWithMarker(markerId, peakTime, alignOnStart)
             break
         end
         idx = idx + 1
+        if idx >= MAX_SEARCH_ITERATIONS then
+            showMessage("Searched for " .. MAX_SEARCH_ITERATIONS .. " markers. Marker ID not found.", "Error", 0)
+            return
+        end
     until not retval
 
     if found then
