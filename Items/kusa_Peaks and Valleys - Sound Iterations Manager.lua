@@ -3,10 +3,7 @@
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog
---
--- Changelog:
--- - Add checkbox to align imploded items with Marker.
+-- @changelog + Adds a Checkbox that allows to align the imploded item with a Marker.
 
 
 function showMessage(message, title, errorType)
