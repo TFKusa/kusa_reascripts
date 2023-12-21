@@ -4,10 +4,10 @@
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog
--- + Align to marker option.
+-- # Align to marker option.
 
 -- Changelog:
---   Added "Align to marker" checkbox
+--   * v2.30 Added "Align to marker" checkbox
 
 
 function showMessage(message, title, errorType)
