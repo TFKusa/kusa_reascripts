@@ -1,9 +1,9 @@
 -- @description kusa_Timestretch item start, peak and end to Markers
--- @version 1.00
+-- @version 1.01
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
-
+-- @changelog Applies to all item takes
 
 local function print(string)
     reaper.ShowConsoleMsg(string .. "\n")
@@ -159,53 +159,105 @@ local function getMarkerPositions(displayedMarkerId)
 end
 
 local function addStartEndStretchMarkers(item)
-    local take = reaper.GetActiveTake(item)
-    if not take then
-        showMessage("No active take in item.")
+    local numTakes = reaper.GetMediaItemNumTakes(item)
+    if numTakes == 0 then
+        showMessage("No takes in item.", "Error", 0)
         return
     end
     local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-    reaper.SetTakeStretchMarker(take, -1, 0)
-    reaper.SetTakeStretchMarker(take, -1, itemLength)
-end
-
-local function updateEndStretchMarkerToMatchLastMarkerPosition(item, positions, take)
-    local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-    local lastMarkerPos = positions[3] - itemStart
-    local endMarkerIdx = 2
-    local idx, _ = reaper.GetTakeStretchMarker(take, endMarkerIdx)
-    if idx ~= nil then
-        reaper.SetTakeStretchMarker(take, idx, lastMarkerPos)
-    else
-        reaper.SetTakeStretchMarker(take, -1, lastMarkerPos)
+    for takeIndex = 0, numTakes - 1 do
+        local take = reaper.GetMediaItemTake(item, takeIndex)
+        if take then
+            local numMarkers = reaper.GetTakeNumStretchMarkers(take)
+            local startMarkerExists = false
+            local endMarkerExists = false
+            for i = 0, numMarkers - 1 do
+                local _, markerPos = reaper.GetTakeStretchMarker(take, i)
+                if math.abs(markerPos) < 0.001 then
+                    startMarkerExists = true
+                end
+                if math.abs(markerPos - itemLength) < 0.001 then
+                    endMarkerExists = true
+                end
+            end
+            if not startMarkerExists then
+                reaper.SetTakeStretchMarker(take, -1, 0)
+            end
+            if not endMarkerExists then
+                reaper.SetTakeStretchMarker(take, -1, itemLength)
+            end
+        end
     end
 end
 
+
+local function updateEndStretchMarkerToMatchLastMarkerPosition(item, positions)
+    local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    local lastMarkerPos = positions[3] - itemStart
+    local numTakes = reaper.GetMediaItemNumTakes(item)
+    for takeIndex = 0, numTakes - 1 do
+        local take = reaper.GetMediaItemTake(item, takeIndex)
+        if take then
+            local endMarkerIdx = 2
+            local idx, _ = reaper.GetTakeStretchMarker(take, endMarkerIdx)
+            if idx ~= nil then
+                reaper.SetTakeStretchMarker(take, idx, lastMarkerPos)
+            else
+                reaper.SetTakeStretchMarker(take, -1, lastMarkerPos)
+            end
+        end
+    end
+end
+
+
 local function addStretchMarkerAtPeak(item, peakTime)
-    local take = reaper.GetActiveTake(item)
-    if not take then
-        showMessage("No active take in item.", "Error", 0)
+    local numTakes = reaper.GetMediaItemNumTakes(item)
+    if numTakes == 0 then
+        showMessage("No takes in item.", "Error", 0)
         return
     end
     local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
     local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
     local specificMarkerPosition = peakTime - itemStart
-    if specificMarkerPosition >= 0 and specificMarkerPosition <= itemLength then
-        reaper.SetTakeStretchMarker(take, -1, specificMarkerPosition)
-    else
-        reaper.ShowConsoleMsg("Peak time is outside of the item's boundaries.\n")
+    if specificMarkerPosition < 0 or specificMarkerPosition > itemLength then
+        showMessage("Peak time is outside of the item's boundaries.", "Error", 0)
+        return
+    end
+    for takeIndex = 0, numTakes - 1 do
+        local take = reaper.GetMediaItemTake(item, takeIndex)
+        if take then
+            local numMarkers = reaper.GetTakeNumStretchMarkers(take)
+            local markerExists = false
+            for i = 0, numMarkers - 1 do
+                local _, markerPos = reaper.GetTakeStretchMarker(take, i)
+                if math.abs(markerPos - specificMarkerPosition) < 0.001 then
+                    markerExists = true
+                    break
+                end
+            end
+            if not markerExists then
+                reaper.SetTakeStretchMarker(take, -1, specificMarkerPosition)
+            end
+        end
     end
 end
 
-local function updatePeakStretchMarkerToSecondMarkerPosition(item, positions, take)
+
+local function updatePeakStretchMarkerToSecondMarkerPosition(item, positions)
     local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
     local secondMarkerPos = positions[2] - itemStart
-    local peakMarkerIdx = 1
-    local idx, _ = reaper.GetTakeStretchMarker(take, peakMarkerIdx)
-    if idx ~= nil then
-        reaper.SetTakeStretchMarker(take, idx, secondMarkerPos)
-    else
-        reaper.SetTakeStretchMarker(take, -1, secondMarkerPos)
+    local numTakes = reaper.GetMediaItemNumTakes(item)
+    for takeIndex = 0, numTakes - 1 do
+        local take = reaper.GetMediaItemTake(item, takeIndex)
+        if take then
+            local peakMarkerIdx = 1
+            local idx, _ = reaper.GetTakeStretchMarker(take, peakMarkerIdx)
+            if idx ~= nil then
+                reaper.SetTakeStretchMarker(take, idx, secondMarkerPos)
+            else
+                reaper.SetTakeStretchMarker(take, -1, secondMarkerPos)
+            end
+        end
     end
 end
 

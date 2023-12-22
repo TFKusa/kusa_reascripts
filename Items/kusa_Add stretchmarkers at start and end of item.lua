@@ -1,8 +1,9 @@
 -- @description kusa_Add stretchmarkers at start and end of item
--- @version 1.00
+-- @version 1.01
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog Applies to all item takes
 
 
 local function showMessage(string, title, errType)
@@ -11,14 +12,35 @@ local function showMessage(string, title, errType)
 end
 
 local function addStartEndStretchMarkers(item)
-    local take = reaper.GetActiveTake(item)
-    if not take then
-        showMessage("No active take in item.")
+    local numTakes = reaper.GetMediaItemNumTakes(item)
+    if numTakes == 0 then
+        showMessage("No takes in item.", "Error", 0)
         return
     end
     local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-    reaper.SetTakeStretchMarker(take, -1, 0)
-    reaper.SetTakeStretchMarker(take, -1, itemLength)
+    for takeIndex = 0, numTakes - 1 do
+        local take = reaper.GetMediaItemTake(item, takeIndex)
+        if take then
+            local numMarkers = reaper.GetTakeNumStretchMarkers(take)
+            local startMarkerExists = false
+            local endMarkerExists = false
+            for i = 0, numMarkers - 1 do
+                local _, markerPos = reaper.GetTakeStretchMarker(take, i)
+                if math.abs(markerPos) < 0.001 then
+                    startMarkerExists = true
+                end
+                if math.abs(markerPos - itemLength) < 0.001 then
+                    endMarkerExists = true
+                end
+            end
+            if not startMarkerExists then
+                reaper.SetTakeStretchMarker(take, -1, 0)
+            end
+            if not endMarkerExists then
+                reaper.SetTakeStretchMarker(take, -1, itemLength)
+            end
+        end
+    end
 end
 
 function main()
