@@ -3,19 +3,27 @@ TOGGLE & MAIN SCRIPTS SETUP
 
         Installation
 
-Some scripts come in two parts :
+Some scripts are provided in two parts :
 kusa_AwesomeScriptName - Toggle
 kusa_AwesomeScriptName - Main
 
-You need to download both versions to use them.
-
-You can add the "Toggle" script in your toolbar :
-- Right click on your toolbar -> Customize toolbar...
-- It opens the Customize menus/toolbars window. Click on "Add..." at the bottom left of the window, it will open the Actions windows.
-- Look for "kusa_AwesomeScriptName - Toggle", and click on "Select".
-- The "Toggle" script now appears at the bottom of the "Customized toolbar" list, and in your toolbar. Right click on it's name to customise its position and icon.
+You need to download both parts to fully utilize the script.
 
 
-When setting this up for the first time, please click a few times on the "Toggle" button, or run the script to initialize it.
+       Adding the "Toggle" Script to your toolbar :
 
-You can now assign a shortcut to "kusa_AwesomeScriptName - Toggle" for quick toggling, and also to "kusa_AwesomeScriptName - Main" that will behave differently depending on the state of the toggle.
+- Right click on your toolbar and select "Customize toolbar..."
+- This action opens the "Customize menus/toolbars" window. Click on "Add..." located at the bottom left of this window to open the "Actions" windows.
+- Search for "kusa_AwesomeScriptName - Toggle", and click on "Select".
+- The "Toggle" script will now appear at the bottom of the "Customized toolbar" list and on your toolbar. Right click on it's name in the list to customize its position and icon.
+
+
+        Initial setup :
+
+When setting up for the first time, please click the "Toggle" button a few times, or run the script to initialize it.
+
+
+        Shorcut assignment :
+
+You can now assign a shortcut to "kusa_AwesomeScriptName - Toggle" for quick access. Additionally, you can assign a shortcut to "kusa_AwesomeScriptName - Main".
+This main script will behave differently depending on the toggle state.
