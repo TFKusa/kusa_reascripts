@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="848990f597bf4120fc168a2d330d395cc0de0fb3">
+<index version="1" name="kusa_reascripts" commit="ffc21227b852a5a051498b8b952927a357482bdb">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -12,6 +12,15 @@
     </reapack>
   </category>
   <category name="Items">
+    <reapack name="kusa_Add stretchmarkers at start and end of item.lua" type="script" desc="kusa_Add stretchmarkers at start and end of item">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2023-12-22T18:18:39Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ffc21227b852a5a051498b8b952927a357482bdb/Items/kusa_Add%20stretchmarkers%20at%20start%20and%20end%20of%20item.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_Bounce in place all items in the session via Master.lua" type="script" desc="kusa_Bounce in place all items in the session via Master">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
