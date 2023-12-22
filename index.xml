@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="a71a0ce2ae68e15e46a3f490e08053580cfc4c8e">
+<index version="1" name="kusa_reascripts" commit="995fadf22a29a7bc5d7bdb0a3f235b0c70e85e93">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -80,6 +80,24 @@
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-18T15:08:39Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/c96c4b60cb82f7eb2288c8eeb397b09eeed2ed9e/Items/kusa_Set%20time%20selection%20to%20selected%20items,%20set%20repeat%20if%20time%20selection.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Timestretch item to start, peak and end Markers - no prompt.lua" type="script" desc="kusa_Timestretch item start, peak and end to Markers - no prompt">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2023-12-22T17:58:17Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/995fadf22a29a7bc5d7bdb0a3f235b0c70e85e93/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers%20-%20no%20prompt.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Timestretch item to start, peak and end Markers.lua" type="script" desc="kusa_Timestretch item start, peak and end to Markers">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2023-12-22T17:58:17Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/995fadf22a29a7bc5d7bdb0a3f235b0c70e85e93/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers.lua</source>
       </version>
     </reapack>
   </category>
