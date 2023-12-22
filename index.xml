@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="995fadf22a29a7bc5d7bdb0a3f235b0c70e85e93">
+<index version="1" name="kusa_reascripts" commit="848990f597bf4120fc168a2d330d395cc0de0fb3">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -118,6 +118,10 @@
         <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/44d7619ec21b19f9dc0caf24e8e06cbb25cf71f8/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main%20Backwards.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-22T18:02:03Z">
+        <changelog><![CDATA[Better error handling]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/848990f597bf4120fc168a2d330d395cc0de0fb3/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main%20Backwards.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Tab like Pro Tools - Main.lua" type="script" desc="kusa_Tab like Pro Tools - Main">
       <metadata>
@@ -134,6 +138,10 @@
       <version name="1.02" author="Kusa" time="2023-12-21T21:47:43Z">
         <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/233fce859740d1b168e2fc7ab7d6d7482f87ec52/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main.lua</source>
+      </version>
+      <version name="1.03" author="Kusa" time="2023-12-22T18:02:03Z">
+        <changelog><![CDATA[Better error handling]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/848990f597bf4120fc168a2d330d395cc0de0fb3/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Tab like Pro Tools - Toggle.lua" type="script" desc="kusa_Tab like Pro Tools - Toggle">
