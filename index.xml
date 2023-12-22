@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="ffc21227b852a5a051498b8b952927a357482bdb">
+<index version="1" name="kusa_reascripts" commit="460da30749c9add406c09170ac7a1998d218766d">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -19,6 +19,10 @@
       </metadata>
       <version name="1.00" author="Kusa" time="2023-12-22T18:18:39Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ffc21227b852a5a051498b8b952927a357482bdb/Items/kusa_Add%20stretchmarkers%20at%20start%20and%20end%20of%20item.lua</source>
+      </version>
+      <version name="1.01" author="Kusa" time="2023-12-22T18:52:17Z">
+        <changelog><![CDATA[Applies to all item takes]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/460da30749c9add406c09170ac7a1998d218766d/Items/kusa_Add%20stretchmarkers%20at%20start%20and%20end%20of%20item.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Bounce in place all items in the session via Master.lua" type="script" desc="kusa_Bounce in place all items in the session via Master">
@@ -99,6 +103,10 @@
       <version name="1.00" author="Kusa" time="2023-12-22T17:58:17Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/995fadf22a29a7bc5d7bdb0a3f235b0c70e85e93/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers%20-%20no%20prompt.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-22T18:52:17Z">
+        <changelog><![CDATA[Applies to all item takes]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/460da30749c9add406c09170ac7a1998d218766d/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers%20-%20no%20prompt.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Timestretch item to start, peak and end Markers.lua" type="script" desc="kusa_Timestretch item start, peak and end to Markers">
       <metadata>
@@ -107,6 +115,10 @@
       </metadata>
       <version name="1.00" author="Kusa" time="2023-12-22T17:58:17Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/995fadf22a29a7bc5d7bdb0a3f235b0c70e85e93/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers.lua</source>
+      </version>
+      <version name="1.01" author="Kusa" time="2023-12-22T18:52:17Z">
+        <changelog><![CDATA[Applies to all item takes]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/460da30749c9add406c09170ac7a1998d218766d/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers.lua</source>
       </version>
     </reapack>
   </category>
