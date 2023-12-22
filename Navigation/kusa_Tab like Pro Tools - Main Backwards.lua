@@ -1,10 +1,10 @@
 -- @description kusa_Tab like Pro Tools - Main Backwards
--- @version 1.00
+-- @version 1.01
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @about : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
--- @changelog Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
+-- @changelog Better error handling
 
 
 local function showMessage(string, title, errType)
@@ -133,7 +133,7 @@ end
 local state_key = "com.kusa.toggletablikeprotools"
 local toggleState = reaper.GetExtState(state_key, "ToggleState")
 if toggleState == "" then
-    local userChoice = showMessage('Please initialize the script by toggling "Tab to transients" at least once. Click "OK" to see the documentation.', "Error", 1)
+    local userChoice = showMessage('Please initialize the script by toggling "kusa_Tab like Pro Tools - Toggle" at least once. Click "OK" to see the documentation.', "Error", 1)
     if userChoice == 1 then
         openURL("https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md")
     end
