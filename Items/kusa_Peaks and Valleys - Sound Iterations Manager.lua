@@ -1,9 +1,10 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.40
+-- @version 1.41
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog Various optimizations
+-- @changelog - Fix crash when used on an item with an altered playrate.
+--  - Fix "Min Duration" value on stereo files
 
 
 local function print(string)
@@ -36,7 +37,42 @@ local lastTrack = nil
 ------------------------------GENERAL FUNCTIONS--------------------------------------------
 -------------------------------------------------------------------------------------------
 
-function addFades()
+local function getChannelsOfSelectedItem(take)
+    local source = reaper.GetMediaItemTake_Source(take)
+    if not source then return nil end
+
+    local channels = reaper.GetMediaSourceNumChannels(source)
+    return channels
+end
+
+local function selectNextTrack(currentTrack)
+    local currentTrackIndex = reaper.GetMediaTrackInfo_Value(currentTrack, "IP_TRACKNUMBER") - 1
+    local totalTracks = reaper.CountTracks(0)
+    local nextTrackIndex = currentTrackIndex + 1
+    if nextTrackIndex < totalTracks then
+        local nextTrack = reaper.GetTrack(0, nextTrackIndex)
+        reaper.SetOnlyTrackSelected(nextTrack)
+    else
+        showMessage("No next track available.", "Error", 0)
+    end
+end
+
+local function cleanupAfterRender(item, track)
+    reaper.SetMediaTrackInfo_Value(track, "B_MUTE", 0)
+    local itemCount = reaper.GetTrackNumMediaItems(track)
+    for i = 0, itemCount - 1 do
+        local trackItem = reaper.GetTrackMediaItem(track, i)
+        local trackItemPosition = reaper.GetMediaItemInfo_Value(trackItem, "D_POSITION")
+        if trackItemPosition == itemPosition then
+            reaper.SetMediaItemInfo_Value(trackItem, "B_MUTE", 1)
+            break
+        end
+    end
+    reaper.SetMediaItemInfo_Value(item, "B_MUTE_ACTUAL", 1)
+    reaper.Main_OnCommand(40635, 0) -- Time selection: Remove (unselect) time selection
+end
+
+local function addFades()
     local numItems = reaper.CountSelectedMediaItems(0)
     for i = 0, numItems - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
@@ -45,7 +81,7 @@ function addFades()
     end
 end
 
-function promptUserForNumber(promptTitle, fieldName)
+local function promptUserForNumber(promptTitle, fieldName)
     local userInputsOK, userInput = reaper.GetUserInputs(promptTitle, 1, fieldName, "")
     if userInputsOK then
         local numberInput = tonumber(userInput)
@@ -58,7 +94,7 @@ function promptUserForNumber(promptTitle, fieldName)
     return nil
 end
 
-function alignItemWithMarker(markerId, peakTime, alignOnStart)
+local function alignItemWithMarker(markerId, peakTime, alignOnStart)
     local MAX_SEARCH_ITERATIONS = 1000
     local retval, isRegion, position, rgnEnd, name, markrgnIdxNumber, color
     local idx = 0
@@ -93,18 +129,47 @@ function alignItemWithMarker(markerId, peakTime, alignOnStart)
     end
 end
 
-function spaceSelectedItems(amount)
+local function spaceSelectedItems(amount)
     local itemCount = reaper.CountSelectedMediaItems(0)
     if itemCount < 2 then return end
-
     local prevItem = reaper.GetSelectedMediaItem(0, 0)
     local prevItemEnd = reaper.GetMediaItemInfo_Value(prevItem, "D_LENGTH") + reaper.GetMediaItemInfo_Value(prevItem, "D_POSITION")
-
     for i = 1, itemCount - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
         local newPosition = prevItemEnd + amount
         reaper.SetMediaItemPosition(item, newPosition, false)
-        prevItemEnd = reaper.GetMediaItemInfo_Value(item, "D_LENGTH") + newPosition
+        prevItemEnd = newPosition + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+    end
+end
+
+
+local function getSelectedItemPlayrate(take)
+    local playrate = reaper.GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+    return playrate
+end
+
+local function hasBeenStretchedFunction(take, item, track)
+    local retval, pos, srcpos = reaper.GetTakeStretchMarker(take, 0)
+    local playrate = getSelectedItemPlayrate(take)
+    if retval ~= -1 or playrate ~= 1 then
+        local userChoice = showMessage("The item's playrate has been altered, analysing it will freeze REAPER. Would you like to render it now ? (keeps original)", "Warning", 4)
+        if userChoice == 6 then
+            local originalTrack = track
+            reaper.Main_OnCommand(40290, 0) -- Set time selection to item
+            local numChannels = getChannelsOfSelectedItem(take)
+            reaper.SetOnlyTrackSelected(track)
+            if numChannels == 1 then
+                reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERMONOSMART"), 0)
+            else
+                reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERSTEREOSMART"), 0)
+            end
+            cleanupAfterRender(item, originalTrack)
+            return true
+        else
+        return true
+        end
+    else
+        return false
     end
 end
 
@@ -112,21 +177,13 @@ end
 -------------------------------------BUFFER------------------------------------------------
 -------------------------------------------------------------------------------------------
 
-function getChannelsOfSelectedItem(take)
-    local source = reaper.GetMediaItemTake_Source(take)
-    if not source then return nil end
-
-    local channels = reaper.GetMediaSourceNumChannels(source)
-    return channels
-end
-
-function calculateDownsamplingFactor(totalSamples, numChannels)
+local function calculateDownsamplingFactor(totalSamples, numChannels)
     local maxBufferSize = 4159674
     local maxSamplesPerChannel = maxBufferSize / numChannels
     return math.max(1, math.ceil(totalSamples / maxSamplesPerChannel))
 end
 
-function prepareItemAnalysis(item, take)
+local function prepareItemAnalysis(item, take)
     if not take then return end
     local accessor = reaper.CreateTakeAudioAccessor(take)
     local retval, currentSampleRate = reaper.GetAudioDeviceInfo("SRATE")
@@ -137,11 +194,11 @@ function prepareItemAnalysis(item, take)
     return accessor, sampleRate, numChannels, startTime, endTime
 end
 
-function calculateTotalSamples(startTime, endTime, sampleRate)
+local function calculateTotalSamples(startTime, endTime, sampleRate)
     return math.floor((endTime - startTime) * sampleRate)
 end
 
-function populateBufferWithDownsampling(accessor, sampleRate, numChannels, startTime, totalSamples, isSilence)
+local function populateBufferWithDownsampling(accessor, sampleRate, numChannels, startTime, totalSamples, isSilence)
     local downsamplingFactor = calculateDownsamplingFactor(totalSamples, numChannels)
     if isSilence then
         downsamplingFactor = downsamplingFactor * 8
@@ -162,7 +219,7 @@ function populateBufferWithDownsampling(accessor, sampleRate, numChannels, start
 end
 
 
-function getBufferReady(item, isSilence, take)
+local function getBufferReady(item, isSilence, take)
     local accessor, sampleRate, numChannels, startTime, endTime = prepareItemAnalysis(item, take)
     if not take then return end
     local totalSamples = calculateTotalSamples(startTime, endTime, sampleRate)
@@ -174,7 +231,7 @@ end
 --------------------------------------PEAK-------------------------------------------------
 -------------------------------------------------------------------------------------------
 
-function findPeakInBuffer(buffer, numSamplesInBuffer, numChannels, downsamplingFactor)
+local function findPeakInBuffer(buffer, numSamplesInBuffer, numChannels, downsamplingFactor)
     local peakValue = 0
     local peakIndex = 0
     for i = 1, numSamplesInBuffer do
@@ -196,7 +253,7 @@ function findPeakInBuffer(buffer, numSamplesInBuffer, numChannels, downsamplingF
     return peakValue, peakIndex
 end
 
-function calculatePeakTime(take, item, peakIndex, sampleRate)
+local function calculatePeakTime(take, item, peakIndex, sampleRate)
     local takeStartOffset = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
     local peakTimeRelativeToSource = takeStartOffset + (peakIndex / sampleRate)
     local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
@@ -208,7 +265,7 @@ function calculatePeakTime(take, item, peakIndex, sampleRate)
     return peakTime
 end
 
-function getPeakTime(item, take)
+local function getPeakTime(item, take)
     local isSilence = false
     local peakBuffer, numSamplesInBuffer, numChannels, downsamplingFactor, peakAccessor, sampleRate, startTime = getBufferReady(item, isSilence, take)
     local peakValue, peakIndex = findPeakInBuffer(peakBuffer, numSamplesInBuffer, numChannels, downsamplingFactor)
@@ -221,11 +278,11 @@ end
 ------------------------------------SILENCES-----------------------------------------------
 -------------------------------------------------------------------------------------------
 
-function detectSilences(buffer, silenceThreshold, minSilenceDuration, sampleRate, downsamplingFactor)
+local function detectSilences(buffer, silenceThreshold, minSilenceDuration, sampleRate, downsamplingFactor, numChannels)
     local silences = {}
     local silenceStartIndex = nil
     local currentSilenceDuration = 0
-    local minSilenceSamples = minSilenceDuration * sampleRate / downsamplingFactor
+    local minSilenceSamples = minSilenceDuration * sampleRate / downsamplingFactor * numChannels
 
     for i = 1, #buffer do
         local sample = math.abs(buffer[i])
@@ -253,7 +310,7 @@ function detectSilences(buffer, silenceThreshold, minSilenceDuration, sampleRate
     return silences
 end
 
-function convertSilencesToTime(silences, startTime, sampleRate, downsamplingFactor, numChannels)
+local function convertSilencesToTime(silences, startTime, sampleRate, downsamplingFactor, numChannels)
     local silencesInTime = {}
     for _, silence in ipairs(silences) do
         local startInTime = startTime + ((silence.start / numChannels) * downsamplingFactor - downsamplingFactor) / sampleRate
@@ -264,7 +321,7 @@ function convertSilencesToTime(silences, startTime, sampleRate, downsamplingFact
 end
 
 
-function deleteSilencesFromItem(item, silences)
+local function deleteSilencesFromItem(item, silences)
     if not item or not silences then return end
 
     table.sort(silences, function(a, b) return a.start < b.start end)
@@ -286,7 +343,7 @@ function deleteSilencesFromItem(item, silences)
     end
 end
 
-function deleteShortItems(coeff)
+local function deleteShortItems(coeff)
     local selectedItemsCount = reaper.CountSelectedMediaItems(0)
     if selectedItemsCount == 0 then return end
 
@@ -311,8 +368,7 @@ function deleteShortItems(coeff)
     end
 end
 
-function createTemporaryItems(track, silences, itemPosition)
-    cleanup()
+local function createTemporaryItems(track, silences, itemPosition)
     lastTrack = track
     local redColor = reaper.ColorToNative(255, 0, 0) | 0x1000000
     for _, silence in ipairs(silences) do
@@ -331,7 +387,7 @@ function createTemporaryItems(track, silences, itemPosition)
     end
 end
 
-function clearTemporaryItems(track)
+local function clearTemporaryItems(track)
     for _, item in ipairs(silenceItems) do
         if reaper.ValidatePtr(item, "MediaItem*") then
             reaper.DeleteTrackMediaItem(track, item)
@@ -340,17 +396,17 @@ function clearTemporaryItems(track)
     silenceItems = {}
 end
 
-function cleanup()
+local function cleanup()
     if lastTrack then
         clearTemporaryItems(lastTrack)
         reaper.UpdateArrange()
     end
 end
 
-function getSilenceTime(item, take)
+local function getSilenceTime(item, take)
     local isSilence = true
     local silenceBuffer, numSamplesInBuffer, numChannels, downsamplingFactor, silenceAccessor, sampleRate, startTime = getBufferReady(item, isSilence, take)
-    local silences = detectSilences(silenceBuffer, silenceThreshold, minSilenceDuration, sampleRate, downsamplingFactor)
+    local silences = detectSilences(silenceBuffer, silenceThreshold, minSilenceDuration, sampleRate, downsamplingFactor, numChannels)
     local silencesInTime = convertSilencesToTime(silences, startTime, sampleRate, downsamplingFactor, numChannels)
     reaper.DestroyAudioAccessor(silenceAccessor)
     return silencesInTime
@@ -360,7 +416,7 @@ end
 ---------------------------------MAIN FUNCTIONS--------------------------------------------
 -------------------------------------------------------------------------------------------
 
-function implodeToTakesKeepPosition()
+local function implodeToTakesKeepPosition()
     local selectedItemsCount = reaper.CountSelectedMediaItems(0)
     if selectedItemsCount < 1 then return end
 
@@ -391,7 +447,7 @@ function implodeToTakesKeepPosition()
     reaper.Main_OnCommand(40543, 0) -- Command ID for "Take: Implode items on same track into takes"
 end
 
-function alignItemsByPeakTime()
+local function alignItemsByPeakTime()
     local numItems = reaper.CountSelectedMediaItems(0)
     if numItems < 2 then return end
 
@@ -413,7 +469,7 @@ function alignItemsByPeakTime()
     return firstPeakTime
 end
 
-function alignItemsByStartPosition()
+local function alignItemsByStartPosition()
     local numItems = reaper.CountSelectedMediaItems(0)
     if numItems < 2 then return end
 
@@ -444,6 +500,7 @@ local function splitMain(item, take, splitAndSpace)
 end
 
 local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart)
+    reaper.Undo_BeginBlock()
     local splitAndSpace = false
     splitMain(item, take, splitAndSpace)
     if onPeak then
@@ -461,6 +518,7 @@ local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart
             showMessage("Could not retrieve Peak Amplitude. Was the item already collapsed ?", "Whoops!", 0)
         end
     end
+    reaper.Undo_EndBlock("Implode to takes.", -1)
 end
 
 -------------------------------------------------------------------------------------------
@@ -472,7 +530,7 @@ local ctx = reaper.ImGui_CreateContext('Peaks and Valleys by Kusa')
 silenceThreshold = 0.01
 minSilenceDuration = 0.2
 
-function loop()
+local function loop()
     local visible, open = reaper.ImGui_Begin(ctx, "Peaks and Valleys by Kusa", true)
     if visible then
         local selectedItem = reaper.GetSelectedMediaItem(0, 0)
@@ -482,6 +540,7 @@ function loop()
         local thresholdChanged
         local minDurChanged
         local alignToMarkerChanged = false
+        local hasBeenStretched = false
         thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.001, 2.0, "%.3f")
         if thresholdChanged or minDurChanged then
@@ -489,11 +548,14 @@ function loop()
             if item then
                 local track = reaper.GetMediaItem_Track(item)
                 local take = reaper.GetActiveTake(item)
-                local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-                local silences = getSilenceTime(item, take)
-                if silences then   
-                    cleanup()
-                    createTemporaryItems(track, silences, itemPosition)
+                hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if not hasBeenStretched then  
+                    local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                    local silences = getSilenceTime(item, take)
+                    if silences then   
+                        cleanup()
+                        createTemporaryItems(track, silences, itemPosition)
+                    end
                 end
             else
                 showMessage("No item selected.", "Error", 0)
@@ -509,11 +571,17 @@ function loop()
                 cleanup()
             else
                 local take = reaper.GetActiveTake(item)
-                cleanup()
-                local onPeak = true
-                local alignOnStart = false
-                implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart)
-                reaper.UpdateArrange()
+                local track = reaper.GetMediaItem_Track(item)
+                hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if not hasBeenStretched then
+                    cleanup()
+                    local onPeak = true
+                    local alignOnStart = false
+                    implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart)
+                    reaper.UpdateArrange()
+                else
+                    cleanup()   
+                end
             end
         end
         reaper.ImGui_SameLine(ctx)
@@ -524,11 +592,17 @@ function loop()
                 cleanup()
             else
                 local take = reaper.GetActiveTake(item)
-                cleanup()
-                local onPeak = false
-                local alignOnStart = true
-                implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart)
-                reaper.UpdateArrange()
+                local track = reaper.GetMediaItem_Track(item)
+                hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if not hasBeenStretched then
+                    cleanup()
+                    local onPeak = false
+                    local alignOnStart = true
+                    implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart)
+                    reaper.UpdateArrange()
+                else
+                    cleanup()   
+                end
             end
         end
         reaper.ImGui_SameLine(ctx)
@@ -539,11 +613,17 @@ function loop()
                 cleanup()
             else
                 local take = reaper.GetActiveTake(item)
-                cleanup()
-                local splitAndSpace = true
-                splitMain(item, take, splitAndSpace)
-                addFades()
-                reaper.UpdateArrange()
+                local track = reaper.GetMediaItem_Track(item)
+                hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if not hasBeenStretched then
+                    cleanup()
+                    local splitAndSpace = true
+                    splitMain(item, take, splitAndSpace)
+                    addFades()
+                    reaper.UpdateArrange()
+                else
+                    cleanup()   
+                end
             end
         end
         reaper.ImGui_SameLine(ctx)
@@ -554,11 +634,17 @@ function loop()
                 cleanup()
             else
                 local take = reaper.GetActiveTake(item)
-                cleanup()
-                local splitAndSpace = false
-                splitMain(item, take, splitAndSpace)
-                addFades()
-                reaper.UpdateArrange()
+                local track = reaper.GetMediaItem_Track(item)
+                hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if not hasBeenStretched then
+                    cleanup()
+                    local splitAndSpace = false
+                    splitMain(item, take, splitAndSpace)
+                    addFades()
+                    reaper.UpdateArrange()
+                else
+                    cleanup()   
+                end
             end
         end
         reaper.ImGui_End(ctx)
