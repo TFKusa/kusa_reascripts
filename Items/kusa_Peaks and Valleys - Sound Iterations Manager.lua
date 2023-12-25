@@ -1,5 +1,5 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.55
+-- @version 1.56
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -93,12 +93,10 @@ local function findChildTrackByName(parentTrack, trackName)
     for i = parentTrackIdx + 1, trackCount - 1 do
         local track = reaper.GetTrack(0, i)
         local isChild = reaper.GetParentTrack(track) == parentTrack
-        retval, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false) 
-        print("Checking track: " .. name .. ", Is child: " .. tostring(isChild))
+        retval, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if isChild and name == trackName then
             return track
         elseif reaper.GetTrackDepth(track) <= reaper.GetTrackDepth(parentTrack) then
-            print("Exiting loop, no more child tracks.")
             break
         end
     end
