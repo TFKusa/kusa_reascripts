@@ -1,10 +1,37 @@
 -- @description kusa_Tab like Pro Tools - Toggle
--- @version 1.01
+-- @version 1.10
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @about : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
 -- @changelog Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
+-- - Fix a bug where activating tab to transient on the edge of an item would not work properly.
+
+local function getCursorPos()
+    local cursorPos = reaper.GetCursorPosition()
+    return cursorPos
+end
+
+function isCursorOverItemOnSelectedTrack(cursorPos)
+    local track = reaper.GetSelectedTrack(0, 0)
+
+    if track then
+        local itemCount = reaper.CountTrackMediaItems(track)
+
+        for i = 0, itemCount - 1 do
+            local item = reaper.GetTrackMediaItem(track, i)
+            local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+            local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+            local itemEnd = itemStart + itemLength
+
+            if cursorPos >= itemStart and cursorPos <= itemEnd then
+                return true, item, itemEnd
+            end
+        end
+    end
+
+    return false
+end
 
 local state_key = "com.kusa.toggletablikeprotools"
 
@@ -18,6 +45,12 @@ function toggleState()
     else
         new_state = true
         reaper.SetExtState(state_key, "ToggleState", "true", true)
+        local cursorPos = getCursorPos()
+        local retval, item, itemEnd = isCursorOverItemOnSelectedTrack(cursorPos)
+        if retval then
+            reaper.Main_OnCommand(40289, 0)  -- Deselect all items
+            reaper.SetMediaItemSelected(item, true)
+        end
     end
 
     is_new_value, filename, sec, cmd, mode, resolution, val = reaper.get_action_context()
