@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="82b7f5e1c3adc081d426d45675ae638674fbf2ad">
+<index version="1" name="kusa_reascripts" commit="9fe68f40036e25a21cd62e421aac6426ce21dec3">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -25,6 +25,15 @@
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/460da30749c9add406c09170ac7a1998d218766d/Items/kusa_Add%20stretchmarkers%20at%20start%20and%20end%20of%20item.lua</source>
       </version>
     </reapack>
+    <reapack name="kusa_B like Pro Tools under mouse cursor.lua" type="script" desc="kusa_B like Pro Tools under mouse cursor">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_B%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_Bounce in place all items in the session via Master.lua" type="script" desc="kusa_Bounce in place all items in the session via Master">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
@@ -34,22 +43,22 @@
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/3a51839b77dfbb07b8e210930938b74110674ab0/Items/kusa_Bounce%20in%20place%20all%20items%20in%20the%20session%20via%20Master.lua</source>
       </version>
     </reapack>
-    <reapack name="kusa_Create fade in under mouse.lua" type="script" desc="kusa_Create fade in under mouse">
+    <reapack name="kusa_D like Pro Tools under mouse cursor.lua" type="script" desc="kusa_D like Pro Tools under mouse cursor">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-12-14T19:57:48Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20in%20under%20mouse.lua</source>
+      <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_D%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
     </reapack>
-    <reapack name="kusa_Create fade out under mouse.lua" type="script" desc="kusa_Create fade out under mouse">
+    <reapack name="kusa_G like Pro Tools under mouse cursor.lua" type="script" desc="kusa_G like Pro Tools under mouse cursor">
       <metadata>
         <link rel="website">https://thomashugofritz.wixsite.com/website</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.0" author="Kusa" time="2023-12-14T19:57:48Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/b9fe0f35ffcb4a0530447a4b4e9d8ebdbb2f580a/Items/kusa_Create%20fade%20out%20under%20mouse.lua</source>
+      <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_G%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Peaks and Valleys - Sound Iterations Manager.lua" type="script" desc="kusa_Peaks and Valleys - Sound Iterations Manager">
@@ -101,6 +110,24 @@
       <version name="1.55" author="Kusa" time="2023-12-25T11:47:49Z">
         <changelog><![CDATA[- + New : Align selected item(s) on peak or start across tracks. Can align with marker if the "Align with marker" checkbox is ticked.]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/82b7f5e1c3adc081d426d45675ae638674fbf2ad/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Q like Pro Tools under mouse cursor.lua" type="script" desc="kusa_Q like Pro Tools under mouse cursor">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_Q%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_S like Pro Tools under mouse cursor.lua" type="script" desc="kusa_S like Pro Tools under mouse cursor">
+      <metadata>
+        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_S%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
