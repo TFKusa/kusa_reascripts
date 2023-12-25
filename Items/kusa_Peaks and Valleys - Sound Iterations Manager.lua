@@ -1,9 +1,11 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.50
+-- @version 1.55
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog - Optimising performances
+-- @changelog - + New : Align selected item(s) on peak or start across tracks. Can align with marker if the "Align with marker" checkbox is ticked.
+-- - Bounces in place the item if its playrate has been altered. The original item will be muted and moved to a new child track named "Original item". This is temporary as I try to understand why this causes a massive performance issue.
+-- - Better code structure, less redundencies.
 
 
 local function print(string)
@@ -56,19 +58,75 @@ local function selectNextTrack(currentTrack)
     end
 end
 
-local function cleanupAfterRender(item, track)
-    reaper.SetMediaTrackInfo_Value(track, "B_MUTE", 0)
-    local itemCount = reaper.GetTrackNumMediaItems(track)
+local function setAllFXStateOnTrack(track, state)
+    local fxCount = reaper.TrackFX_GetCount(track)
+    for fxIndex = 0, fxCount - 1 do
+        reaper.TrackFX_SetEnabled(track, fxIndex, state)
+    end
+end
+
+local function muteOriginalItem(item, originalTrack)
+    reaper.SetMediaTrackInfo_Value(originalTrack, "B_MUTE", 0)
+    local itemCount = reaper.GetTrackNumMediaItems(originalTrack)
+    local trackItemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    reaper.SetMediaItemInfo_Value(item, "B_MUTE_ACTUAL", 1)
+    return trackItemPosition
+end
+
+local function getMediaItemAtPosition(track, position)
+    local itemCount = reaper.CountTrackMediaItems(track)
     for i = 0, itemCount - 1 do
-        local trackItem = reaper.GetTrackMediaItem(track, i)
-        local trackItemPosition = reaper.GetMediaItemInfo_Value(trackItem, "D_POSITION")
-        if trackItemPosition == itemPosition then
-            reaper.SetMediaItemInfo_Value(trackItem, "B_MUTE", 1)
+        local item = reaper.GetTrackMediaItem(track, i)
+        if item then
+            local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+            if itemStart == position then
+                return item
+            end
+        end
+    end
+    return nil
+end
+
+local function findChildTrackByName(parentTrack, trackName)
+    local parentTrackIdx = reaper.GetMediaTrackInfo_Value(parentTrack, "IP_TRACKNUMBER") - 1
+    local trackCount = reaper.CountTracks(0)
+    for i = parentTrackIdx + 1, trackCount - 1 do
+        local track = reaper.GetTrack(0, i)
+        local isChild = reaper.GetParentTrack(track) == parentTrack
+        retval, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false) 
+        print("Checking track: " .. name .. ", Is child: " .. tostring(isChild))
+        if isChild and name == trackName then
+            return track
+        elseif reaper.GetTrackDepth(track) <= reaper.GetTrackDepth(parentTrack) then
+            print("Exiting loop, no more child tracks.")
             break
         end
     end
-    reaper.SetMediaItemInfo_Value(item, "B_MUTE_ACTUAL", 1)
+    return nil
+end
+
+local function createChildTrack(parentTrack, childTrack, item, trackItemPosition)
+    local trackName = "Original item"
+    local parentTrackIndex = reaper.CSurf_TrackToID(parentTrack, false)
+    reaper.ReorderSelectedTracks(parentTrackIndex, 1)
+    local newItem = getMediaItemAtPosition(childTrack, trackItemPosition)
+    reaper.MoveMediaItemToTrack(newItem, parentTrack)
+    local originalItemTrack = findChildTrackByName(parentTrack, trackName)
+    if originalItemTrack then
+        reaper.MoveMediaItemToTrack(item, originalItemTrack)
+        reaper.DeleteTrack(childTrack)
+    else
+        reaper.MoveMediaItemToTrack(item, childTrack)
+        reaper.GetSetMediaTrackInfo_String(childTrack, "P_NAME", trackName, true)
+    end
+end
+
+local function cleanupAfterRender(item, originalTrack)
+    setAllFXStateOnTrack(originalTrack, true)
+    local trackItemPosition = muteOriginalItem(item, originalTrack)
     reaper.Main_OnCommand(40635, 0) -- Time selection: Remove (unselect) time selection
+    childTrack = reaper.GetSelectedTrack(0, 0)
+    createChildTrack(originalTrack, childTrack, item, trackItemPosition)
 end
 
 local function addFades()
@@ -98,7 +156,6 @@ local function alignItemWithMarker(markerId, peakTime, alignOnStart)
     local retval, isRegion, position, rgnEnd, name, markrgnIdxNumber, color
     local idx = 0
     local found = false
-
     repeat
         retval, isRegion, position, rgnEnd, name, markrgnIdxNumber, color = reaper.EnumProjectMarkers3(0, idx)
         if retval and not isRegion and markrgnIdxNumber == markerId then
@@ -111,7 +168,6 @@ local function alignItemWithMarker(markerId, peakTime, alignOnStart)
             return
         end
     until not retval
-
     if found then
         local selectedItem = reaper.GetSelectedMediaItem(0, 0)
         if selectedItem then
@@ -141,8 +197,6 @@ local function spaceSelectedItems(amount)
     end
 end
 
-
-
 local function getSelectedItemPlayrate(take)
     local playrate = reaper.GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
     return playrate
@@ -152,24 +206,40 @@ local function hasBeenStretchedFunction(take, item, track)
     local retval, pos, srcpos = reaper.GetTakeStretchMarker(take, 0)
     local playrate = getSelectedItemPlayrate(take)
     if retval ~= -1 or playrate ~= 1 then
-        local userChoice = showMessage("The item's playrate has been altered, analysing it will freeze REAPER. Would you like to render it now ? (keeps original)", "Warning", 4)
+        local userChoice = showMessage("The item's playrate has been altered. Analysing it will freeze REAPER. Would you like to render it now on a new track ?", "Warning", 4)
         if userChoice == 6 then
+            reaper.Undo_BeginBlock()
             local originalTrack = track
             reaper.Main_OnCommand(40290, 0) -- Set time selection to item
             local numChannels = getChannelsOfSelectedItem(take)
             reaper.SetOnlyTrackSelected(track)
+            setAllFXStateOnTrack(track, false)
             if numChannels == 1 then
                 reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERMONOSMART"), 0)
             else
                 reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERSTEREOSMART"), 0)
             end
             cleanupAfterRender(item, originalTrack)
+
+            reaper.Undo_EndBlock("Stretched item render.", -1)
             return true
         else
         return true
         end
     else
         return false
+    end
+end
+
+local function getUserInput()
+    local retval, userMarkerId = reaper.GetUserInputs("Enter Marker ID", 1, "Marker ID:", "")
+    local markerId = tonumber(userMarkerId)
+    if userMarkerId:match("^%d+$") then
+        local markerId = tonumber(userMarkerId)
+        return markerId, retval
+    else
+        showMessage("Marker ID not found.", "Error", 0)
+        return markerId, false
     end
 end
 
@@ -508,6 +578,7 @@ end
 
 local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
     reaper.Undo_BeginBlock()
+    local firstPeakTime
     local splitAndSpace = false
     splitMain(item, take, splitAndSpace, silencesInLoop)
     if onPeak then
@@ -527,6 +598,54 @@ local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart
         end
     end
     reaper.Undo_EndBlock("Implode to takes.", -1)
+end
+
+function getMarkerPosition(markerId)
+    local num_markers, num_regions = reaper.CountProjectMarkers(0)
+    local total_markers_and_regions = num_markers + num_regions
+    for i = 0, total_markers_and_regions - 1 do
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers(i)
+        if not isrgn and markrgnindexnumber == markerId then
+            return pos
+        end
+    end
+    return nil
+end
+
+function alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
+    local markerPos
+    if shouldAlignToMarker then
+        markerPos = getMarkerPosition(markerId)
+    else
+        markerPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    end
+    if markerPos == nil then
+        showMessage("Marker with the specified ID does not exist.", "Error", 0)
+        return
+    end
+
+    local itemCount = reaper.CountSelectedMediaItems(0)
+    if itemCount < 1 then return end
+
+    if onPeak then
+        for i = 0, itemCount - 1 do
+            local item = reaper.GetSelectedMediaItem(0, i)
+            local take = reaper.GetActiveTake(item)
+            if take ~= nil then
+                local peakTime = getPeakTime(item, take)
+                local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                local offset = peakTime - itemPos
+                local newPos = markerPos - offset
+
+                reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPos)
+            end
+        end
+    else
+        for i = 0, itemCount - 1 do
+            local item = reaper.GetSelectedMediaItem(0, i)
+            reaper.SetMediaItemInfo_Value(item, "D_POSITION", markerPos)
+        end
+    end
 end
 
 -------------------------------------------------------------------------------------------
@@ -549,13 +668,16 @@ local function loop()
         local minDurChanged
         local alignToMarkerChanged = false
         local hasBeenStretched = false
+        local splitAndSpace = false
         thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.001, 2.0, "%.3f")
+        item = reaper.GetSelectedMediaItem(0, 0)
+        if item then
+            track = reaper.GetMediaItem_Track(item)
+            take = reaper.GetActiveTake(item)
+        end
         if thresholdChanged or minDurChanged then
-            local item = reaper.GetSelectedMediaItem(0, 0)
             if item then
-                local track = reaper.GetMediaItem_Track(item)
-                local take = reaper.GetActiveTake(item)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
                 if not hasBeenStretched then  
                     local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
@@ -570,16 +692,14 @@ local function loop()
                 cleanup()
             end
         end
-        alignToMarkerChanged, shouldAlignToMarker = reaper.ImGui_Checkbox(ctx, "Align to marker", shouldAlignToMarker)
+
+        alignToMarkerChanged, shouldAlignToMarker = reaper.ImGui_Checkbox(ctx, "Align with marker", shouldAlignToMarker)
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Takes (peak)') then
-            local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
-                local take = reaper.GetActiveTake(item)
-                local track = reaper.GetMediaItem_Track(item)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
                 if not hasBeenStretched then
                     cleanup()
@@ -594,13 +714,10 @@ local function loop()
         end
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Takes (start)') then
-            local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
-                local take = reaper.GetActiveTake(item)
-                local track = reaper.GetMediaItem_Track(item)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
                 if not hasBeenStretched then
                     cleanup()
@@ -614,18 +731,58 @@ local function loop()
             end
         end
         reaper.ImGui_SameLine(ctx)
+        if reaper.ImGui_Button(ctx, 'Align selected (peak)') then
+            if not item then
+                showMessage("No Item selected.", "Error", 0)
+            else
+                if shouldAlignToMarker then
+                    local markerId, retval = getUserInput()
+                    if retval then
+                        if markerId == nil then return end
+                        local onPeak = true
+                        alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
+                        cleanup()
+                        reaper.UpdateArrange()
+                    end
+                else
+                    local onPeak = true
+                    alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
+                    cleanup()
+                    reaper.UpdateArrange()
+                end
+            end
+        end
+        reaper.ImGui_SameLine(ctx)
+        if reaper.ImGui_Button(ctx, 'Align selected (start)') then
+            if not item then
+                showMessage("No Item selected.", "Error", 0)
+            else
+                if shouldAlignToMarker then
+                    local markerId, retval = getUserInput()
+                    if retval then
+                        if markerId == nil then return end
+                            local onPeak = false
+                            alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
+                            cleanup()
+                            reaper.UpdateArrange()
+                    end
+                else
+                    alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
+                    cleanup()
+                    reaper.UpdateArrange()
+                end
+            end
+        end
+        reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Split and space items') then
-            local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
-                local take = reaper.GetActiveTake(item)
-                local track = reaper.GetMediaItem_Track(item)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
                 if not hasBeenStretched then
                     cleanup()
-                    local splitAndSpace = true
+                    splitAndSpace = true
                     splitMain(item, take, splitAndSpace, silencesInLoop)
                     addFades()
                     reaper.UpdateArrange()
@@ -636,17 +793,14 @@ local function loop()
         end
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Split') then
-            local item = reaper.GetSelectedMediaItem(0, 0)
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
-                local take = reaper.GetActiveTake(item)
-                local track = reaper.GetMediaItem_Track(item)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
                 if not hasBeenStretched then
                     cleanup()
-                    local splitAndSpace = false
+                    splitAndSpace = false
                     splitMain(item, take, splitAndSpace, silencesInLoop)
                     addFades()
                     reaper.UpdateArrange()
