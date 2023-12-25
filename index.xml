@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="206fef1a74587f2738a381f3c09580bcf817ec6a">
+<index version="1" name="kusa_reascripts" commit="89564e4382dfb12c89d95ebd13b6d7da06bb684a">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -193,6 +193,10 @@
       <version name="1.01" author="Kusa" time="2023-12-21T21:47:43Z">
         <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/233fce859740d1b168e2fc7ab7d6d7482f87ec52/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Toggle.lua</source>
+      </version>
+      <version name="1.10" author="Kusa" time="2023-12-25T11:01:36Z">
+        <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/89564e4382dfb12c89d95ebd13b6d7da06bb684a/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Toggle.lua</source>
       </version>
     </reapack>
   </category>
