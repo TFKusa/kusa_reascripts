@@ -1,7 +1,8 @@
 -- @description kusa_Setup Trackspacer from selected to hovered track
--- @version 1.0
+-- @version 1.01
 -- @author Kusa
--- @website https://thomashugofritz.wixsite.com/website
+-- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
+-- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 function main()
