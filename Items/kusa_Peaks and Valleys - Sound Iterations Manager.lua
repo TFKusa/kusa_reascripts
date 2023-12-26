@@ -1,10 +1,9 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.58
+-- @version 1.59
 -- @author Kusa
--- @website https://thomashugofritz.wixsite.com/website
+-- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
+-- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog - Bug fix: Added a small tolerance to the playrate check, as tiny portions of unaltered audio occasionally return a playrate of 0.999999999.
--- @changelog - Prompt added to request a REAPER restart upon the first use of this script (necessary if the script has just been installed).
 
 local function tableToString(tbl, depth)
     if depth == nil then depth = 1 end

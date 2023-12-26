@@ -1,7 +1,8 @@
 -- @description kusa_Timestretch item start, peak and end to Markers - no prompt
--- @version 1.01
+-- @version 1.02
 -- @author Kusa
--- @website https://thomashugofritz.wixsite.com/website
+-- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
+-- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog Applies to all item takes
 

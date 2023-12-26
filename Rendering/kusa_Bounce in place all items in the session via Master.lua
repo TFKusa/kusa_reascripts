@@ -1,7 +1,8 @@
 -- @description kusa_Bounce in place all items in the session via Master
--- @version 1.00
+-- @version 1.01
 -- @author Kusa
--- @website https://thomashugofritz.wixsite.com/website
+-- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
+-- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 local tail = 3 -- in seconds

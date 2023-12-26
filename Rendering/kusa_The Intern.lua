@@ -1,7 +1,8 @@
 -- @description kusa_The Intern
--- @version 2.2
+-- @version 2.21
 -- @author Kusa
--- @website https://thomashugofritz.wixsite.com/website
+-- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
+-- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 

@@ -1,7 +1,8 @@
 -- @description kusa_Tab like Pro Tools - Toggle
--- @version 1.11
+-- @version 1.12
 -- @author Kusa
--- @website https://thomashugofritz.wixsite.com/website
+-- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
+-- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @about : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
 -- @changelog Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md
