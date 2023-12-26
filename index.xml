@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="9fe68f40036e25a21cd62e421aac6426ce21dec3">
+<index version="1" name="kusa_reascripts" commit="9f81dae4df6a6f60c5040164b33bc7241ca737d0">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -110,6 +110,10 @@
       <version name="1.55" author="Kusa" time="2023-12-25T11:47:49Z">
         <changelog><![CDATA[- + New : Align selected item(s) on peak or start across tracks. Can align with marker if the "Align with marker" checkbox is ticked.]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/82b7f5e1c3adc081d426d45675ae638674fbf2ad/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
+      <version name="1.56" author="Kusa" time="2023-12-25T23:59:35Z">
+        <changelog><![CDATA[- + New : Align selected item(s) on peak or start across tracks. Can align with marker if the "Align with marker" checkbox is ticked.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9f81dae4df6a6f60c5040164b33bc7241ca737d0/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Q like Pro Tools under mouse cursor.lua" type="script" desc="kusa_Q like Pro Tools under mouse cursor">
