@@ -1,5 +1,5 @@
 -- @description kusa_Tab like Pro Tools - Main
--- @version 1.03
+-- @version 1.10
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -110,6 +110,8 @@ local function main(toggleState)
     if toggleState then
         isCursorOverItem, item, itemEnd = isCursorOverItemOnSelectedTrack(cursorPos)
         if isCursorOverItem then
+            reaper.Main_OnCommand(40289, 0)  -- Deselect all items
+            reaper.SetMediaItemSelected(item, true)
             reaper.Main_OnCommand(40375, 0) -- Move cursor to next transient in items
         else
             reaper.Main_OnCommand(40417, 0) -- Select and move to next item

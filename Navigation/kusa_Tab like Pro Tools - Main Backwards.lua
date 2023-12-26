@@ -1,5 +1,5 @@
 -- @description kusa_Tab like Pro Tools - Main Backwards
--- @version 1.01
+-- @version 1.10
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -110,6 +110,8 @@ local function main(toggleState)
     if toggleState then
         isCursorOverItem, item, itemStart = isCursorOverItemOnSelectedTrack(cursorPos)
         if isCursorOverItem then
+            reaper.Main_OnCommand(40289, 0)  -- Deselect all items
+            reaper.SetMediaItemSelected(item, true)
             reaper.Main_OnCommand(40376, 0) -- Move cursor to next previous in items
         else
             reaper.Main_OnCommand(40416, 0) -- Select and move to previous item (start)
