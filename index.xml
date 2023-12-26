@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="ea73b6b883d7e84e07e282fdfb39562a0467e38e">
+<index version="1" name="kusa_reascripts" commit="ab37012a684c5cc6c483e0129450b57152c7215f">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -17,7 +17,7 @@
   <category name="Items">
     <reapack name="kusa_Add stretchmarkers at start and end of item.lua" type="script" desc="kusa_Add stretchmarkers at start and end of item">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.00" author="Kusa" time="2023-12-22T18:18:39Z">
@@ -27,46 +27,49 @@
         <changelog><![CDATA[Applies to all item takes]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/460da30749c9add406c09170ac7a1998d218766d/Items/kusa_Add%20stretchmarkers%20at%20start%20and%20end%20of%20item.lua</source>
       </version>
+      <version name="1.02" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Add%20stretchmarkers%20at%20start%20and%20end%20of%20item.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_B like Pro Tools under mouse cursor.lua" type="script" desc="kusa_B like Pro Tools under mouse cursor">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_B%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
-    </reapack>
-    <reapack name="kusa_Bounce in place all items in the session via Master.lua" type="script" desc="kusa_Bounce in place all items in the session via Master">
-      <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
-        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
-      </metadata>
-      <version name="1.00" author="Kusa" time="2023-12-21T13:49:05Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/3a51839b77dfbb07b8e210930938b74110674ab0/Items/kusa_Bounce%20in%20place%20all%20items%20in%20the%20session%20via%20Master.lua</source>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_B%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_D like Pro Tools under mouse cursor.lua" type="script" desc="kusa_D like Pro Tools under mouse cursor">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_D%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_D%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_G like Pro Tools under mouse cursor.lua" type="script" desc="kusa_G like Pro Tools under mouse cursor">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_G%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_G%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Peaks and Valleys - Sound Iterations Manager.lua" type="script" desc="kusa_Peaks and Valleys - Sound Iterations Manager">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.12" author="Kusa" time="2023-12-19T20:28:12Z">
@@ -126,37 +129,49 @@
         <changelog><![CDATA[- Prompt added to request a REAPER restart upon the first use of this script (necessary if the script has just been installed).]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/4c6ede276d66b1c3c104efa6002a3a73c41dfc10/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
       </version>
+      <version name="1.59" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Q like Pro Tools under mouse cursor.lua" type="script" desc="kusa_Q like Pro Tools under mouse cursor">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_Q%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Q%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_S like Pro Tools under mouse cursor.lua" type="script" desc="kusa_S like Pro Tools under mouse cursor">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-25T23:52:47Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9fe68f40036e25a21cd62e421aac6426ce21dec3/Items/kusa_S%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_S%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Set time selection to selected items, set repeat if time selection.lua" type="script" desc="kusa_Set time selection to selected items, set repeat if time selection">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-18T15:08:39Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/c96c4b60cb82f7eb2288c8eeb397b09eeed2ed9e/Items/kusa_Set%20time%20selection%20to%20selected%20items,%20set%20repeat%20if%20time%20selection.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Set%20time%20selection%20to%20selected%20items,%20set%20repeat%20if%20time%20selection.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Timestretch item to start, peak and end Markers - no prompt.lua" type="script" desc="kusa_Timestretch item start, peak and end to Markers - no prompt">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.00" author="Kusa" time="2023-12-22T17:58:17Z">
@@ -166,10 +181,14 @@
         <changelog><![CDATA[Applies to all item takes]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/460da30749c9add406c09170ac7a1998d218766d/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers%20-%20no%20prompt.lua</source>
       </version>
+      <version name="1.02" author="Kusa" time="2023-12-26T23:12:09Z">
+        <changelog><![CDATA[Applies to all item takes]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers%20-%20no%20prompt.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Timestretch item to start, peak and end Markers.lua" type="script" desc="kusa_Timestretch item start, peak and end to Markers">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.00" author="Kusa" time="2023-12-22T17:58:17Z">
@@ -178,6 +197,10 @@
       <version name="1.01" author="Kusa" time="2023-12-22T18:52:17Z">
         <changelog><![CDATA[Applies to all item takes]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/460da30749c9add406c09170ac7a1998d218766d/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers.lua</source>
+      </version>
+      <version name="1.02" author="Kusa" time="2023-12-26T23:12:09Z">
+        <changelog><![CDATA[Applies to all item takes]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers.lua</source>
       </version>
     </reapack>
   </category>
@@ -191,7 +214,7 @@
 {\pard \ql \f0 \sa180 \li0 \fi0 : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md\par}
 }
 ]]></description>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.00" author="Kusa" time="2023-12-21T22:39:18Z">
@@ -206,6 +229,10 @@
         <changelog><![CDATA[Better error handling]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/a100085ee22bf84e4f6ff16e450836449684a1e7/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main%20Backwards.lua</source>
       </version>
+      <version name="1.11" author="Kusa" time="2023-12-26T23:12:09Z">
+        <changelog><![CDATA[Better error handling]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main%20Backwards.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Tab like Pro Tools - Main.lua" type="script" desc="kusa_Tab like Pro Tools - Main">
       <metadata>
@@ -216,7 +243,7 @@
 {\pard \ql \f0 \sa180 \li0 \fi0 : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md\par}
 }
 ]]></description>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.02" author="Kusa" time="2023-12-21T21:47:43Z">
@@ -231,6 +258,10 @@
         <changelog><![CDATA[Better error handling]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/a100085ee22bf84e4f6ff16e450836449684a1e7/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main.lua</source>
       </version>
+      <version name="1.11" author="Kusa" time="2023-12-26T23:12:09Z">
+        <changelog><![CDATA[Better error handling]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Main.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Tab like Pro Tools - Toggle.lua" type="script" desc="kusa_Tab like Pro Tools - Toggle">
       <metadata>
@@ -241,7 +272,7 @@
 {\pard \ql \f0 \sa180 \li0 \fi0 : Documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md\par}
 }
 ]]></description>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.01" author="Kusa" time="2023-12-21T21:47:43Z">
@@ -256,23 +287,39 @@
         <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/a100085ee22bf84e4f6ff16e450836449684a1e7/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Toggle.lua</source>
       </version>
+      <version name="1.12" author="Kusa" time="2023-12-26T23:12:09Z">
+        <changelog><![CDATA[Hi ! Check out installation instructions : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TOGGLE%20%26%20MAIN%20SCRIPTS%20SETUP.md]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Navigation/kusa_Tab%20like%20Pro%20Tools%20-%20Toggle.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Regions">
     <reapack name="kusa_Nudge start or end of regions in time selection.lua" type="script" desc="kusa_Nudge start or end of regions in time selection">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.1" author="Kusa" time="2023-12-06T17:44:53Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/1f3e2fbe739b90c3e5eb99dfc238c7adabc12727/Regions/kusa_Nudge%20start%20or%20end%20of%20regions%20in%20time%20selection.lua</source>
       </version>
+      <version name="1.11" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Regions/kusa_Nudge%20start%20or%20end%20of%20regions%20in%20time%20selection.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Rendering">
+    <reapack name="kusa_Bounce in place all items in the session via Master.lua" type="script" desc="kusa_Bounce in place all items in the session via Master">
+      <metadata>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Rendering/kusa_Bounce%20in%20place%20all%20items%20in%20the%20session%20via%20Master.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_The Intern - Assistant TO the Region Manager.lua" type="script" desc="kusa_The Intern - Assistant TO the Region Manager">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-11-06T15:56:43Z">
@@ -281,10 +328,13 @@
       <version name="1.1" author="Kusa" time="2023-11-07T12:34:42Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/9f99492697994b7b6c156299aa497583bf863750/Rendering/kusa_The%20Intern%20-%20Assistant%20TO%20the%20Region%20Manager.lua</source>
       </version>
+      <version name="1.11" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Rendering/kusa_The%20Intern%20-%20Assistant%20TO%20the%20Region%20Manager.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_The Intern.lua" type="script" desc="kusa_The Intern">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-11-12T22:08:33Z">
@@ -323,25 +373,34 @@
       <version name="2.2" author="Kusa" time="2023-12-20T11:52:35Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/c581c98653fced30dd39e80fe7aa0173f55d6634/Rendering/kusa_The%20Intern.lua</source>
       </version>
+      <version name="2.21" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Rendering/kusa_The%20Intern.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Tracks">
     <reapack name="kusa_Structure selected tracks into a nested folder hierarchy.lua" type="script" desc="kusa_The Intern - Structure selected tracks into a nested folder hierarchy">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-06T17:44:53Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/1f3e2fbe739b90c3e5eb99dfc238c7adabc12727/Tracks/kusa_Structure%20selected%20tracks%20into%20a%20nested%20folder%20hierarchy.lua</source>
       </version>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Tracks/kusa_Structure%20selected%20tracks%20into%20a%20nested%20folder%20hierarchy.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Toggle Hide:Show All Tracks Except Selected.lua" type="script" desc="kusa_The Intern - Toggle Hide/Show All Tracks Except Selected">
       <metadata>
-        <link rel="website">https://thomashugofritz.wixsite.com/website</link>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
       <version name="1.0" author="Kusa" time="2023-12-06T17:44:53Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/1f3e2fbe739b90c3e5eb99dfc238c7adabc12727/Tracks/kusa_Toggle%20Hide:Show%20All%20Tracks%20Except%20Selected.lua</source>
+      </version>
+      <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Tracks/kusa_Toggle%20Hide:Show%20All%20Tracks%20Except%20Selected.lua</source>
       </version>
     </reapack>
   </category>
