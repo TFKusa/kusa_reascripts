@@ -1,5 +1,5 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.56
+-- @version 1.57
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
@@ -203,7 +203,7 @@ end
 local function hasBeenStretchedFunction(take, item, track)
     local retval, pos, srcpos = reaper.GetTakeStretchMarker(take, 0)
     local playrate = getSelectedItemPlayrate(take)
-    if retval ~= -1 or playrate ~= 1 then
+    if retval == 0 or playrate ~= 1 then
         local userChoice = showMessage("The item's playrate has been altered. Analysing it will freeze REAPER. Would you like to render it now on a new track ?", "Warning", 4)
         if userChoice == 6 then
             reaper.Undo_BeginBlock()
