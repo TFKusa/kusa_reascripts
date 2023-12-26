@@ -1,12 +1,25 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.57
+-- @version 1.58
 -- @author Kusa
 -- @website https://thomashugofritz.wixsite.com/website
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog - + New : Align selected item(s) on peak or start across tracks. Can align with marker if the "Align with marker" checkbox is ticked.
--- - Bounces in place the item if its playrate has been altered. The original item will be muted and moved to a new child track named "Original item". This is temporary as I try to understand why this causes a massive performance issue.
--- - Better code structure, less redundencies.
+-- @changelog - Bug fix: Added a small tolerance to the playrate check, as tiny portions of unaltered audio occasionally return a playrate of 0.999999999.
+-- @changelog - Prompt added to request a REAPER restart upon the first use of this script (necessary if the script has just been installed).
 
+local function tableToString(tbl, depth)
+    if depth == nil then depth = 1 end
+    if depth > 5 then return "..." end
+
+    local str = "{"
+    for k, v in pairs(tbl) do
+        local key = tostring(k)
+        local value = type(v) == "table" and tableToString(v, depth + 1) or tostring(v)
+        str = str .. "[" .. key .. "] = " .. value .. ", "
+    end
+    str = str:sub(1, -3)
+    str = str .. "}"
+    return str
+end
 
 local function print(string)
     reaper.ShowConsoleMsg(string .. "\n")
@@ -33,6 +46,24 @@ end
 
 local silenceItems = {}
 local lastTrack = nil
+-------------------------------------------------------------------------------------------
+--------------------------------FIRST RUN CHECK--------------------------------------------
+-------------------------------------------------------------------------------------------
+
+local extStateKey = "PeaksAndValleysByKusa"
+local extStateFlag = "HasRunBefore"
+
+local hasRunBefore = reaper.GetExtState(extStateKey, extStateFlag)
+
+if hasRunBefore == "" then
+    local userChoice = showMessage("If you have just installed this script, please close and reopen REAPER to prevent potential crashes.\n Would you like to quit REAPER now ?", "Thank you for downloading Peaks & Valleys.", 4)
+    if userChoice == 6 then
+        reaper.SetExtState(extStateKey, extStateFlag, "true", true)
+        reaper.Main_OnCommand(40004, 0) -- File: Quit REAPER
+    else
+    reaper.SetExtState(extStateKey, extStateFlag, "true", true)
+    end
+end
 
 -------------------------------------------------------------------------------------------
 ------------------------------GENERAL FUNCTIONS--------------------------------------------
@@ -131,7 +162,7 @@ local function addFades()
     local numItems = reaper.CountSelectedMediaItems(0)
     for i = 0, numItems - 1 do
         local item = reaper.GetSelectedMediaItem(0, i)
-        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.00001)
+        reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0.0001)
         reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0.1)
     end
 end
@@ -203,7 +234,8 @@ end
 local function hasBeenStretchedFunction(take, item, track)
     local retval, pos, srcpos = reaper.GetTakeStretchMarker(take, 0)
     local playrate = getSelectedItemPlayrate(take)
-    if retval == 0 or playrate ~= 1 then
+    local epsilon = 0.00000000000001
+    if retval == 0 or math.abs(playrate - 1) > epsilon then
         local userChoice = showMessage("The item's playrate has been altered. Analysing it will freeze REAPER. Would you like to render it now on a new track ?", "Warning", 4)
         if userChoice == 6 then
             reaper.Undo_BeginBlock()
@@ -388,33 +420,56 @@ local function convertSilencesToTime(silences, startTime, sampleRate, downsampli
     for _, silence in ipairs(silences) do
         local startInTime = startTime + ((silence.start / numChannels) * downsamplingFactor - downsamplingFactor) / sampleRate
         local endInTime = startTime + ((silence["end"] / numChannels) * downsamplingFactor - downsamplingFactor) / sampleRate
+        if startInTime < 0 then
+            startInTime = 0
+        end
+
         table.insert(silencesInTime, { start = startInTime, ["end"] = endInTime })
     end
     return silencesInTime
 end
 
+--[[ local function adjustSilenceTimes(silencesInTime, subtractFromStart, addToEnd)
+    for _, silence in ipairs(silencesInTime) do
+        silence.start = math.max(0, silence.start - subtractFromStart)
+        silence["end"] = silence["end"] + addToEnd
+    end
+end ]]
 
 local function deleteSilencesFromItem(item, silences)
-    if not item or not silences then return end
-
-    table.sort(silences, function(a, b) return a.start < b.start end)
-
-    local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-
+    if not item or #silences == 0 then
+        return
+    end
+    reaper.Undo_BeginBlock()
+    reaper.PreventUIRefresh(1)
+    local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
     for i = #silences, 1, -1 do
         local silence = silences[i]
-        local silenceStart = itemPosition + silence.start + 0.15
-        local silenceEnd = itemPosition + silence["end"]--[[  - 0.01 ]]
-
-        local splitItemEnd = reaper.SplitMediaItem(item, silenceEnd)
-        
-        local splitItemStart = reaper.SplitMediaItem(item, silenceStart)
-        
-        if splitItemStart and splitItemEnd then
-            reaper.DeleteTrackMediaItem(reaper.GetMediaItem_Track(splitItemEnd), splitItemStart)
+        local silenceStart = itemStart + silence.start
+        local silenceEnd = itemStart + silence["end"]
+        if silenceEnd < silenceStart then
+            silenceEnd = silenceStart
+        end
+        if silenceStart == itemStart then
+            local splitItemEnd = reaper.SplitMediaItem(item, silenceEnd)
+            if splitItemEnd then
+                reaper.DeleteTrackMediaItem(reaper.GetMediaItem_Track(item), item)
+            end
+        else
+            local splitItemEnd = reaper.SplitMediaItem(item, silenceEnd)
+            local splitItemStart = reaper.SplitMediaItem(item, silenceStart)
+            if splitItemStart then
+                reaper.DeleteTrackMediaItem(reaper.GetMediaItem_Track(splitItemStart), splitItemStart)
+            end
         end
     end
+    reaper.PreventUIRefresh(-1)
+    reaper.Undo_EndBlock("Delete Silences", -1)
+
+    reaper.UpdateArrange()
 end
+
+
 
 local function deleteShortItems(coeff)
     local selectedItemsCount = reaper.CountSelectedMediaItems(0)
@@ -483,6 +538,7 @@ local function getSilenceTime(item, take)
     local silences = detectSilences(silenceBuffer, silenceThreshold, minSilenceDuration, sampleRate, downsamplingFactor, numChannels)
     local silencesInTime = convertSilencesToTime(silences, startTime, sampleRate, downsamplingFactor, numChannels)
     reaper.DestroyAudioAccessor(silenceAccessor)
+    --adjustSilenceTimes(silencesInTime, -0.1, -0.0001)
     return silencesInTime
 end
 
@@ -566,6 +622,7 @@ local function alignItemsByStartPosition()
 end
 
 local function splitMain(item, take, splitAndSpace, silencesInLoop)
+    reaper.SetMediaItemInfo_Value(item, "B_LOOPSRC", 0)
     deleteSilencesFromItem(item, silencesInLoop)
     deleteShortItems(3)
     if splitAndSpace then
@@ -575,7 +632,6 @@ local function splitMain(item, take, splitAndSpace, silencesInLoop)
 end
 
 local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
-    reaper.Undo_BeginBlock()
     local firstPeakTime
     local splitAndSpace = false
     splitMain(item, take, splitAndSpace, silencesInLoop)
@@ -595,7 +651,6 @@ local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart
             showMessage("Could not retrieve Peak Amplitude. Was the item already collapsed ?", "Whoops!", 0)
         end
     end
-    reaper.Undo_EndBlock("Implode to takes.", -1)
 end
 
 function getMarkerPosition(markerId)
@@ -669,7 +724,7 @@ local function loop()
         local splitAndSpace = false
         thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.001, 2.0, "%.3f")
-        item = reaper.GetSelectedMediaItem(0, 0)
+        local item = selectedItem
         if item then
             track = reaper.GetMediaItem_Track(item)
             take = reaper.GetActiveTake(item)
@@ -694,6 +749,7 @@ local function loop()
         alignToMarkerChanged, shouldAlignToMarker = reaper.ImGui_Checkbox(ctx, "Align with marker", shouldAlignToMarker)
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Takes (peak)') then
+            reaper.Undo_BeginBlock()
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
@@ -709,9 +765,11 @@ local function loop()
                     cleanup()   
                 end
             end
+            reaper.Undo_EndBlock("Implode to takes (peak).", -1)
         end
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Takes (start)') then
+            reaper.Undo_BeginBlock()
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
@@ -727,9 +785,11 @@ local function loop()
                     cleanup()   
                 end
             end
+            reaper.Undo_EndBlock("Implode to takes (start).", -1)
         end
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Align selected (peak)') then
+            reaper.Undo_BeginBlock()
             if not item then
                 showMessage("No Item selected.", "Error", 0)
             else
@@ -749,9 +809,11 @@ local function loop()
                     reaper.UpdateArrange()
                 end
             end
+            reaper.Undo_EndBlock("Align selected items (peak).", -1)
         end
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Align selected (start)') then
+            reaper.Undo_BeginBlock()
             if not item then
                 showMessage("No Item selected.", "Error", 0)
             else
@@ -770,9 +832,11 @@ local function loop()
                     reaper.UpdateArrange()
                 end
             end
+            reaper.Undo_EndBlock("Align selected items (start).", -1)
         end
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Split and space items') then
+            reaper.Undo_BeginBlock()
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
@@ -788,9 +852,11 @@ local function loop()
                     cleanup()   
                 end
             end
+            reaper.Undo_EndBlock("Delete silences and space items.", -1)
         end
         reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, 'Split') then
+            reaper.Undo_BeginBlock()
             if not item then
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
@@ -806,6 +872,7 @@ local function loop()
                     cleanup()   
                 end
             end
+            reaper.Undo_EndBlock("Delete silences.", -1)
         end
         reaper.ImGui_End(ctx)
     end
