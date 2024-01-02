@@ -1,9 +1,10 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.59
+-- @version 1.60
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog : Better performances by downsampling even more the buffer for analysis.
 
 local function tableToString(tbl, depth)
     if depth == nil then depth = 1 end
@@ -277,7 +278,8 @@ end
 -------------------------------------------------------------------------------------------
 
 local function calculateDownsamplingFactor(totalSamples, numChannels)
-    local maxBufferSize = 4159674
+    --local maxBufferSize = 4159674
+    local maxBufferSize = 500000
     local maxSamplesPerChannel = maxBufferSize / numChannels
     return math.max(1, math.ceil(totalSamples / maxSamplesPerChannel))
 end
@@ -427,13 +429,6 @@ local function convertSilencesToTime(silences, startTime, sampleRate, downsampli
     end
     return silencesInTime
 end
-
---[[ local function adjustSilenceTimes(silencesInTime, subtractFromStart, addToEnd)
-    for _, silence in ipairs(silencesInTime) do
-        silence.start = math.max(0, silence.start - subtractFromStart)
-        silence["end"] = silence["end"] + addToEnd
-    end
-end ]]
 
 local function deleteSilencesFromItem(item, silences)
     if not item or #silences == 0 then
@@ -621,6 +616,9 @@ local function alignItemsByStartPosition()
 end
 
 local function splitMain(item, take, splitAndSpace, silencesInLoop)
+    if not silencesInLoop then
+        silencesInLoop = getSilenceTime(item, take)
+    end
     reaper.SetMediaItemInfo_Value(item, "B_LOOPSRC", 0)
     deleteSilencesFromItem(item, silencesInLoop)
     deleteShortItems(3)
@@ -633,6 +631,9 @@ end
 local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
     local firstPeakTime
     local splitAndSpace = false
+    if not silencesInLoop then
+        silencesInLoop = getSilenceTime(item, take)
+    end
     splitMain(item, take, splitAndSpace, silencesInLoop)
     if onPeak then
         firstPeakTime = alignItemsByPeakTime()
@@ -644,10 +645,14 @@ local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart
     implodeToTakesKeepPosition()
     if shouldAlignToMarker then
         local userMarkerChoice = promptUserForNumber("Align with marker", "Please enter the Marker ID")
-        if firstPeakTime ~= nil then
-            alignItemWithMarker(userMarkerChoice, firstPeakTime, alignOnStart)
+        if onPeak then
+            if firstPeakTime ~= nil then
+                alignItemWithMarker(userMarkerChoice, firstPeakTime, alignOnStart)
+            else
+                showMessage("Could not retrieve Peak Amplitude. Was the item already collapsed ?", "Whoops!", 0)
+            end
         else
-            showMessage("Could not retrieve Peak Amplitude. Was the item already collapsed ?", "Whoops!", 0)
+            alignItemWithMarker(userMarkerChoice, firstPeakTime, true)
         end
     end
 end
