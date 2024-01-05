@@ -1,9 +1,10 @@
 -- @description kusa_The Intern
--- @version 2.21
+-- @version 2.22
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog : - Adds "Actor-Mixer" as a valid destination in Wwise.
 
 
 
@@ -1505,7 +1506,7 @@ function onClickToWwise()
         return       
     else
         local userIPSetting = txtRemotePcIp:val()
-        local valuesToCheck = {"SwitchContainer", "RandomSequenceContainer", "BlendContainer", "WorkUnit", "Folder"}
+        local valuesToCheck = {"SwitchContainer", "RandomSequenceContainer", "BlendContainer", "WorkUnit", "Folder", "ActorMixer"}
         local isValid = selectedWwiseObjectIsValid(userIPSetting, valuesToCheck)
         if isValid then
             local wwiseWinProjectPath, err = getWwiseProjectPath()
