@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="0f3f701f87da80bdcee731a3c2cb35ea25b4fd3e">
+<index version="1" name="kusa_reascripts" commit="2151ccb06d73e143107e02143aea05a91fcfb653">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -379,6 +379,10 @@
       </version>
       <version name="2.21" author="Kusa" time="2023-12-26T23:12:09Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Rendering/kusa_The%20Intern.lua</source>
+      </version>
+      <version name="2.22" author="Kusa" time="2024-01-05T23:36:16Z">
+        <changelog><![CDATA[: - Adds "Actor-Mixer" as a valid destination in Wwise.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/2151ccb06d73e143107e02143aea05a91fcfb653/Rendering/kusa_The%20Intern.lua</source>
       </version>
     </reapack>
   </category>
