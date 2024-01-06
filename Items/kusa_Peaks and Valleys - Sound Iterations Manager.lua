@@ -1,10 +1,10 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.60
+-- @version 1.61
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog : Better performances by downsampling even more the buffer for analysis.
+-- @changelog : Asks for bounce in place if using Align items (peaks) on items with an altered playrate. Align items (peaks and start) now align items with the edit cursor.
 
 local function tableToString(tbl, depth)
     if depth == nil then depth = 1 end
@@ -239,17 +239,19 @@ local function hasBeenStretchedFunction(take, item, track)
         local userChoice = showMessage("The item's playrate has been altered. Analysing it will freeze REAPER. Would you like to render it now on a new track ?", "Warning", 4)
         if userChoice == 6 then
             reaper.Undo_BeginBlock()
-            local originalTrack = track
-            reaper.Main_OnCommand(40290, 0) -- Set time selection to item
-            local numChannels = getChannelsOfSelectedItem(take)
             reaper.SetOnlyTrackSelected(track)
+            local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+            local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+            local itemEnd = itemStart + itemLength
+            reaper.GetSet_LoopTimeRange(true, false, itemStart, itemEnd, false)
+            local numChannels = getChannelsOfSelectedItem(take)
             setAllFXStateOnTrack(track, false)
             if numChannels == 1 then
                 reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERMONOSMART"), 0)
             else
                 reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERSTEREOSMART"), 0)
             end
-            cleanupAfterRender(item, originalTrack)
+            cleanupAfterRender(item, track)
 
             reaper.Undo_EndBlock("Stretched item render.", -1)
             return true
@@ -279,7 +281,7 @@ end
 
 local function calculateDownsamplingFactor(totalSamples, numChannels)
     --local maxBufferSize = 4159674
-    local maxBufferSize = 500000
+    local maxBufferSize = 800000
     local maxSamplesPerChannel = maxBufferSize / numChannels
     return math.max(1, math.ceil(totalSamples / maxSamplesPerChannel))
 end
@@ -674,7 +676,7 @@ function alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
     if shouldAlignToMarker then
         markerPos = getMarkerPosition(markerId)
     else
-        markerPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+        markerPos = reaper.GetCursorPosition()
     end
     if markerPos == nil then
         showMessage("Marker with the specified ID does not exist.", "Error", 0)
@@ -688,13 +690,17 @@ function alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
         for i = 0, itemCount - 1 do
             local item = reaper.GetSelectedMediaItem(0, i)
             local take = reaper.GetActiveTake(item)
+            local track = reaper.GetMediaItem_Track(item)
             if take ~= nil then
-                local peakTime = getPeakTime(item, take)
-                local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-                local offset = peakTime - itemPos
-                local newPos = markerPos - offset
+                local hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if not hasBeenStretched then  
+                    local peakTime = getPeakTime(item, take)
+                    local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                    local offset = peakTime - itemPos
+                    local newPos = markerPos - offset
 
-                reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPos)
+                    reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPos)
+                end
             end
         end
     else
