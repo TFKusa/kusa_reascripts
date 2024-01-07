@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="5c1201faac8388bd1120f32f50dacd41904da599">
+<index version="1" name="kusa_reascripts" commit="5c1f2df1a6c12c384864a384a81123bfc2882669">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -139,6 +139,12 @@
       <version name="1.61" author="Kusa" time="2024-01-06T01:29:48Z">
         <changelog><![CDATA[: Asks for bounce in place if using Align items (peaks) on items with an altered playrate. Align items (peaks and start) now align items with the edit cursor.]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5c1201faac8388bd1120f32f50dacd41904da599/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
+      <version name="1.62" author="Kusa" time="2024-01-07T19:31:16Z">
+        <changelog><![CDATA[:
+# Checks if audio is WAV, as other formats need to be converted in real time for processing, leading to performances issues.
+# User has the choice to keep the original item when rendering for processing.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5c1f2df1a6c12c384864a384a81123bfc2882669/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Q like Pro Tools under mouse cursor.lua" type="script" desc="kusa_Q like Pro Tools under mouse cursor">
