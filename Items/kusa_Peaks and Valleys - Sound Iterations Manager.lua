@@ -1,10 +1,12 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 1.61
+-- @version 1.62
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog : Asks for bounce in place if using Align items (peaks) on items with an altered playrate. Align items (peaks and start) now align items with the edit cursor.
+-- @changelog :
+--      # Checks if audio is WAV, as other formats need to be converted in real time for processing, leading to performances issues.
+--      # User has the choice to keep the original item when rendering for processing.
 
 local function tableToString(tbl, depth)
     if depth == nil then depth = 1 end
@@ -46,6 +48,7 @@ end
 
 local silenceItems = {}
 local lastTrack = nil
+local shouldKeepOriginal = true
 -------------------------------------------------------------------------------------------
 --------------------------------FIRST RUN CHECK--------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -134,6 +137,22 @@ local function findChildTrackByName(parentTrack, trackName)
     return nil
 end
 
+local function getUnusedGroupNumber()
+    local groupNumber = 1
+    while true do
+        local found = false
+        for i = 0, reaper.CountMediaItems(0) - 1 do
+            local item = reaper.GetMediaItem(0, i)
+            if item and reaper.GetMediaItemInfo_Value(item, "I_GROUPID") == groupNumber then
+                found = true
+                break
+            end
+        end
+        if not found then return groupNumber end
+        groupNumber = groupNumber + 1
+    end
+end
+
 local function createChildTrack(parentTrack, childTrack, item, trackItemPosition)
     local trackName = "Original item"
     local parentTrackIndex = reaper.CSurf_TrackToID(parentTrack, false)
@@ -148,14 +167,27 @@ local function createChildTrack(parentTrack, childTrack, item, trackItemPosition
         reaper.MoveMediaItemToTrack(item, childTrack)
         reaper.GetSetMediaTrackInfo_String(childTrack, "P_NAME", trackName, true)
     end
+    reaper.SetMediaItemSelected(item, false)
+    reaper.SetMediaItemSelected(newItem, true)
+    reaper.UpdateArrange()
 end
 
-local function cleanupAfterRender(item, originalTrack)
+local function cleanupAfterRender(item, originalTrack, shouldKeepOriginal)
     setAllFXStateOnTrack(originalTrack, true)
     local trackItemPosition = muteOriginalItem(item, originalTrack)
     reaper.Main_OnCommand(40635, 0) -- Time selection: Remove (unselect) time selection
-    childTrack = reaper.GetSelectedTrack(0, 0)
-    createChildTrack(originalTrack, childTrack, item, trackItemPosition)
+    local track = reaper.GetMediaItem_Track(item)
+    local childTrack = reaper.GetSelectedTrack(0, 0)
+    if shouldKeepOriginal then
+        createChildTrack(originalTrack, childTrack, item, trackItemPosition)
+    else
+        local newItem = getMediaItemAtPosition(childTrack, trackItemPosition)
+        reaper.MoveMediaItemToTrack(newItem, originalTrack)
+        reaper.DeleteTrackMediaItem(originalTrack, item)
+        reaper.DeleteTrack(childTrack)
+
+    end
+    reaper.UpdateArrange()
 end
 
 local function addFades()
@@ -231,33 +263,39 @@ local function getSelectedItemPlayrate(take)
     return playrate
 end
 
+local function bounceInPlace(item, track, shouldKeepOriginal)
+    reaper.SetOnlyTrackSelected(track)
+    local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+    local itemEnd = itemStart + itemLength
+    reaper.GetSet_LoopTimeRange(true, false, itemStart, itemEnd, false)
+    local numChannels = getChannelsOfSelectedItem(take)
+    setAllFXStateOnTrack(track, false)
+    if numChannels == 1 then
+        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERMONOSMART"), 0)
+    else
+        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERSTEREOSMART"), 0)
+    end
+    cleanupAfterRender(item, track, shouldKeepOriginal)
+end
+
+local function audioIsWav(take, item, track)
+    local source = reaper.GetMediaItemTake_Source(take)
+    local filenamebuf = ""
+    filenamebuf = reaper.GetMediaSourceFileName(source, filenamebuf)
+    if filenamebuf:match(".wav$") then
+        return true
+    else
+        return false
+    end
+end
+
 local function hasBeenStretchedFunction(take, item, track)
     local retval, pos, srcpos = reaper.GetTakeStretchMarker(take, 0)
     local playrate = getSelectedItemPlayrate(take)
     local epsilon = 0.00000000000001
     if retval == 0 or math.abs(playrate - 1) > epsilon then
-        local userChoice = showMessage("The item's playrate has been altered. Analysing it will freeze REAPER. Would you like to render it now on a new track ?", "Warning", 4)
-        if userChoice == 6 then
-            reaper.Undo_BeginBlock()
-            reaper.SetOnlyTrackSelected(track)
-            local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-            local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-            local itemEnd = itemStart + itemLength
-            reaper.GetSet_LoopTimeRange(true, false, itemStart, itemEnd, false)
-            local numChannels = getChannelsOfSelectedItem(take)
-            setAllFXStateOnTrack(track, false)
-            if numChannels == 1 then
-                reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERMONOSMART"), 0)
-            else
-                reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERSTEREOSMART"), 0)
-            end
-            cleanupAfterRender(item, track)
-
-            reaper.Undo_EndBlock("Stretched item render.", -1)
-            return true
-        else
         return true
-        end
     else
         return false
     end
@@ -691,15 +729,20 @@ function alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
             local item = reaper.GetSelectedMediaItem(0, i)
             local take = reaper.GetActiveTake(item)
             local track = reaper.GetMediaItem_Track(item)
+            local childTrack = findChildTrackByName(track, "Original item")
+            local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+            local newItem = nil
+            if childTrack then
+                newItem = getMediaItemAtPosition(childTrack, itemPos)
+            end
             if take ~= nil then
-                local hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-                if not hasBeenStretched then  
-                    local peakTime = getPeakTime(item, take)
-                    local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-                    local offset = peakTime - itemPos
-                    local newPos = markerPos - offset
+                local peakTime = getPeakTime(item, take)
+                local offset = peakTime - itemPos
+                local newPos = markerPos - offset
 
-                    reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPos)
+                reaper.SetMediaItemInfo_Value(item, "D_POSITION", newPos)
+                if childTrack then
+                    reaper.SetMediaItemInfo_Value(newItem, "D_POSITION", newPos)
                 end
             end
         end
@@ -720,6 +763,11 @@ local ctx = reaper.ImGui_CreateContext('Peaks and Valleys by Kusa')
 silenceThreshold = 0.01
 minSilenceDuration = 0.2
 
+local alignToMarkerChanged = false
+local isWav = true
+local hasBeenStretched = false
+local splitAndSpace = false
+
 local function loop()
     local visible, open = reaper.ImGui_Begin(ctx, "Peaks and Valleys by Kusa", true)
     if visible then
@@ -729,9 +777,6 @@ local function loop()
         end
         local thresholdChanged
         local minDurChanged
-        local alignToMarkerChanged = false
-        local hasBeenStretched = false
-        local splitAndSpace = false
         thresholdChanged, silenceThreshold = reaper.ImGui_SliderDouble(ctx, 'Threshold', silenceThreshold, 0.001, 0.3, "%.3f")       
         minDurChanged, minSilenceDuration = reaper.ImGui_SliderDouble(ctx, 'Min Duration', minSilenceDuration, 0.001, 2.0, "%.3f")
         local item = selectedItem
@@ -741,8 +786,16 @@ local function loop()
         end
         if thresholdChanged or minDurChanged then
             if item then
+                isWav = audioIsWav(take, item, track)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-                if not hasBeenStretched then  
+                if hasBeenStretched or not isWav then
+                    local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+                    if userChoice == 6 then
+                        reaper.Undo_BeginBlock()
+                        bounceInPlace(item, track, shouldKeepOriginal)
+                        reaper.Undo_EndBlock("Stretched item render.", -1)
+                    end
+                else
                     local itemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
                     silencesInLoop = getSilenceTime(item, take)
                     if silencesInLoop then   
@@ -764,15 +817,22 @@ local function loop()
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
-                hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-                if not hasBeenStretched then
+                local isWav = audioIsWav(take, item, track)
+                local hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if hasBeenStretched or not isWav then
+                    local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+                    if userChoice == 6 then
+                        reaper.Undo_BeginBlock()
+                        bounceInPlace(item, track, shouldKeepOriginal)
+                        cleanup()
+                        reaper.Undo_EndBlock("Stretched item render.", -1)
+                    end
+                else
                     cleanup()
                     local onPeak = true
                     local alignOnStart = false
                     implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
                     reaper.UpdateArrange()
-                else
-                    cleanup()   
                 end
             end
             reaper.Undo_EndBlock("Implode to takes (peak).", -1)
@@ -784,15 +844,22 @@ local function loop()
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
-                hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-                if not hasBeenStretched then
+                local isWav = audioIsWav(take, item, track)
+                local hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                if hasBeenStretched or not isWav then
+                    local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+                    if userChoice == 6 then
+                        reaper.Undo_BeginBlock()
+                        bounceInPlace(item, track, shouldKeepOriginal)
+                        cleanup()
+                        reaper.Undo_EndBlock("Stretched item render.", -1)
+                    end
+                else
                     cleanup()
                     local onPeak = false
                     local alignOnStart = true
                     implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
                     reaper.UpdateArrange()
-                else
-                    cleanup()   
                 end
             end
             reaper.Undo_EndBlock("Implode to takes (start).", -1)
@@ -803,20 +870,44 @@ local function loop()
             if not item then
                 showMessage("No Item selected.", "Error", 0)
             else
-                if shouldAlignToMarker then
-                    local markerId, retval = getUserInput()
-                    if retval then
-                        if markerId == nil then return end
+                local itemCount = reaper.CountSelectedMediaItems(0)
+                local shouldContinue = true
+                if itemCount < 1 then return end
+                for i = 0, itemCount - 1 do
+                    local item = reaper.GetSelectedMediaItem(0, i)
+                    local take = reaper.GetActiveTake(item)
+                    local track = reaper.GetMediaItem_Track(item)
+                    if take ~= nil then
+                        isWav = audioIsWav(take, item, track)
+                        hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+                        if hasBeenStretched or not isWav then
+                            local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+                            if userChoice == 6 then
+                                reaper.Undo_BeginBlock()
+                                bounceInPlace(item, track, shouldKeepOriginal)
+                                reaper.Undo_EndBlock("Stretched item render.", -1)
+                            else
+                                shouldContinue = false
+                            end
+                        end
+                    end
+                end
+                if not hasBeenStretched or isWav and shouldContinue then
+                    if shouldAlignToMarker then
+                        local markerId, retval = getUserInput()
+                        if retval then
+                            if markerId == nil then return end
+                            local onPeak = true
+                            alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
+                            cleanup()
+                            reaper.UpdateArrange()
+                        end
+                    else
                         local onPeak = true
                         alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
                         cleanup()
                         reaper.UpdateArrange()
                     end
-                else
-                    local onPeak = true
-                    alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
-                    cleanup()
-                    reaper.UpdateArrange()
                 end
             end
             reaper.Undo_EndBlock("Align selected items (peak).", -1)
@@ -851,15 +942,21 @@ local function loop()
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
+                isWav = audioIsWav(take, item, track)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-                if not hasBeenStretched then
+                if hasBeenStretched or not isWav then
+                    local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+                    if userChoice == 6 then
+                        reaper.Undo_BeginBlock()
+                        bounceInPlace(item, track, shouldKeepOriginal)
+                        reaper.Undo_EndBlock("Stretched item render.", -1)
+                    end
+                else
                     cleanup()
                     splitAndSpace = true
                     splitMain(item, take, splitAndSpace, silencesInLoop)
                     addFades()
                     reaper.UpdateArrange()
-                else
-                    cleanup()   
                 end
             end
             reaper.Undo_EndBlock("Delete silences and space items.", -1)
@@ -871,19 +968,27 @@ local function loop()
                 showMessage("No Item selected.", "Error", 0)
                 cleanup()
             else
+                isWav = audioIsWav(take, item, track)
                 hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-                if not hasBeenStretched then
+                if hasBeenStretched or not isWav then
+                    local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+                    if userChoice == 6 then
+                        reaper.Undo_BeginBlock()
+                        bounceInPlace(item, track, shouldKeepOriginal)
+                        reaper.Undo_EndBlock("Stretched item render.", -1)
+                    end
+                else
                     cleanup()
                     splitAndSpace = false
                     splitMain(item, take, splitAndSpace, silencesInLoop)
                     addFades()
                     reaper.UpdateArrange()
-                else
-                    cleanup()   
                 end
             end
             reaper.Undo_EndBlock("Delete silences.", -1)
         end
+        reaper.ImGui_SameLine(ctx)
+        shouldKeepOriginalChanged, shouldKeepOriginal = reaper.ImGui_Checkbox(ctx, "Keep original item(s) when rendering", shouldKeepOriginal)
         reaper.ImGui_End(ctx)
     end
 
