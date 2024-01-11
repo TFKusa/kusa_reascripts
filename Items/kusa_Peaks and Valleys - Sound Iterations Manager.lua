@@ -1,13 +1,12 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 2.00
+-- @version 2.01
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # + Multi item selection support added.
---      # + "Active mode" checkbox.
---      # + Remembers "Active mode" and "Keep original item(s) when rendering" state when the script is terminated.
+--      # Fix : Align with marker : asks once for marker ID when multiple items are selected
+--      # Improved performances for silence previews.
 
 local function tableToString(tbl, depth)
     if depth == nil then depth = 1 end
@@ -347,7 +346,7 @@ end
 
 local function calculateDownsamplingFactor(totalSamples, numChannels)
     --local maxBufferSize = 4159674
-    local maxBufferSize = 800000
+    local maxBufferSize = 3000000
     local maxSamplesPerChannel = maxBufferSize / numChannels
     return math.max(1, math.ceil(totalSamples / maxSamplesPerChannel))
 end
@@ -374,7 +373,7 @@ end
 local function populateBufferWithDownsampling(accessor, sampleRate, numChannels, startTime, totalSamples, isSilence)
     local downsamplingFactor = calculateDownsamplingFactor(totalSamples, numChannels)
     if isSilence then
-        downsamplingFactor = downsamplingFactor * 8
+        downsamplingFactor = downsamplingFactor * 80
     end
     local totalBlocks = math.ceil(totalSamples / downsamplingFactor)
     local buffer = reaper.new_array(totalBlocks * numChannels)
@@ -691,8 +690,7 @@ local function splitMain(item, take, splitAndSpace)
     end
 end
 
-
-local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
+local function implodeMain(item, take, onPeak, alignOnStart, silencesInLoop, shouldAlignToMarker, userMarkerChoice)
     local firstPeakTime
     local splitAndSpace = false
     splitMain(item, take, splitAndSpace)
@@ -705,7 +703,6 @@ local function implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart
     end
     implodeToTakesKeepPosition()
     if shouldAlignToMarker then
-        local userMarkerChoice = promptUserForNumber("Align with marker", "Please enter the Marker ID")
         if onPeak then
             if firstPeakTime ~= nil then
                 alignItemWithMarker(userMarkerChoice, firstPeakTime, alignOnStart)
@@ -933,6 +930,10 @@ local function loop()
             cleanup()
             reaper.Undo_BeginBlock()
             if safeToExecute(selectedItems) then
+                local userMarkerChoice = nil
+                if shouldAlignToMarker then
+                    userMarkerChoice = promptUserForNumber("Align with marker", "Please enter the Marker ID")
+                end
                 local selectedItems = storeSelectedMediaItems()
                 for i, item in ipairs(selectedItems) do
                     selectOnlyThisItem(item)
@@ -940,7 +941,8 @@ local function loop()
                     local onPeak = true
                     local alignOnStart = false
                     local silencesInLoop = getSilenceTime(item, take)
-                    implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
+
+                    implodeMain(item, take, onPeak, alignOnStart, silencesInLoop, shouldAlignToMarker, userMarkerChoice)
                 end
                 reaper.UpdateArrange()
             end
@@ -950,8 +952,13 @@ local function loop()
         reaper.ImGui_SameLine(ctx)
    
         if reaper.ImGui_Button(ctx, 'Takes (start)') then
+            cleanup()
             reaper.Undo_BeginBlock()
             if safeToExecute(selectedItems) then
+                local userMarkerChoice = nil
+                if shouldAlignToMarker then
+                    userMarkerChoice = promptUserForNumber("Align with marker", "Please enter the Marker ID")
+                end
                 local selectedItems = storeSelectedMediaItems()
                 for i, item in ipairs(selectedItems) do
                     selectOnlyThisItem(item)
@@ -959,7 +966,7 @@ local function loop()
                     local track = reaper.GetMediaItem_Track(item)
                     local onPeak = false
                     local alignOnStart = true
-                    implodeMain(item, take, onPeak, shouldAlignToMarker, alignOnStart, silencesInLoop)
+                    implodeMain(item, take, onPeak, alignOnStart, silencesInLoop, shouldAlignToMarker, userMarkerChoice)
                 end
                 reaper.UpdateArrange()
             else
@@ -971,6 +978,7 @@ local function loop()
         reaper.ImGui_SameLine(ctx)
 
         if reaper.ImGui_Button(ctx, 'Align selected (peak)') then
+            cleanup()
             reaper.Undo_BeginBlock()
             if safeToExecute(selectedItems) then
                 if shouldAlignToMarker then
@@ -995,6 +1003,7 @@ local function loop()
         reaper.ImGui_SameLine(ctx)
 
         if reaper.ImGui_Button(ctx, 'Align selected (start)') then
+            cleanup()
             reaper.Undo_BeginBlock()
             cleanup()
             if shouldAlignToMarker then
@@ -1015,6 +1024,7 @@ local function loop()
         reaper.ImGui_SameLine(ctx)
 
         if reaper.ImGui_Button(ctx, 'Split and space items') then
+            cleanup()
             reaper.Undo_BeginBlock()
             if safeToExecute(selectedItems) then
                 local selectedItems = storeSelectedMediaItems()
@@ -1033,6 +1043,7 @@ local function loop()
         reaper.ImGui_SameLine(ctx)
 
         if reaper.ImGui_Button(ctx, 'Split') then
+            cleanup()
             reaper.Undo_BeginBlock()
             if safeToExecute(selectedItems) then
                 local selectedItems = storeSelectedMediaItems()
