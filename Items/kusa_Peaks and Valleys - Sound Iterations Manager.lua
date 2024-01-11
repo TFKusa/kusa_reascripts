@@ -51,7 +51,6 @@ end
 local selectedItems = {}
 local silenceItems = {}
 local lastTrack = nil
-local shouldKeepOriginal = true
 -------------------------------------------------------------------------------------------
 --------------------------------FIRST RUN CHECK--------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -821,12 +820,10 @@ end
 local function askForBounce(shouldKeepOriginal, itemsToConvert, selectedItems)
     local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
     if userChoice == 6 then
-        reaper.Undo_BeginBlock()
         for i, item in ipairs(itemsToConvert) do
             local track = reaper.GetMediaItem_Track(item)
             bounceInPlace(item, track, shouldKeepOriginal, selectedItems)
         end
-        reaper.Undo_EndBlock("Bounce in place.", -1)
         return true
     else
         unselectEveryItem()
@@ -845,7 +842,9 @@ local function safeToExecute(selectedItems)
     cleanup()
     local itemsToConvert = itemsAreValid(selectedItems)
     if itemsToConvert then
+        reaper.Undo_BeginBlock()
         local goodToGo = askForBounce(shouldKeepOriginal, itemsToConvert, selectedItems)
+        reaper.Undo_EndBlock("Bounce in place.", -1)
         if goodToGo then
             return true
         else
