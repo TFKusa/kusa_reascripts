@@ -485,16 +485,16 @@ local function main()
     local markerId = getClosestMarkerToItem()
     if not markerId then return end
     if safeToExecute(selectedItems) then
-        local selectedItems = storeSelectedMediaItems()
-        for i, item in ipairs(selectedItems) do
-            local take = reaper.GetActiveTake(item)
-            if not take then
-                showMessage("No active take in item.")
-                return
-            end
-            if markerId and item then
-                local positions = getMarkerPositions(markerId)
-                if #positions >= 3 then
+        local positions = getMarkerPositions(markerId)
+        if #positions >= 3 then
+            local selectedItems = storeSelectedMediaItems()
+            for i, item in ipairs(selectedItems) do
+                if item then
+                    local take = reaper.GetActiveTake(item)
+                    if not take then
+                        showMessage("No active take in item.")
+                        return
+                    end     
                     local firstPosition = positions[1]
                     local lastPosition = positions[3]
                     local peakTime = processItemsForPeaks(item)
@@ -506,14 +506,12 @@ local function main()
                     reaper.SetMediaItemLength(item, newLength, true)
                     updateEndStretchMarkerToMatchLastMarkerPosition(item, positions, take)
                     updatePeakStretchMarkerToSecondMarkerPosition(item, positions, take)
-                else
-                    local userChoice = showMessage("Couldn't find all needed Markers. Would you like to visit the documentation ?", "Error", 4)
-                    if userChoice == 6 then
-                        openURL("https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TIMESTRETCH%20ITEM%20START%2C%20PEAK%20AND%20END%20TO%20MARKERS%20-%20DOCUMENTATION.md")
-                    end
                 end
-            else
-                showMessage("Invalid marker ID or no item selected.", "Error", 0)
+            end
+        else
+            local userChoice = showMessage("Couldn't find all needed Markers. Would you like to visit the documentation ?", "Error", 4)
+            if userChoice == 6 then
+                openURL("https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TIMESTRETCH%20ITEM%20START%2C%20PEAK%20AND%20END%20TO%20MARKERS%20-%20DOCUMENTATION.md")
             end
         end
     end
