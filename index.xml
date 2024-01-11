@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="5631123e3f158790d5d44a6932643ada37491873">
+<index version="1" name="kusa_reascripts" commit="fe07a5957b7ab7aae7bb7f92978de12d21dba24f">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -205,6 +205,11 @@
       <version name="1.02" author="Kusa" time="2023-12-26T23:12:09Z">
         <changelog><![CDATA[Applies to all item takes]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers%20-%20no%20prompt.lua</source>
+      </version>
+      <version name="1.10" author="Kusa" time="2024-01-11T12:50:47Z">
+        <changelog><![CDATA[:
+# + Multi item selection support added.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/fe07a5957b7ab7aae7bb7f92978de12d21dba24f/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers%20-%20no%20prompt.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Timestretch item to start, peak and end Markers.lua" type="script" desc="kusa_Timestretch item start, peak and end to Markers">
