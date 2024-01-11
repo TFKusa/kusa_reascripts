@@ -1,10 +1,11 @@
 -- @description kusa_Timestretch item start, peak and end to Markers - no prompt
--- @version 1.02
+-- @version 1.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog Applies to all item takes
+-- @changelog :
+--      # + Multi item selection support added.
 
 
 local function showMessage(string, title, errType)
@@ -24,6 +25,8 @@ if not reaper.APIExists("CF_GetSWSVersion") then
         return
     end
 end
+
+local selectedItems = {}
 
 function getChannelsOfSelectedItem(take)
     local source = reaper.GetMediaItemTake_Source(take)
@@ -278,38 +281,241 @@ local function updatePeakStretchMarkerToSecondMarkerPosition(item, positions)
     end
 end
 
+function tableIsEmpty(table)
+    for _ in pairs(table) do
+        return false
+    end
+    return true
+end
+
+local function audioIsWav(take, item, track)
+    local source = reaper.GetMediaItemTake_Source(take)
+    local filenamebuf = ""
+    filenamebuf = reaper.GetMediaSourceFileName(source, filenamebuf)
+    if filenamebuf:match(".wav$") then
+        return true
+    else
+        return false
+    end
+end
+
+local function getSelectedItemPlayrate(take)
+    local playrate = reaper.GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
+    return playrate
+end
+
+local function hasBeenStretchedFunction(take, item, track)
+    local retval, pos, srcpos = reaper.GetTakeStretchMarker(take, 0)
+    local playrate = getSelectedItemPlayrate(take)
+    local epsilon = 0.00000000000001
+    if retval == 0 or math.abs(playrate - 1) > epsilon then
+        return true
+    else
+        return false
+    end
+end
+
+local function itemsAreValid(selectedItems)
+    if not tableIsEmpty(selectedItems) then
+        local itemsToConvert = {}
+        for _, item in ipairs(selectedItems) do
+            local take = reaper.GetActiveTake(item)
+            local track = reaper.GetMediaItem_Track(item)
+            local isWav = audioIsWav(take, item, track)
+            local hasBeenStretched = hasBeenStretchedFunction(take, item, track)
+            if not isWav or hasBeenStretched then
+                table.insert(itemsToConvert, item)
+            end
+        end
+        if tableIsEmpty(itemsToConvert) then
+            return nil
+        else
+            return itemsToConvert
+        end
+    end
+end
+
+local function setAllFXStateOnTrack(track, state)
+    local fxCount = reaper.TrackFX_GetCount(track)
+    for fxIndex = 0, fxCount - 1 do
+        reaper.TrackFX_SetEnabled(track, fxIndex, state)
+    end
+end
+
+local function findChildTrackByName(parentTrack, trackName)
+    local parentTrackIdx = reaper.GetMediaTrackInfo_Value(parentTrack, "IP_TRACKNUMBER") - 1
+    local trackCount = reaper.CountTracks(0)
+    for i = parentTrackIdx + 1, trackCount - 1 do
+        local track = reaper.GetTrack(0, i)
+        local isChild = reaper.GetParentTrack(track) == parentTrack
+        retval, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        if isChild and name == trackName then
+            return track
+        elseif reaper.GetTrackDepth(track) <= reaper.GetTrackDepth(parentTrack) then
+            break
+        end
+    end
+    return nil
+end
+
+local function getMediaItemAtPosition(track, position)
+    local itemCount = reaper.CountTrackMediaItems(track)
+    for i = 0, itemCount - 1 do
+        local item = reaper.GetTrackMediaItem(track, i)
+        if item then
+            local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+            if itemStart == position then
+                return item
+            end
+        end
+    end
+    return nil
+end
+
+local function createChildTrack(parentTrack, childTrack, item, trackItemPosition)
+    local trackName = "Original item"
+    local parentTrackIndex = reaper.CSurf_TrackToID(parentTrack, false)
+    reaper.ReorderSelectedTracks(parentTrackIndex, 1)
+    local newItem = getMediaItemAtPosition(childTrack, trackItemPosition)
+    reaper.MoveMediaItemToTrack(newItem, parentTrack)
+    local originalItemTrack = findChildTrackByName(parentTrack, trackName)
+    if originalItemTrack then
+        reaper.MoveMediaItemToTrack(item, originalItemTrack)
+        reaper.DeleteTrack(childTrack)
+    else
+        reaper.MoveMediaItemToTrack(item, childTrack)
+        reaper.GetSetMediaTrackInfo_String(childTrack, "P_NAME", trackName, true)
+    end
+    reaper.SetMediaItemSelected(item, false)
+    reaper.SetMediaItemSelected(newItem, true)
+    reaper.UpdateArrange()
+    return newItem
+end
+
+local function muteOriginalItem(item, originalTrack)
+    reaper.SetMediaTrackInfo_Value(originalTrack, "B_MUTE", 0)
+    local itemCount = reaper.GetTrackNumMediaItems(originalTrack)
+    local trackItemPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    reaper.SetMediaItemInfo_Value(item, "B_MUTE_ACTUAL", 1)
+    return trackItemPosition
+end
+
+local function cleanupAfterRender(item, originalTrack, shouldKeepOriginal, selectedItems)
+    setAllFXStateOnTrack(originalTrack, true)
+    local trackItemPosition = muteOriginalItem(item, originalTrack)
+    reaper.Main_OnCommand(40635, 0) -- Time selection: Remove (unselect) time selection
+    local track = reaper.GetMediaItem_Track(item)
+    local childTrack = reaper.GetSelectedTrack(0, 0)
+    local newItem
+    if shouldKeepOriginal then
+        newItem = createChildTrack(originalTrack, childTrack, item, trackItemPosition)
+
+    else
+        newItem = getMediaItemAtPosition(childTrack, trackItemPosition)
+        reaper.MoveMediaItemToTrack(newItem, originalTrack)
+        reaper.DeleteTrackMediaItem(originalTrack, item)
+        reaper.DeleteTrack(childTrack)
+        reaper.SetMediaItemSelected(newItem, true)
+    end
+    reaper.UpdateArrange()
+end
+
+local function bounceInPlace(item, track, shouldKeepOriginal, selectedItems)
+    local take = reaper.GetActiveTake(item)
+    reaper.SetOnlyTrackSelected(track)
+    local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+    local itemEnd = itemStart + itemLength
+    reaper.GetSet_LoopTimeRange(true, false, itemStart, itemEnd, false)
+    local numChannels = getChannelsOfSelectedItem(take)
+    setAllFXStateOnTrack(track, false)
+    if numChannels == 1 then
+        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERMONOSMART"), 0)
+    else
+        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_AWRENDERSTEREOSMART"), 0)
+    end
+    local shouldKeepOriginal = false
+    cleanupAfterRender(item, track, shouldKeepOriginal, selectedItems)
+end
+
+local function askForBounce(shouldKeepOriginal, itemsToConvert, selectedItems)
+    local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+    if userChoice == 6 then
+        for i, item in ipairs(itemsToConvert) do
+            local track = reaper.GetMediaItem_Track(item)
+            bounceInPlace(item, track, shouldKeepOriginal, selectedItems)
+        end
+        return true
+    else
+        unselectEveryItem()
+        return false
+    end
+end
+
+local function safeToExecute(selectedItems)
+    local itemsToConvert = itemsAreValid(selectedItems)
+    if itemsToConvert then
+        reaper.Undo_BeginBlock()
+        local goodToGo = askForBounce(shouldKeepOriginal, itemsToConvert, selectedItems)
+        reaper.Undo_EndBlock("Bounce in place.", -1)
+        if goodToGo then
+            return true
+        else
+            return false
+        end
+    else
+        return true
+    end
+end
+
+local function storeSelectedMediaItems()
+    local itemCount = reaper.CountSelectedMediaItems(0)
+    local selectedItems = {}
+    for i = 0, itemCount - 1 do
+        local item = reaper.GetSelectedMediaItem(0, i)
+        local take = reaper.GetActiveTake(item)
+        if item and take then
+            table.insert(selectedItems, item)
+        end
+    end
+    return selectedItems
+end
 
 local function main()
     local markerId = getClosestMarkerToItem()
     if not markerId then return end
-    local item = reaper.GetSelectedMediaItem(0, 0)
-    local take = reaper.GetActiveTake(item)
-    if not take then
-        showMessage("No active take in item.")
-        return
-    end
-    if markerId and item then
-        local positions = getMarkerPositions(markerId)
-        if #positions >= 3 then
-            local firstPosition = positions[1]
-            local lastPosition = positions[3]
-            local peakTime = processItemsForPeaks(item)
-            addStretchMarkerAtPeak(item, peakTime)
-            addStartEndStretchMarkers(item)
-            reaper.SetMediaItemPosition(item, firstPosition, true)
-            local itemStartPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-            local newLength = lastPosition - itemStartPosition
-            reaper.SetMediaItemLength(item, newLength, true)
-            updateEndStretchMarkerToMatchLastMarkerPosition(item, positions, take)
-            updatePeakStretchMarkerToSecondMarkerPosition(item, positions, take)
-        else
-            local userChoice = showMessage("Couldn't find all needed Markers. Would you like to visit the documentation ?", "Error", 4)
-            if userChoice == 6 then
-                openURL("https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TIMESTRETCH%20ITEM%20START%2C%20PEAK%20AND%20END%20TO%20MARKERS%20-%20DOCUMENTATION.md")
+    if safeToExecute(selectedItems) then
+        local selectedItems = storeSelectedMediaItems()
+        for i, item in ipairs(selectedItems) do
+            local take = reaper.GetActiveTake(item)
+            if not take then
+                showMessage("No active take in item.")
+                return
+            end
+            if markerId and item then
+                local positions = getMarkerPositions(markerId)
+                if #positions >= 3 then
+                    local firstPosition = positions[1]
+                    local lastPosition = positions[3]
+                    local peakTime = processItemsForPeaks(item)
+                    addStretchMarkerAtPeak(item, peakTime)
+                    addStartEndStretchMarkers(item)
+                    reaper.SetMediaItemPosition(item, firstPosition, true)
+                    local itemStartPosition = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                    local newLength = lastPosition - itemStartPosition
+                    reaper.SetMediaItemLength(item, newLength, true)
+                    updateEndStretchMarkerToMatchLastMarkerPosition(item, positions, take)
+                    updatePeakStretchMarkerToSecondMarkerPosition(item, positions, take)
+                else
+                    local userChoice = showMessage("Couldn't find all needed Markers. Would you like to visit the documentation ?", "Error", 4)
+                    if userChoice == 6 then
+                        openURL("https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/TIMESTRETCH%20ITEM%20START%2C%20PEAK%20AND%20END%20TO%20MARKERS%20-%20DOCUMENTATION.md")
+                    end
+                end
+            else
+                showMessage("Invalid marker ID or no item selected.", "Error", 0)
             end
         end
-    else
-        showMessage("Invalid marker ID or no item selected.", "Error", 0)
     end
 end
 
