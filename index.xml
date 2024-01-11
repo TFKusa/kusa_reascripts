@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="5c1f2df1a6c12c384864a384a81123bfc2882669">
+<index version="1" name="kusa_reascripts" commit="5631123e3f158790d5d44a6932643ada37491873">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -145,6 +145,13 @@
 # Checks if audio is WAV, as other formats need to be converted in real time for processing, leading to performances issues.
 # User has the choice to keep the original item when rendering for processing.]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5c1f2df1a6c12c384864a384a81123bfc2882669/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
+      <version name="2.00" author="Kusa" time="2024-01-11T03:51:19Z">
+        <changelog><![CDATA[:
+# + Multi item selection support added.
+# + "Active mode" checkbox.
+# + Remembers "Active mode" and "Keep original item(s) when rendering" state when the script is terminated.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/5631123e3f158790d5d44a6932643ada37491873/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Q like Pro Tools under mouse cursor.lua" type="script" desc="kusa_Q like Pro Tools under mouse cursor">
