@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="8a6c18314ad97ad19dbdd90739f93c4bc545a8a4">
+<index version="1" name="kusa_reascripts" commit="a339e27ee13daec3bf485fc038f348032c5b62df">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -347,6 +347,15 @@
       </metadata>
       <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Rendering/kusa_Bounce%20in%20place%20all%20items%20in%20the%20session%20via%20Master.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Bounce item(s) in place for resampling.lua" type="script" desc="kusa_Bounce item(s) in place for resampling">
+      <metadata>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2024-01-13T15:42:18Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/a339e27ee13daec3bf485fc038f348032c5b62df/Rendering/kusa_Bounce%20item(s)%20in%20place%20for%20resampling.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_The Intern - Assistant TO the Region Manager.lua" type="script" desc="kusa_The Intern - Assistant TO the Region Manager">
