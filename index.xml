@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="a339e27ee13daec3bf485fc038f348032c5b62df">
+<index version="1" name="kusa_reascripts" commit="e1c248bcb72914eed0f6c30895aee68b9752935f">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -41,6 +41,15 @@
       </version>
       <version name="1.01" author="Kusa" time="2023-12-26T23:12:09Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_B%20like%20Pro%20Tools%20under%20mouse%20cursor.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Create single loop from item.lua" type="script" desc="kusa_Create single loop from item">
+      <metadata>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2024-01-15T12:19:13Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/e1c248bcb72914eed0f6c30895aee68b9752935f/Items/kusa_Create%20single%20loop%20from%20item.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_D like Pro Tools under mouse cursor.lua" type="script" desc="kusa_D like Pro Tools under mouse cursor">
