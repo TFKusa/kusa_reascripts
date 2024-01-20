@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="e1c248bcb72914eed0f6c30895aee68b9752935f">
+<index version="1" name="kusa_reascripts" commit="4620efe4ba3379522936cf5b2a594119c02eb27d">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -334,17 +334,23 @@
       </version>
     </reapack>
   </category>
-  <category name="Regions">
+  <category name="Regions and Markers">
     <reapack name="kusa_Nudge start or end of regions in time selection.lua" type="script" desc="kusa_Nudge start or end of regions in time selection">
       <metadata>
         <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
         <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
       </metadata>
-      <version name="1.1" author="Kusa" time="2023-12-06T17:44:53Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/1f3e2fbe739b90c3e5eb99dfc238c7adabc12727/Regions/kusa_Nudge%20start%20or%20end%20of%20regions%20in%20time%20selection.lua</source>
+      <version name="1.11" author="Kusa" time="2024-01-20T14:43:17Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/4620efe4ba3379522936cf5b2a594119c02eb27d/Regions%20and%20Markers/kusa_Nudge%20start%20or%20end%20of%20regions%20in%20time%20selection.lua</source>
       </version>
-      <version name="1.11" author="Kusa" time="2023-12-26T23:12:09Z">
-        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Regions/kusa_Nudge%20start%20or%20end%20of%20regions%20in%20time%20selection.lua</source>
+    </reapack>
+    <reapack name="kusa_Set subproject Start and End to selected item(s).lua" type="script" desc="kusa_Set subproject Start and End to selected item(s)">
+      <metadata>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2024-01-20T14:43:17Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/4620efe4ba3379522936cf5b2a594119c02eb27d/Regions%20and%20Markers/kusa_Set%20subproject%20Start%20and%20End%20to%20selected%20item(s).lua</source>
       </version>
     </reapack>
   </category>
