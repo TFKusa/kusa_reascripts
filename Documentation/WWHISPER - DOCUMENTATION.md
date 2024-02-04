@@ -39,9 +39,19 @@ To activate a command from a marker that is placed earlier in the timeline than 
 
         BASIC GAME OBJECTS COMMANDS :
 
-InitObj_gameObjectName          - Registers a Game Object, example : InitObj_Player
-UnRegObj_gameObjectName         - Unregisters a Game Object, example : UnRegObj_Player
+InitObj_gameObjectName          - Registers a Game Object
+
+example : InitObj_Player
+
+
+UnRegObj_gameObjectName         - Unregisters a Game Object
+example : UnRegObj_Player
+
+
 ResetAllObj                     - Unregisters all Game Objects
+
+
+
 
         Notes on Game Object Management:
 
@@ -53,6 +63,7 @@ By default, only one Game Object is created when running the script ("Listener,"
         POSTING AN EVENT :
 
 Event_eventName_gameObjectName
+
 example : Event_PlayFootsteps_Solaire
 
 
@@ -61,12 +72,14 @@ example : Event_PlayFootsteps_Solaire
         SETTING AN RTPC :
 
 RTPC_rtpcName_value_gameObjectName
+
 example : RTPC_PlayerSpeed_100_TrustyPatches
 
 OR
 
 RTPCInterp_rtpcName_startingValue_targetValue_interpTimeInMs_gameObjectName
-exampe : RTPCInterp_PlayerSpeed_0_100_SiegmeyerOfCatarina
+
+example : RTPCInterp_PlayerSpeed_0_100_SiegmeyerOfCatarina
 
 
 
@@ -74,6 +87,7 @@ exampe : RTPCInterp_PlayerSpeed_0_100_SiegmeyerOfCatarina
         SETTING A SWITCH :
 
 Switch_switchGroupName_switchGroupState_gameObjectName
+
 example : Switch_GroundMaterials_Stone_MarvelousChester
 
 
@@ -82,6 +96,7 @@ example : Switch_GroundMaterials_Stone_MarvelousChester
         SETTING A STATE :
 
 State_stateGroupName_stateName
+
 example : State_MusicMenuState_CrestfallenWarrior
 
 
@@ -90,9 +105,11 @@ example : State_MusicMenuState_CrestfallenWarrior
         SETTING THE POSITION OF A GAME OBJECT :
 
 SetPos_PosX_PosY_PosZ_gameObjectName
+
 example : SetPos_10_0_0_BigHatLogan
 
 OR
 
 SetPosInterp_startPosX_startPosY_startPosZ_targetPosX_targetPosY_targetPosZ_interpTimeInMs_gameObjectName
+
 example : SetPosInterp_-20_0_0_20_0_0_1500_PetrusOfThorolund
