@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="033d287486bbf713afecd358c5ff16b2f8916862">
+<index version="1" name="kusa_reascripts" commit="31eba812490ad5639b8547c330a8c4fdcde898ed">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -369,6 +369,9 @@
       </metadata>
       <version name="1.00" author="Kusa" time="2024-02-05T22:48:05Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/033d287486bbf713afecd358c5ff16b2f8916862/Regions%20and%20Markers/kusa_Wwhisper%20-%20Marker%20Creator.lua</source>
+      </version>
+      <version name="1.10" author="Kusa" time="2024-02-05T23:37:11Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/31eba812490ad5639b8547c330a8c4fdcde898ed/Regions%20and%20Markers/kusa_Wwhisper%20-%20Marker%20Creator.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Wwhisper.lua" type="script" desc="kusa_Wwhisper">
