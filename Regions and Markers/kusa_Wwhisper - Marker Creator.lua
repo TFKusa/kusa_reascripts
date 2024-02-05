@@ -1,5 +1,5 @@
 -- @description kusa_Wwhisper - Marker Creator
--- @version 1.00
+-- @version 1.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
@@ -31,6 +31,47 @@ local inputTextName, inputTextGameObjectName, inputTextValue, inputTextStartingV
 local shouldInterp = false
 local markerName
 
+
+local function inputText(ctx, label, var)
+    local _, newValue = reaper.ImGui_InputText(ctx, label, var)
+    return newValue or var
+end
+
+
+local eventTypeConfig = {
+    {eventType = "Event", fields = {{"Event name", "inputTextName"}, {"Game Object name", "inputTextGameObjectName"}}},
+    {eventType = "RTPC", fields = {{"RTPC name", "inputTextName"}, {"Value", "inputTextValue"}, {"Game Object name", "inputTextGameObjectName"}}},
+    {eventType = "State", fields = {{"State group name", "inputTextName"}, {"State name", "inputTextChildName"}}},
+    {eventType = "Switch", fields = {{"Switch group name", "inputTextName"}, {"Switch name", "inputTextChildName"}, {"Game Object name", "inputTextGameObjectName"}}},
+    {eventType = "SetPos", fields = {{"X", "inputTextPosX"}, {"Y", "inputTextPosY"}, {"Z", "inputTextPosZ"}, {"Game Object name", "inputTextGameObjectName"}}},
+    {eventType = "InitObj", fields = {{"Game Object name", "inputTextGameObjectName"}}},
+    {eventType = "UnRegObj", fields = {{"Game Object name", "inputTextGameObjectName"}}},
+    {eventType = "ResetAllObj", fields = {}}
+}
+
+local function handleInputsAndMarkerName(ctx, currentItem, shouldInterp)
+    local config = eventTypeConfig[currentItem + 1]
+
+    local fields = config.fields
+    local eventType = config.eventType
+    if currentItem == 1 and shouldInterp then
+        eventType = "RTPCInterp"
+        fields = {{"RTPC name", "inputTextName"}, {"Starting value", "inputTextStartingValue"}, {"Target value", "inputTextTargetValue"}, {"Interpolation Time (ms)", "inputTextInterpTime"}, {"Game Object name", "inputTextGameObjectName"}}
+    elseif currentItem == 4 and shouldInterp then
+        eventType = "SetPosInterp"
+        fields = {{"Start X", "inputTextPosX"}, {"Start Y", "inputTextPosY"}, {"Start Z", "inputTextPosZ"}, {"Target X", "inputTextTargetX"}, {"Target Y", "inputTextTargetY"}, {"Target Z", "inputTextTargetZ"}, {"Interpolation Time (ms)", "inputTextInterpTime"}, {"Game Object name", "inputTextGameObjectName"}}
+    end
+
+    local markerParts = {eventType}
+    for _, field in ipairs(fields) do
+        local label, varName = table.unpack(field)
+        _G[varName] = inputText(ctx, label, _G[varName])
+        table.insert(markerParts, _G[varName])
+    end
+
+    return concatenateWithUnderscore(table.unpack(markerParts))
+end
+
 function loop()
     local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Marker Creator', true)
     local width, height = reaper.ImGui_GetWindowSize(ctx)
@@ -41,73 +82,10 @@ function loop()
             currentItem = selectedItem
         end
 
-        if currentItem == 0 then
-            eventType = "Event"
-            _, inputTextName = reaper.ImGui_InputText(ctx, 'Event name', inputTextName)
-            _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
-            markerName = concatenateWithUnderscore(eventType, inputTextName, inputTextGameObjectName)
-        elseif currentItem == 1 then
-            if not shouldInterp then
-                eventType = "RTPC"
-                _, inputTextName = reaper.ImGui_InputText(ctx, 'RTPC name', inputTextName)
-                _, inputTextValue = reaper.ImGui_InputText(ctx, 'Value', inputTextValue)
-            else
-                eventType = "RTPCInterp"
-                _, inputTextName = reaper.ImGui_InputText(ctx, 'RTPC name', inputTextName)
-                _, inputTextStartingValue = reaper.ImGui_InputText(ctx, 'Starting value', inputTextStartingValue)
-                _, inputTextTargetValue = reaper.ImGui_InputText(ctx, 'Target value', inputTextTargetValue)
-                _, inputTextInterpTime = reaper.ImGui_InputText(ctx, 'Interpolation Time (ms)', inputTextInterpTime)
-            end
-            _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
+
+        local markerName = handleInputsAndMarkerName(ctx, currentItem, shouldInterp)
+        if currentItem == 1 or currentItem == 4 then
             _, shouldInterp = reaper.ImGui_Checkbox(ctx, "Interpolation", shouldInterp)
-            if shouldInterp then
-                markerName = concatenateWithUnderscore(eventType, inputTextName, inputTextStartingValue, inputTextTargetValue, inputTextInterpTime, inputTextGameObjectName)
-            else
-                markerName = concatenateWithUnderscore(eventType, inputTextName, inputTextValue, inputTextGameObjectName)
-            end            
-        elseif currentItem == 2 then
-            eventType = "State"
-            _, inputTextName = reaper.ImGui_InputText(ctx, 'State group name', inputTextName)
-            _, inputTextChildName = reaper.ImGui_InputText(ctx, 'State name', inputTextChildName)
-            markerName = concatenateWithUnderscore(eventType, inputTextName, inputTextChildName)
-        elseif currentItem == 3 then
-            eventType = "Switch"
-            _, inputTextName = reaper.ImGui_InputText(ctx, 'Switch group name', inputTextName)
-            _, inputTextChildName = reaper.ImGui_InputText(ctx, 'Switch name', inputTextChildName)
-            _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
-            markerName = concatenateWithUnderscore(eventType, inputTextName, inputTextChildName, inputTextGameObjectName)
-        elseif currentItem == 4 then
-            if shouldInterp then
-                eventType = "SetPosInterp"
-                _, inputTextPosX = reaper.ImGui_InputText(ctx, 'Start X', inputTextPosX)
-                _, inputTextPosY = reaper.ImGui_InputText(ctx, 'Start Y', inputTextPosY)
-                _, inputTextPosZ = reaper.ImGui_InputText(ctx, 'Start Z', inputTextPosZ)
-                _, inputTextTargetX = reaper.ImGui_InputText(ctx, 'Target X', inputTextTargetX)
-                _, inputTextTargetY = reaper.ImGui_InputText(ctx, 'Target Y', inputTextTargetY)
-                _, inputTextTargetZ = reaper.ImGui_InputText(ctx, 'Target Z', inputTextTargetZ)
-                _, inputTextInterpTime = reaper.ImGui_InputText(ctx, 'Interpolation Time (ms)', inputTextInterpTime)
-                _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
-                markerName = concatenateWithUnderscore(eventType, inputTextPosX, inputTextPosY, inputTextPosZ, inputTextTargetX, inputTextTargetY, inputTextTargetZ, inputTextInterpTime, inputTextGameObjectName)  
-            else
-                eventType = "SetPos"
-                _, inputTextPosX = reaper.ImGui_InputText(ctx, 'X', inputTextPosX)
-                _, inputTextPosY = reaper.ImGui_InputText(ctx, 'Y', inputTextPosY)
-                _, inputTextPosZ = reaper.ImGui_InputText(ctx, 'Z', inputTextPosZ)
-                _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
-                markerName = concatenateWithUnderscore(eventType, inputTextPosX, inputTextPosY, inputTextPosZ, inputTextGameObjectName)  
-            end
-            _, shouldInterp = reaper.ImGui_Checkbox(ctx, "Interpolation", shouldInterp)
-        elseif currentItem == 5 then
-            eventType = "InitObj"
-            _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
-            markerName = concatenateWithUnderscore(eventType, inputTextGameObjectName)
-        elseif currentItem == 6 then
-            eventType = "UnRegObj"
-            _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
-            markerName = concatenateWithUnderscore(eventType, inputTextGameObjectName)
-        elseif currentItem == 7 then
-            eventType = "ResetAllObj"
-            markerName = eventType
         end
 
         reaper.ImGui_Indent(ctx, 200)
