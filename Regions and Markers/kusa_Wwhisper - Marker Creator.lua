@@ -6,10 +6,7 @@
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 
 function concatenateWithUnderscore(...)
-    -- Store all variable arguments in a table
     local args = {...}
-    
-    -- Concatenate the table elements with "_" as the separator
     local concatenatedString = table.concat(args, "_")
     
     return concatenatedString
@@ -23,7 +20,6 @@ if not reaImguiAvailable then
 end
 
 local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
---local size = reaper.GetAppVersion():match('OSX') and 13 or 20
 
 local windowWidth = 543
 local windowHeight = 296
@@ -39,12 +35,12 @@ function loop()
     local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Marker Creator', true)
     local width, height = reaper.ImGui_GetWindowSize(ctx)
     if visible then
-        -- Combo box
+        
         local changed, selectedItem = reaper.ImGui_Combo(ctx, 'Options', currentItem, "Event\0RTPC\0State\0Switch\0Position\0")
         if changed then
             currentItem = selectedItem
         end
-        -- Conditional GUI elements based on the selection
+
         if currentItem == 0 then
             eventType = "Event"
             _, inputTextName = reaper.ImGui_InputText(ctx, 'Event name', inputTextName)
