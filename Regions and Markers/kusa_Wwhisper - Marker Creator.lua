@@ -36,7 +36,7 @@ function loop()
     local width, height = reaper.ImGui_GetWindowSize(ctx)
     if visible then
         
-        local changed, selectedItem = reaper.ImGui_Combo(ctx, 'Options', currentItem, "Event\0RTPC\0State\0Switch\0Position\0")
+        local changed, selectedItem = reaper.ImGui_Combo(ctx, 'Options', currentItem, "Event\0RTPC\0State\0Switch\0Position\0Register Game Object\0Unregister Game Object\0Unregister all Game Objects\0")
         if changed then
             currentItem = selectedItem
         end
@@ -97,6 +97,17 @@ function loop()
                 markerName = concatenateWithUnderscore(eventType, inputTextPosX, inputTextPosY, inputTextPosZ, inputTextGameObjectName)  
             end
             _, shouldInterp = reaper.ImGui_Checkbox(ctx, "Interpolation", shouldInterp)
+        elseif currentItem == 5 then
+            eventType = "InitObj"
+            _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
+            markerName = concatenateWithUnderscore(eventType, inputTextGameObjectName)
+        elseif currentItem == 6 then
+            eventType = "UnRegObj"
+            _, inputTextGameObjectName = reaper.ImGui_InputText(ctx, 'Game Object name', inputTextGameObjectName)
+            markerName = concatenateWithUnderscore(eventType, inputTextGameObjectName)
+        elseif currentItem == 7 then
+            eventType = "ResetAllObj"
+            markerName = eventType
         end
 
         reaper.ImGui_Indent(ctx, 200)
