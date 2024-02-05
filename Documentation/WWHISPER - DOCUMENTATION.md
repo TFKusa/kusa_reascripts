@@ -14,6 +14,9 @@ WWHISPER - DOCUMENTATION
 - Type "ReaWwise", right click on it and install it.
 
 
+If you'd like to use Wwhisper - Marker Creator as well, please download and install ReaImGui on ReaPack.
+
+
 
 
         What is Wwhisper
@@ -37,6 +40,15 @@ To activate a command from a marker that is placed earlier in the timeline than 
 
 
 
+        Notes on Game Object Management:
+
+By default, only one Game Object is created when running the script ("Listener," positioned at 0,0,0). Calling a new Game Object in a command without initializing it will automatically create it. When playback is stopped, the script will shut down and unregister all active Game Objects.
+
+
+
+        If you are not using Wwhisper - Marker Creator, here's how you can manually rename your markers :
+
+
         BASIC GAME OBJECTS COMMANDS :
 
 InitObj_gameObjectName          - Registers a Game Object
@@ -50,13 +62,6 @@ example : UnRegObj_Player
 
 
 ResetAllObj                     - Unregisters all Game Objects
-
-
-
-
-        Notes on Game Object Management:
-
-By default, only one Game Object is created when running the script ("Listener," positioned at 0,0,0). Calling a new Game Object in a command without initializing it will automatically create it. When playback is stopped, the script will shut down and unregister all active Game Objects.
 
 
 
