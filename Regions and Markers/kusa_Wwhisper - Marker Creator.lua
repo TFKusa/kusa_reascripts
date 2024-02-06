@@ -1,10 +1,10 @@
 -- @description kusa_Wwhisper - Marker Creator
--- @version 1.12
+-- @version 1.20
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog : - Code clean up.
+-- @changelog : - Added "Duplicate nearest marker" button
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
@@ -25,34 +25,46 @@ local function inputText(ctx, label, var)
     return newValue or var
 end
 
-local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
-    local config = eventTypeConfig[currentOption + 1]
-
-    local fields = config.fields
-    local eventType = config.eventType
-    if currentOption == 1 and shouldInterp then
-        eventType = "RTPCInterp"
-        fields = {{"RTPC name", "inputs.inputTextName"}, {"Starting value", "inputs.inputTextStartingValue"}, {"Target value", "inputs.inputTextTargetValue"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
-    elseif currentOption == 4 and shouldInterp then
-        eventType = "SetPosInterp"
-        fields = {{"Start X", "inputs.inputTextPosX"}, {"Start Y", "inputs.inputTextPosY"}, {"Start Z", "inputs.inputTextPosZ"}, {"Target X", "inputs.inputTextTargetX"}, {"Target Y", "inputs.inputTextTargetY"}, {"Target Z", "inputs.inputTextTargetZ"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
+local function getNearestMarker(playPosition)
+    local numMarkers = reaper.CountProjectMarkers(0)
+    local closestDist = math.huge
+    local closestIndex = -1
+    local closestPos = 0
+    local closestName = ""
+    for i = 0, numMarkers - 1 do
+        local retval, isRegion, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers(i)
+        if not isRegion then
+            local dist = math.abs(pos - playPosition)
+            if dist < closestDist then
+                closestDist = dist
+                closestIndex = markrgnindexnumber
+                closestPos = pos
+                closestName = name
+            end
+        end
     end
-
-    local markerParts = {eventType}
-    for _, field in ipairs(fields) do
-        local label, varName = table.unpack(field)
-        _G[varName] = inputText(ctx, label, _G[varName])
-        table.insert(markerParts, _G[varName])
-    end
-
-    return concatenateWithUnderscore(table.unpack(markerParts))
+    return closestIndex, closestPos, closestName
 end
 
+local function duplicateMarker(closestIndex, closestPos, closestName)
+    if closestIndex ~= -1 then
+        local newPos = closestPos + 0.1
+        reaper.AddProjectMarker2(0, false, newPos, 0, closestName, -1, 0)
+    else
+        reaper.ShowMessageBox("No marker found near the play cursor.", "Error", 0)
+    end
+end
+
+local function duplicateNearestMarker()
+    local playPosition = reaper.GetCursorPosition()
+    local closestIndex, closestPos, closestName = getNearestMarker(playPosition)
+    duplicateMarker(closestIndex, closestPos, closestName)
+end
 
 local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
 
 local windowWidth = 543
-local windowHeight = 296
+local windowHeight = 310
 reaper.ImGui_SetNextWindowSize(ctx, windowWidth, windowHeight, 0)
 
 
@@ -87,6 +99,29 @@ local eventTypeConfig = {
     {eventType = "ResetAllObj", fields = {}}
 }
 
+local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
+    local config = eventTypeConfig[currentOption + 1]
+
+    local fields = config.fields
+    local eventType = config.eventType
+    if currentOption == 1 and shouldInterp then
+        eventType = "RTPCInterp"
+        fields = {{"RTPC name", "inputs.inputTextName"}, {"Starting value", "inputs.inputTextStartingValue"}, {"Target value", "inputs.inputTextTargetValue"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
+    elseif currentOption == 4 and shouldInterp then
+        eventType = "SetPosInterp"
+        fields = {{"Start X", "inputs.inputTextPosX"}, {"Start Y", "inputs.inputTextPosY"}, {"Start Z", "inputs.inputTextPosZ"}, {"Target X", "inputs.inputTextTargetX"}, {"Target Y", "inputs.inputTextTargetY"}, {"Target Z", "inputs.inputTextTargetZ"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
+    end
+
+    local markerParts = {eventType}
+    for _, field in ipairs(fields) do
+        local label, varName = table.unpack(field)
+        _G[varName] = inputText(ctx, label, _G[varName])
+        table.insert(markerParts, _G[varName])
+    end
+
+    return concatenateWithUnderscore(table.unpack(markerParts))
+end
+
 function loop()
     local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Marker Creator', true)
     local width, height = reaper.ImGui_GetWindowSize(ctx)
@@ -108,7 +143,10 @@ function loop()
             local cursorPos = reaper.GetCursorPosition()
             reaper.AddProjectMarker(0, false, cursorPos, 0, markerName, -1)
         end
-
+        reaper.ImGui_Unindent(ctx, 30)
+        if reaper.ImGui_Button(ctx, 'Duplicate nearest marker') then
+            duplicateNearestMarker()
+        end
         reaper.ImGui_End(ctx)
     end
 
