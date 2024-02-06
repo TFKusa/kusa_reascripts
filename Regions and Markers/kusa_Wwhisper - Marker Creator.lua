@@ -1,53 +1,29 @@
 -- @description kusa_Wwhisper - Marker Creator
--- @version 1.11
+-- @version 1.12
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog : - Code clean up.
 
-function concatenateWithUnderscore(...)
+
+local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
+if not reaImguiAvailable then
+    reaper.MB("This script requires ReaImGui. Please install it via ReaPack.", "Error", 0)
+    return
+end
+
+local function concatenateWithUnderscore(...)
     local args = {...}
     local concatenatedString = table.concat(args, "_")
     
     return concatenatedString
 end
 
-local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
-
-if not reaImguiAvailable then
-    reaper.MB("This script requires ReaImGui. Please install it via ReaPack.", "Error", 0)
-    return
-end
-
-local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
-
-local windowWidth = 543
-local windowHeight = 296
-reaper.ImGui_SetNextWindowSize(ctx, windowWidth, windowHeight, 0)
-
-
-local currentOption = 0
-local inputTextName, inputTextGameObjectName, inputTextValue, inputTextStartingValue, inputTextTargetValue, inputTextInterpTime, inputTextChildName, inputTextPosX, inputTextPosY, inputTextPosZ, inputTextTargetX, inputTextTargetY, inputTextTargetZ = "", "", "", "", "", "", "", "", "", "", "", "", ""
-local shouldInterp = false
-local markerName
-
-
 local function inputText(ctx, label, var)
     local _, newValue = reaper.ImGui_InputText(ctx, label, var)
     return newValue or var
 end
-
-
-local eventTypeConfig = {
-    {eventType = "Event", fields = {{"Event name", "inputTextName"}, {"Game Object name", "inputTextGameObjectName"}}},
-    {eventType = "RTPC", fields = {{"RTPC name", "inputTextName"}, {"Value", "inputTextValue"}, {"Game Object name", "inputTextGameObjectName"}}},
-    {eventType = "State", fields = {{"State group name", "inputTextName"}, {"State name", "inputTextChildName"}}},
-    {eventType = "Switch", fields = {{"Switch group name", "inputTextName"}, {"Switch name", "inputTextChildName"}, {"Game Object name", "inputTextGameObjectName"}}},
-    {eventType = "SetPos", fields = {{"X", "inputTextPosX"}, {"Y", "inputTextPosY"}, {"Z", "inputTextPosZ"}, {"Game Object name", "inputTextGameObjectName"}}},
-    {eventType = "InitObj", fields = {{"Game Object name", "inputTextGameObjectName"}}},
-    {eventType = "UnRegObj", fields = {{"Game Object name", "inputTextGameObjectName"}}},
-    {eventType = "ResetAllObj", fields = {}}
-}
 
 local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
     local config = eventTypeConfig[currentOption + 1]
@@ -56,10 +32,10 @@ local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
     local eventType = config.eventType
     if currentOption == 1 and shouldInterp then
         eventType = "RTPCInterp"
-        fields = {{"RTPC name", "inputTextName"}, {"Starting value", "inputTextStartingValue"}, {"Target value", "inputTextTargetValue"}, {"Interpolation Time (ms)", "inputTextInterpTime"}, {"Game Object name", "inputTextGameObjectName"}}
+        fields = {{"RTPC name", "inputs.inputTextName"}, {"Starting value", "inputs.inputTextStartingValue"}, {"Target value", "inputs.inputTextTargetValue"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
     elseif currentOption == 4 and shouldInterp then
         eventType = "SetPosInterp"
-        fields = {{"Start X", "inputTextPosX"}, {"Start Y", "inputTextPosY"}, {"Start Z", "inputTextPosZ"}, {"Target X", "inputTextTargetX"}, {"Target Y", "inputTextTargetY"}, {"Target Z", "inputTextTargetZ"}, {"Interpolation Time (ms)", "inputTextInterpTime"}, {"Game Object name", "inputTextGameObjectName"}}
+        fields = {{"Start X", "inputs.inputTextPosX"}, {"Start Y", "inputs.inputTextPosY"}, {"Start Z", "inputs.inputTextPosZ"}, {"Target X", "inputs.inputTextTargetX"}, {"Target Y", "inputs.inputTextTargetY"}, {"Target Z", "inputs.inputTextTargetZ"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
     end
 
     local markerParts = {eventType}
@@ -71,6 +47,45 @@ local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
 
     return concatenateWithUnderscore(table.unpack(markerParts))
 end
+
+
+local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
+
+local windowWidth = 543
+local windowHeight = 296
+reaper.ImGui_SetNextWindowSize(ctx, windowWidth, windowHeight, 0)
+
+
+local currentOption = 0
+local shouldInterp = false
+local markerName
+
+local inputs = {
+    inputTextName = "",
+    inputTextGameObjectName = "",
+    inputTextValue = "",
+    inputTextStartingValue = "",
+    inputTextTargetValue = "",
+    inputTextInterpTime = "",
+    inputTextChildName = "",
+    inputTextPosX = "",
+    inputTextPosY = "",
+    inputTextPosZ = "",
+    inputTextTargetX = "",
+    inputTextTargetY = "",
+    inputTextTargetZ = "",
+}
+
+local eventTypeConfig = {
+    {eventType = "Event", fields = {{"Event name", "inputs.inputTextName"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
+    {eventType = "RTPC", fields = {{"RTPC name", "inputs.inputTextName"}, {"Value", "inputs.inputTextValue"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
+    {eventType = "State", fields = {{"State group name", "inputs.inputTextName"}, {"State name", "inputs.inputTextChildName"}}},
+    {eventType = "Switch", fields = {{"Switch group name", "inputs.inputTextName"}, {"Switch name", "inputs.inputTextChildName"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
+    {eventType = "SetPos", fields = {{"X", "inputs.inputTextPosX"}, {"Y", "inputs.inputTextPosY"}, {"Z", "inputs.inputTextPosZ"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
+    {eventType = "InitObj", fields = {{"Game Object name", "inputs.inputTextGameObjectName"}}},
+    {eventType = "UnRegObj", fields = {{"Game Object name", "inputs.inputTextGameObjectName"}}},
+    {eventType = "ResetAllObj", fields = {}}
+}
 
 function loop()
     local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Marker Creator', true)
