@@ -1,9 +1,11 @@
 -- @description kusa_Wwhisper - Take Marker Creator
--- @version 1.00
+-- @version 1.01
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog :
+--      # Adjusted window height
 
 
 
@@ -110,7 +112,7 @@ end
 local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
 
 local windowWidth = 543
-local windowHeight = 310
+local windowHeight = 330
 reaper.ImGui_SetNextWindowSize(ctx, windowWidth, windowHeight, 0)
 
 
@@ -177,7 +179,6 @@ end
 
 function loop()
     local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Take Marker Creator', true)
-    local width, height = reaper.ImGui_GetWindowSize(ctx)
     if visible then
 
         local colorChanged, selectedColorIndex = reaper.ImGui_Combo(ctx, 'Take marker color', currentColorIndex, "Red\0Green\0Blue\0Yellow\0Orange\0Purple\0")
