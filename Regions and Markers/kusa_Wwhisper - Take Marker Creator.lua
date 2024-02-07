@@ -1,16 +1,55 @@
--- @description kusa_Wwhisper - Marker Creator
--- @version 1.20
+-- @description kusa_Wwhisper - Take Marker Creator
+-- @version 1.00
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog : - Added "Duplicate nearest marker" button
+
+
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
 if not reaImguiAvailable then
     reaper.MB("This script requires ReaImGui. Please install it via ReaPack.", "Error", 0)
     return
+end
+
+local colors = {
+    {name = "Red", value = 33226752},
+    {name = "Green", value = 16830208},
+    {name = "Blue", value = 16806892},
+    {name = "Yellow", value = 0},
+    {name = "Orange", value = 32795136},
+    {name = "Purple", value = 28901614},
+}
+
+local selectedColorValue = colors[1].value
+
+function collectAndSortTakeMarkers()
+    local markerData = {}
+    local itemCount = reaper.CountMediaItems(0)
+
+    for i = 0, itemCount - 1 do
+        local item = reaper.GetMediaItem(0, i)
+        local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+        for takeIndex = 0, reaper.CountTakes(item) - 1 do
+            local take = reaper.GetMediaItemTake(item, takeIndex)
+            if take then
+                local takeMarkerCount = reaper.GetNumTakeMarkers(take)
+                for k = 0, takeMarkerCount - 1 do
+                    local retval, name, color = reaper.GetTakeMarker(take, k)
+                    if retval ~= -1 then
+                        local adjustedMarkerPos = itemPos + retval
+                        table.insert(markerData, {name = name, adjustedPos = adjustedMarkerPos, take = take, color = color})
+                    end
+                end
+            end
+        end
+    end
+
+    table.sort(markerData, function(a, b) return a.adjustedPos < b.adjustedPos end)
+
+    return markerData
 end
 
 local function concatenateWithUnderscore(...)
@@ -25,31 +64,37 @@ local function inputText(ctx, label, var)
     return newValue or var
 end
 
-local function getNearestMarker(playPosition)
-    local numMarkers = reaper.CountProjectMarkers(0)
+local function getNearestTakeMarker(playPosition, sortedTakeMarkers)
     local closestDist = math.huge
     local closestIndex = -1
     local closestPos = 0
     local closestName = ""
-    for i = 0, numMarkers - 1 do
-        local retval, isRegion, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers(i)
-        if not isRegion then
-            local dist = math.abs(pos - playPosition)
-            if dist < closestDist then
-                closestDist = dist
-                closestIndex = markrgnindexnumber
-                closestPos = pos
-                closestName = name
-            end
+
+    for i, marker in ipairs(sortedTakeMarkers) do
+        local dist = math.abs(marker.adjustedPos - playPosition)
+        if dist < closestDist then
+            closestDist = dist
+            closestIndex = i
+            closestPos = marker.adjustedPos
+            closestName = marker.name
+            color = marker.color
         end
     end
-    return closestIndex, closestPos, closestName
+
+    return closestIndex, closestPos, closestName, color
 end
 
-local function duplicateMarker(closestIndex, closestPos, closestName)
+local function duplicateTakeMarker(sortedTakeMarkers, closestIndex, closestPos, closestName, color)
     if closestIndex ~= -1 then
+        local markerData = sortedTakeMarkers[closestIndex]
+        local take = markerData.take
         local newPos = closestPos + 0.1
-        reaper.AddProjectMarker2(0, false, newPos, 0, closestName, -1, 0)
+        
+        if take then
+            local newMarkerIndex = reaper.SetTakeMarker(take, -1, closestName, newPos, color)
+        else
+            reaper.ShowMessageBox("No take associated with the marker.", "Error", 0)
+        end
     else
         reaper.ShowMessageBox("No marker found near the play cursor.", "Error", 0)
     end
@@ -57,8 +102,9 @@ end
 
 local function duplicateNearestMarker()
     local playPosition = reaper.GetCursorPosition()
-    local closestIndex, closestPos, closestName = getNearestMarker(playPosition)
-    duplicateMarker(closestIndex, closestPos, closestName)
+    local sortedTakeMarkers = collectAndSortTakeMarkers()
+    local closestIndex, closestPos, closestName, color = getNearestTakeMarker(playPosition, sortedTakeMarkers)
+    duplicateTakeMarker(sortedTakeMarkers, closestIndex, closestPos, closestName, color)
 end
 
 local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
@@ -69,6 +115,7 @@ reaper.ImGui_SetNextWindowSize(ctx, windowWidth, windowHeight, 0)
 
 
 local currentOption = 0
+local currentColorIndex = 0
 local shouldInterp = false
 local markerName
 
@@ -122,16 +169,26 @@ local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
     return concatenateWithUnderscore(table.unpack(markerParts))
 end
 
+local function handleMarkerColor(currentColorIndex)
+    local colorConfig = colors[currentColorIndex + 1]
+    local currentColorValue = colorConfig.value
+    return currentColorValue
+end
+
 function loop()
-    local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Marker Creator', true)
+    local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Take Marker Creator', true)
     local width, height = reaper.ImGui_GetWindowSize(ctx)
     if visible then
+
+        local colorChanged, selectedColorIndex = reaper.ImGui_Combo(ctx, 'Take marker color', currentColorIndex, "Red\0Green\0Blue\0Yellow\0Orange\0Purple\0")
+        if colorChanged then
+            currentColorIndex = selectedColorIndex
+        end
         
-        local changed, selectedOption = reaper.ImGui_Combo(ctx, 'Options', currentOption, "Event\0RTPC\0State\0Switch\0Position\0Register Game Object\0Unregister Game Object\0Unregister all Game Objects\0")
+        local changed, selectedOption = reaper.ImGui_Combo(ctx, 'Type', currentOption, "Event\0RTPC\0State\0Switch\0Position\0Register Game Object\0Unregister Game Object\0Unregister all Game Objects\0")
         if changed then
             currentOption = selectedOption
         end
-
 
         local markerName = handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
         if currentOption == 1 or currentOption == 4 then
@@ -139,12 +196,24 @@ function loop()
         end
 
         reaper.ImGui_Indent(ctx, 200)
-        if reaper.ImGui_Button(ctx, 'Create Marker') then
-            local cursorPos = reaper.GetCursorPosition()
-            reaper.AddProjectMarker(0, false, cursorPos, 0, markerName, -1)
+        if reaper.ImGui_Button(ctx, 'Create take marker') then
+            local selectedItemCount = reaper.CountSelectedMediaItems(0)
+            if selectedItemCount > 0 then
+                local cursorPos = reaper.GetCursorPosition()
+                local item = reaper.GetSelectedMediaItem(0, 0)
+                if item then
+                    local take = reaper.GetMediaItemTake(item, 0)
+                    if take then
+                        local colorToApply = handleMarkerColor(currentColorIndex)
+                        reaper.SetTakeMarker(take, -1, markerName, cursorPos, colorToApply)
+                    end
+                end
+            else
+                reaper.ShowMessageBox("No item selected.", "Whoops.", 0)
+            end
         end
-        reaper.ImGui_Unindent(ctx, 30)
-        if reaper.ImGui_Button(ctx, 'Duplicate nearest marker') then
+        reaper.ImGui_Unindent(ctx, 40)
+        if reaper.ImGui_Button(ctx, 'Duplicate nearest take marker') then
             duplicateNearestMarker()
         end
         reaper.ImGui_End(ctx)

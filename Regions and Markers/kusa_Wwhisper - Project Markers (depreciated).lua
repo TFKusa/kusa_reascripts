@@ -1,5 +1,5 @@
--- @description kusa_Wwhisper
--- @version 1.10
+-- @description kusa_Wwhisper (depreciated)
+-- @version 1.11
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
