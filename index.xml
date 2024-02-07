@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="cc293ff407671b1682c34db73298f2b9fb1b7bdc">
+<index version="1" name="kusa_reascripts" commit="147e22d9cced4acbe53262bda29dd35e77bec8df">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -392,6 +392,11 @@
       </metadata>
       <version name="1.00" author="Kusa" time="2024-02-05T07:03:41Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/34f0a4c97be0a23ff5f541b59d78ef35832b6da3/Regions%20and%20Markers/kusa_Wwhisper.lua</source>
+      </version>
+      <version name="1.10" author="Kusa" time="2024-02-07T12:36:11Z">
+        <changelog><![CDATA[:
+# Fix : Better error handling when entering float values (all number values need to be integers)]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/147e22d9cced4acbe53262bda29dd35e77bec8df/Regions%20and%20Markers/kusa_Wwhisper.lua</source>
       </version>
     </reapack>
   </category>
