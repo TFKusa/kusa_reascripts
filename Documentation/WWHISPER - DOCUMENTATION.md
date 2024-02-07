@@ -12,16 +12,14 @@ WWHISPER - DOCUMENTATION
 - In Reaper -> Extensions -> ReaPack -> Browse packages
 - Type "kusa", right click on "kusa_Wwhisper" and install it.
 - Type "ReaWwise", right click on it and install it.
-
-
-If you'd like to use Wwhisper - Marker Creator as well, please download and install ReaImGui on ReaPack.
+        If you'd like to use Wwhisper - Take Marker Creator as well (higly recommended), please download and install ReaImGui on ReaPack.
 
 
 
 
         What is Wwhisper
 
-Wwhisper is a ReaScript that enables REAPER to send commands to Wwise using project markers. When the script is running, REAPER enters a custom playing state that detects markers and performs various actions depending on their names.
+Wwhisper is a ReaScript that enables REAPER to send commands to Wwise using take markers. When the script is running, REAPER enters a custom playing state that detects markers and performs various actions depending on their names.
 
 
 
@@ -33,9 +31,9 @@ Think of Game Objects as the actors in your scene. They can be a character, a we
 
 
 
-        Notes on Triggering Commands with Markers:
+        Notes on Triggering Commands with Take Markers:
 
-To activate a command from a marker that is placed earlier in the timeline than the current play cursor position when the script is run, prepend an exclamation point to the beginning of the marker name. This is particularly useful for initiating musical cues or other events that need to start from markers positioned well before the working point in the timeline.
+To activate a command from a take marker that is placed earlier in the timeline than the current play cursor position when the script is run, prepend an exclamation point to the beginning of the take marker name. This is particularly useful for initiating musical cues or other events that need to start from markers positioned well before the working point in the timeline.
 
 
 
@@ -46,7 +44,7 @@ By default, only one Game Object is created when running the script ("Listener,"
 
 
 
-        If you are not using Wwhisper - Marker Creator, here's how you can manually rename your markers :
+        If you are not using Wwhisper - Take Marker Creator, here's how you can manually rename your markers :
 
 
         BASIC GAME OBJECTS COMMANDS :
