@@ -1,9 +1,11 @@
 -- @description kusa_Wwhisper
--- @version 1.00
+-- @version 1.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog :
+--      # Fix : Better error handling when entering float values (all number values need to be integers)
 
 
 
@@ -285,7 +287,7 @@ local function actionRTPC(parts)
         registerObject(gameObjectName)
         gameObjectID = gameObjectIDs[gameObjectName]
     end
-    if type(newRtpcValue) ~= "number" then
+    if type(newRtpcValue) ~= "number" or newRtpcValue % 1 ~= 0 then
         reaper.Main_OnCommand(1016, 0) -- Stops the transport
         reaper.MB("RTPC value needs to be an integer.", "Whoops !", 0)
         return
@@ -310,7 +312,7 @@ local function actionRTPCInterp(parts)
 
     local numbers = {currentRtpcValue, targetRtpcValue, interpolationTimeMs}
     for _, number in ipairs(numbers) do
-        if type(number) ~= "number" then
+        if type(number) ~= "number" or number % 1 ~= 0 then
             reaper.Main_OnCommand(1016, 0) -- Stops the transport
             reaper.MB("RTPC values or interpolation time need to be integers.", "Whoops !", 0)
             return
@@ -359,7 +361,7 @@ local function actionSetPos(parts)
 
     local positions = {positionX, positionY, positionZ}
     for _, position in ipairs(positions) do
-        if type(position) ~= "number" then
+        if type(position) ~= "number" or position % 1 ~= 0 then
             reaper.Main_OnCommand(1016, 0) -- Stops the transport
             reaper.MB("Coordinates need to be integers.", "Whoops !", 0)
             return
@@ -388,7 +390,7 @@ local function actionPosInterp(parts)
     local interpolationTimeMs = tonumber(parts[8])
     local positions = {currentPosX, currentPosY, currentPosZ, targetPosX, targetPosY, targetPosZ, interpolationTimeMs}
     for _, position in ipairs(positions) do
-        if type(position) ~= "number" then
+        if type(position) ~= "number" or position % 1 ~= 0 then
             reaper.Main_OnCommand(1016, 0) -- Stops the transport
             reaper.MB("Coordinates or interpolation time need to be integers.", "Whoops !", 0)
             return
@@ -529,5 +531,3 @@ setDefaultListener()
 preprocessMarkers()
 reaper.OnPlayButton()
 main()
-
-
