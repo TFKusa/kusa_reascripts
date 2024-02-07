@@ -416,26 +416,6 @@ local actionMapping = {
     UnRegObj = {func = actionUnRegObj, parts = 2},
     ResetAllObj = {func = actionResetAllObj, parts = 1}
 }
-------------------------------------------
-
-
-local function preprocessMarkers()
-    local playPos = reaper.GetPlayPosition()
-    local retval, num_markers = reaper.CountProjectMarkers(0)
-
-    for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers(i)
-        if not isrgn and pos < playPos and name:sub(1,1) == "!" then
-            local actionName = name:match("^!(.-)_")
-            if actionName and actionMapping[actionName] then
-                processMarker(name:sub(2), actionMapping[actionName].parts, actionMapping[actionName].func)
-            end
-        end
-    end
-end
-
-
-------------------------------------------
 
 local function preprocessMarkers()
     local playPos = reaper.GetCursorPosition()
