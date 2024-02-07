@@ -1,13 +1,11 @@
 -- @description kusa_Wwhisper - Take Marker Creator
--- @version 1.01
+-- @version 1.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Adjusted window height
-
-
+--      # Fix colors for Windows
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
@@ -16,14 +14,27 @@ if not reaImguiAvailable then
     return
 end
 
-local colors = {
+local colors = {}
+
+if os.getenv("HOME") ~= nil then
+    colors = {
     {name = "Red", value = 33226752},
     {name = "Green", value = 16830208},
     {name = "Blue", value = 16806892},
     {name = "Yellow", value = 0},
     {name = "Orange", value = 32795136},
     {name = "Purple", value = 28901614},
-}
+    }
+else
+    colors = {
+        {name = "Red", value = 16777471},
+        {name = "Green", value = 16809984},
+        {name = "Blue", value = 33226752},
+        {name = "Yellow", value = 16842751},
+        {name = "Orange", value = 16810239},
+        {name = "Purple", value = 33489151},
+        }
+end   
 
 local selectedColorValue = colors[1].value
 
