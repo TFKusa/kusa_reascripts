@@ -1,9 +1,11 @@
 -- @description kusa_Wwhisper
--- @version 1.00
+-- @version 1.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog :
+--      # Fix : "!" before an action is back
 
 
 if not reaper.AK_Waapi_Connect("127.0.0.1", 8080) then
@@ -417,21 +419,6 @@ local actionMapping = {
     ResetAllObj = {func = actionResetAllObj, parts = 1}
 }
 
-local function preprocessMarkers()
-    local playPos = reaper.GetCursorPosition()
-    local retval, num_markers = reaper.CountProjectMarkers(0)
-
-    for i = 0, num_markers - 1 do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers(i)
-        if not isrgn and pos < playPos and name:sub(1, 1) == "!" then
-            name = name:sub(2)
-            local actionName = name:match("^(.-)_")
-            if actionName and actionMapping[actionName] then
-                processMarker(name, actionMapping[actionName].parts, actionMapping[actionName].func)
-            end
-        end
-    end
-end
 
 ------------------------------------------
 
@@ -464,6 +451,22 @@ end
 
 ------------------------------------------
 
+local function preprocessMarkers(sortedMarkers)
+    local playPos = reaper.GetCursorPosition()
+    
+    for i, marker in ipairs(sortedMarkers) do
+        local pos = marker.adjustedPos
+        local name = marker.name
+        if pos < playPos and name:sub(1,1) == "!" then
+            local actionName = name:match("^!(.-)_")
+            if actionName and actionMapping[actionName] then
+                processMarker(name:sub(2), actionMapping[actionName].parts, actionMapping[actionName].func)
+            end
+        end
+    end
+end
+
+------------------------------------------
 
 
 local lastMarker = -1
@@ -518,6 +521,6 @@ end
 
 
 setDefaultListener()
-preprocessMarkers()
+preprocessMarkers(sortedMarkers)
 reaper.OnPlayButton()
 main()
