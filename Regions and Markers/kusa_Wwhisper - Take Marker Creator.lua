@@ -172,7 +172,7 @@ end
 local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
 
 local windowWidth = 543
-local windowHeight = 330
+local windowHeight = 360
 reaper.ImGui_SetNextWindowSize(ctx, windowWidth, windowHeight, 0)
 
 
