@@ -1,11 +1,11 @@
 -- @description kusa_Wwhisper - Take Marker Creator
--- @version 1.10
+-- @version 1.15
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Fix colors for Windows
+--      # Fix marker position when item does not start at 0
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
@@ -214,10 +214,12 @@ function loop()
                 local cursorPos = reaper.GetCursorPosition()
                 local item = reaper.GetSelectedMediaItem(0, 0)
                 if item then
+                    local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                    local markerPos = cursorPos - itemPos
                     local take = reaper.GetMediaItemTake(item, 0)
                     if take then
                         local colorToApply = handleMarkerColor(currentColorIndex)
-                        reaper.SetTakeMarker(take, -1, markerName, cursorPos, colorToApply)
+                        reaper.SetTakeMarker(take, -1, markerName, markerPos, colorToApply)
                     end
                 end
             else
