@@ -1,11 +1,11 @@
 -- @description kusa_Wwhisper - Take Marker Creator
--- @version 1.15
+-- @version 1.16
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Fix marker position when item does not start at 0
+--      # Adds create MIDI item button
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
