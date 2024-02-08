@@ -1,12 +1,16 @@
 -- @description kusa_Wwhisper
--- @version 1.10
+-- @version 1.11
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Fix : "!" before an action is back
+--      # Better error handling when ReaWwise isn't installed (thank you X-Raym)
 
+if not reaper.AK_Waapi_Connect then
+    reaper.ShowMessageBox("Missing dependency, please install ReaWwise.", "Whoops !", 0)
+    return
+end
 
 if not reaper.AK_Waapi_Connect("127.0.0.1", 8080) then
     reaper.MB("Could not connect to Wwise.", "Whoops !", 0)
