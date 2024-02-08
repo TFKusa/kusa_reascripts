@@ -10,7 +10,7 @@
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
 if not reaImguiAvailable then
-    reaper.MB("This script requires ReaImGui. Please install it via ReaPack.", "Error", 0)
+    reaper.MB("This script requires ReaImGui. Please install it via ReaPack.", "Whoops !", 0)
     return
 end
 
@@ -109,13 +109,13 @@ local function duplicateTakeMarker(sortedTakeMarkers, closestIndex, closestPos, 
                 local newPosRelative = closestPos - itemPos + 0.1
                 local newMarkerIndex = reaper.SetTakeMarker(take, -1, closestName, newPosRelative, color)
             else
-                reaper.ShowMessageBox("Failed to get the media item for the take.", "Error", 0)
+                reaper.ShowMessageBox("Failed to get the media item for the take.", "Whoops !", 0)
             end
         else
-            reaper.ShowMessageBox("No take associated with the marker.", "Error", 0)
+            reaper.ShowMessageBox("No take associated with the marker.", "Whoops !", 0)
         end
     else
-        reaper.ShowMessageBox("No marker found near the play cursor.", "Error", 0)
+        reaper.ShowMessageBox("No marker found near the play cursor.", "Whoops !", 0)
     end
 end
 
@@ -273,7 +273,7 @@ function loop()
                     end
                 end
             else
-                reaper.ShowMessageBox("No item selected.", "Whoops.", 0)
+                reaper.ShowMessageBox("No item selected.", "Whoops !", 0)
             end
             reaper.Undo_EndBlock("Create take marker", 0)
         end
