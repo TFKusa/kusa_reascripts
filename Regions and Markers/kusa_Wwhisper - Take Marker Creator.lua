@@ -101,10 +101,16 @@ local function duplicateTakeMarker(sortedTakeMarkers, closestIndex, closestPos, 
     if closestIndex ~= -1 then
         local markerData = sortedTakeMarkers[closestIndex]
         local take = markerData.take
-        local newPos = closestPos + 0.1
         
         if take then
-            local newMarkerIndex = reaper.SetTakeMarker(take, -1, closestName, newPos, color)
+            local item = reaper.GetMediaItemTake_Item(take)
+            if item then
+                local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                local newPosRelative = closestPos - itemPos + 0.1
+                local newMarkerIndex = reaper.SetTakeMarker(take, -1, closestName, newPosRelative, color)
+            else
+                reaper.ShowMessageBox("Failed to get the media item for the take.", "Error", 0)
+            end
         else
             reaper.ShowMessageBox("No take associated with the marker.", "Error", 0)
         end
@@ -113,11 +119,54 @@ local function duplicateTakeMarker(sortedTakeMarkers, closestIndex, closestPos, 
     end
 end
 
+
 local function duplicateNearestMarker()
     local playPosition = reaper.GetCursorPosition()
     local sortedTakeMarkers = collectAndSortTakeMarkers()
     local closestIndex, closestPos, closestName, color = getNearestTakeMarker(playPosition, sortedTakeMarkers)
     duplicateTakeMarker(sortedTakeMarkers, closestIndex, closestPos, closestName, color)
+end
+
+local function handleTrackForMIDIItem()
+    local trackIndex
+    local selectedTrack = reaper.GetSelectedTrack(0, 0)
+    if selectedTrack then
+        trackIndex = reaper.GetMediaTrackInfo_Value(selectedTrack, "IP_TRACKNUMBER")
+    else
+        trackIndex = reaper.GetNumTracks()
+    end
+    reaper.InsertTrackAtIndex(trackIndex, true)
+
+    local newTrack
+    if selectedTrack then
+        newTrack = reaper.GetTrack(0, trackIndex)
+    else
+        newTrack = reaper.GetTrack(0, trackIndex)
+    end
+    return newTrack
+end
+
+
+local function createMIDIItem()
+    local loopStartTime, loopEndTime = reaper.GetSet_LoopTimeRange(false, false, 0, 0, false)
+    local itemStart, itemEnd
+    if loopStartTime == loopEndTime then
+        local item = reaper.GetSelectedMediaItem(0, 0)
+        if item then
+            itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+            local itemLength = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+            itemEnd = itemStart + itemLength
+        else
+            reaper.ShowMessageBox("No item selected or time selection.", "Whoops !", 0)
+            return
+        end
+    else
+        itemStart = loopStartTime
+        itemEnd = loopEndTime
+    end
+    local track = handleTrackForMIDIItem()
+    local midiItem = reaper.CreateNewMIDIItemInProj(track, itemStart, itemEnd, false)
+    reaper.SetMediaItemInfo_Value(midiItem, "B_LOOPSRC", 0)
 end
 
 local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
@@ -209,6 +258,7 @@ function loop()
 
         reaper.ImGui_Indent(ctx, 200)
         if reaper.ImGui_Button(ctx, 'Create take marker') then
+            reaper.Undo_BeginBlock()
             local selectedItemCount = reaper.CountSelectedMediaItems(0)
             if selectedItemCount > 0 then
                 local cursorPos = reaper.GetCursorPosition()
@@ -225,11 +275,25 @@ function loop()
             else
                 reaper.ShowMessageBox("No item selected.", "Whoops.", 0)
             end
+            reaper.Undo_EndBlock("Create take marker", 0)
         end
+
         reaper.ImGui_Unindent(ctx, 40)
+
         if reaper.ImGui_Button(ctx, 'Duplicate nearest take marker') then
+            reaper.Undo_BeginBlock()
             duplicateNearestMarker()
+            reaper.Undo_EndBlock("Duplicate nearest take marker", 0)
         end
+
+        reaper.ImGui_Indent(ctx, 33)
+
+        if reaper.ImGui_Button(ctx, 'Create new MIDI Item') then
+            reaper.Undo_BeginBlock()
+            createMIDIItem()
+            reaper.Undo_EndBlock("Create new MIDI Item", 0)
+        end
+
         reaper.ImGui_End(ctx)
     end
 
