@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="820d6a64ef74dd7afa0d51faaa6955d42a4b011c">
+<index version="1" name="kusa_reascripts" commit="da8eb4dba5a01d8eecb293bcfd68698b17ab1c53">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -362,6 +362,15 @@
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/4620efe4ba3379522936cf5b2a594119c02eb27d/Regions%20and%20Markers/kusa_Set%20subproject%20Start%20and%20End%20to%20selected%20item(s).lua</source>
       </version>
     </reapack>
+    <reapack name="kusa_Take Marker - Replace all underscores by semicolons.lua" type="script" desc="kusa_Replace all underscores with semicolons for all take markers.">
+      <metadata>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2024-02-12T19:33:24Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/da8eb4dba5a01d8eecb293bcfd68698b17ab1c53/Regions%20and%20Markers/kusa_Take%20Marker%20-%20Replace%20all%20underscores%20by%20semicolons.lua</source>
+      </version>
+    </reapack>
     <reapack name="kusa_Wwhisper - Project Marker Creator (depreciated).lua" type="script" desc="kusa_Wwhisper - Marker Creator (depreciated)">
       <metadata>
         <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
@@ -410,6 +419,11 @@
 # Adds create MIDI item button]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/24e4bcdfe4074c90d7af0b05ded90a7020c12b46/Regions%20and%20Markers/kusa_Wwhisper%20-%20Take%20Marker%20Creator.lua</source>
       </version>
+      <version name="1.20" author="Kusa" time="2024-02-12T19:33:24Z">
+        <changelog><![CDATA[:
+# Uses semicolon ";" instead of underscore "_" as a separator. I uploaded a script that can rename your markers if you were using Wwhisper on a project.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/da8eb4dba5a01d8eecb293bcfd68698b17ab1c53/Regions%20and%20Markers/kusa_Wwhisper%20-%20Take%20Marker%20Creator.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Wwhisper.lua" type="script" desc="kusa_Wwhisper">
       <metadata>
@@ -428,6 +442,11 @@
         <changelog><![CDATA[:
 # Better error handling when ReaWwise isn't installed (thank you X-Raym)]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/820d6a64ef74dd7afa0d51faaa6955d42a4b011c/Regions%20and%20Markers/kusa_Wwhisper.lua</source>
+      </version>
+      <version name="1.20" author="Kusa" time="2024-02-12T19:33:24Z">
+        <changelog><![CDATA[:
+# Uses semicolon ";" instead of underscore "_" as a separator. I uploaded a script that can rename your markers if you were using Wwhisper on a project.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/da8eb4dba5a01d8eecb293bcfd68698b17ab1c53/Regions%20and%20Markers/kusa_Wwhisper.lua</source>
       </version>
     </reapack>
   </category>
