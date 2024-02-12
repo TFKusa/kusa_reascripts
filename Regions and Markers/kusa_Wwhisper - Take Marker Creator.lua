@@ -1,11 +1,11 @@
 -- @description kusa_Wwhisper - Take Marker Creator
--- @version 1.16
+-- @version 1.20
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Adds create MIDI item button
+--      # Uses semicolon ";" instead of underscore "_" as a separator. I uploaded a script that can rename your markers if you were using Wwhisper on a project.
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
@@ -38,7 +38,7 @@ end
 
 local selectedColorValue = colors[1].value
 
-function collectAndSortTakeMarkers()
+local function collectAndSortTakeMarkers()
     local markerData = {}
     local itemCount = reaper.CountMediaItems(0)
 
@@ -65,9 +65,9 @@ function collectAndSortTakeMarkers()
     return markerData
 end
 
-local function concatenateWithUnderscore(...)
+local function concatenateWithSemicolon(...)
     local args = {...}
-    local concatenatedString = table.concat(args, "_")
+    local concatenatedString = table.concat(args, ";")
     
     return concatenatedString
 end
@@ -228,7 +228,7 @@ local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
         table.insert(markerParts, _G[varName])
     end
 
-    return concatenateWithUnderscore(table.unpack(markerParts))
+    return concatenateWithSemicolon(table.unpack(markerParts))
 end
 
 local function handleMarkerColor(currentColorIndex)
@@ -237,7 +237,7 @@ local function handleMarkerColor(currentColorIndex)
     return currentColorValue
 end
 
-function loop()
+local function loop()
     local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Take Marker Creator', true)
     if visible then
 

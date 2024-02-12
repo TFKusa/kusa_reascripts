@@ -1,11 +1,11 @@
 -- @description kusa_Wwhisper
--- @version 1.11
+-- @version 1.20
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Better error handling when ReaWwise isn't installed (thank you X-Raym)
+--      # Uses semicolon ";" instead of underscore "_" as a separator. I uploaded a script that can rename your markers if you were using Wwhisper on a project.
 
 if not reaper.AK_Waapi_Connect then
     reaper.ShowMessageBox("Missing dependency, please install ReaWwise.", "Whoops !", 0)
@@ -238,7 +238,7 @@ end
 
 local function processMarker(name, expectedParts, actionFunc)
     local parts = {}
-    for part in string.gmatch(name, "[^_]+") do
+    for part in string.gmatch(name, "[^;]+") do
         table.insert(parts, part)
     end
 
@@ -426,7 +426,7 @@ local actionMapping = {
 
 ------------------------------------------
 
-function collectAndSortTakeMarkers()
+local function collectAndSortTakeMarkers()
     local markerData = {}
     local itemCount = reaper.CountMediaItems(0)
 
@@ -462,7 +462,7 @@ local function preprocessMarkers(sortedMarkers)
         local pos = marker.adjustedPos
         local name = marker.name
         if pos < playPos and name:sub(1,1) == "!" then
-            local actionName = name:match("^!(.-)_")
+            local actionName = name:match("^!(.-);")
             if actionName and actionMapping[actionName] then
                 processMarker(name:sub(2), actionMapping[actionName].parts, actionMapping[actionName].func)
             end
@@ -508,7 +508,7 @@ local function main()
         if math.abs(playPos - marker.adjustedPos) <= marginOfError and lastMarker ~= i then
             if not markerCooldowns[i] or reaper.time_precise() - markerCooldowns[i] > cooldownPeriod then
                 local namePrefix = marker.name:sub(1, 1) == "!" and marker.name:sub(2) or marker.name
-                namePrefix = namePrefix:match("^(.-)_")
+                namePrefix = namePrefix:match("^(.-);")
                 if namePrefix and actionMapping[namePrefix] then
                     if processMarker(marker.name, actionMapping[namePrefix].parts, actionMapping[namePrefix].func) then
                         lastMarker = i

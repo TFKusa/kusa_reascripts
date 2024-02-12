@@ -49,14 +49,14 @@ By default, only one Game Object is created when running the script ("Listener,"
 
         BASIC GAME OBJECTS COMMANDS :
 
-InitObj_gameObjectName          - Registers a Game Object
+InitObj;gameObjectName          - Registers a Game Object
 
-example : InitObj_Player
+example : InitObj;Player
 
 
-UnRegObj_gameObjectName         - Unregisters a Game Object
+UnRegObj;gameObjectName         - Unregisters a Game Object
 
-example : UnRegObj_Player
+example : UnRegObj;Player
 
 
 ResetAllObj                     - Unregisters all Game Objects
@@ -66,54 +66,54 @@ ResetAllObj                     - Unregisters all Game Objects
 
         POSTING AN EVENT :
 
-Event_eventName_gameObjectName
+Event;eventName;gameObjectName
 
-example : Event_PlayFootsteps_Solaire
+example : Event;PlayFootsteps;Solaire
 
 
 
 
         SETTING AN RTPC :
 
-RTPC_rtpcName_value_gameObjectName
+RTPC;rtpcName;value;gameObjectName
 
-example : RTPC_PlayerSpeed_100_TrustyPatches
+example : RTPC;PlayerSpeed;100;TrustyPatches
 
 OR
 
-RTPCInterp_rtpcName_startingValue_targetValue_interpTimeInMs_gameObjectName
+RTPCInterp;rtpcName;startingValue;targetValue;interpTimeInMs;gameObjectName
 
-example : RTPCInterp_PlayerSpeed_0_100_SiegmeyerOfCatarina
+example : RTPCInterp;PlayerSpeed;0;100;SiegmeyerOfCatarina
 
 
 
 
         SETTING A SWITCH :
 
-Switch_switchGroupName_switchGroupState_gameObjectName
+Switch;switchGroupName;switchGroupState;gameObjectName
 
-example : Switch_GroundMaterials_Stone_MarvelousChester
+example : Switch;GroundMaterials;Stone;MarvelousChester
 
 
 
 
         SETTING A STATE :
 
-State_stateGroupName_stateName
+State;stateGroupName;stateName
 
-example : State_MusicMenuState_CrestfallenWarrior
+example : State;MusicMenuState;CrestfallenWarrior
 
 
 
 
         SETTING THE POSITION OF A GAME OBJECT :
 
-SetPos_PosX_PosY_PosZ_gameObjectName
+SetPos;PosX;PosY;PosZ;gameObjectName
 
-example : SetPos_10_0_0_BigHatLogan
+example : SetPos;10;0;0;BigHatLogan
 
 OR
 
-SetPosInterp_startPosX_startPosY_startPosZ_targetPosX_targetPosY_targetPosZ_interpTimeInMs_gameObjectName
+SetPosInterp;startPosX;startPosY;startPosZ;targetPosX;targetPosY;targetPosZ;interpTimeInMs;gameObjectName
 
-example : SetPosInterp_-20_0_0_20_0_0_1500_PetrusOfThorolund
+example : SetPosInterp;-20;0;0;20;0;0;1500;PetrusOfThorolund
