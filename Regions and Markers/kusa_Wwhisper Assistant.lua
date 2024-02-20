@@ -1,11 +1,9 @@
--- @description kusa_Wwhisper - Take Marker Creator
--- @version 1.20
+-- @description kusa_Wwhisper Assistant
+-- @version 1.00
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
--- @changelog :
---      # Uses semicolon ";" instead of underscore "_" as a separator. I uploaded a script that can rename your markers if you were using Wwhisper on a project.
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
@@ -14,17 +12,27 @@ if not reaImguiAvailable then
     return
 end
 
+if not reaper.APIExists("CF_GetSWSVersion") then
+    local userChoice = reaper.ShowMessageBox("This script requires the SWS Extension to run. Would you like to download it now ?", "Whoops !", 4)
+    if userChoice == 6 then
+        reaper.CF_ShellExecute("https://www.sws-extension.org/")
+        return
+    else
+        return
+    end
+end
+
 local colors = {}
 
 if os.getenv("HOME") ~= nil then
     colors = {
-    {name = "Red", value = 33226752},
-    {name = "Green", value = 16830208},
-    {name = "Blue", value = 16806892},
-    {name = "Yellow", value = 0},
-    {name = "Orange", value = 32795136},
-    {name = "Purple", value = 28901614},
-    }
+        {name = "Red", value = 33226752},
+        {name = "Green", value = 16830208},
+        {name = "Blue", value = 16806892},
+        {name = "Yellow", value = 0},
+        {name = "Orange", value = 32795136},
+        {name = "Purple", value = 28901614},
+        }
 else
     colors = {
         {name = "Red", value = 16777471},
@@ -127,7 +135,47 @@ local function duplicateNearestMarker()
     duplicateTakeMarker(sortedTakeMarkers, closestIndex, closestPos, closestName, color)
 end
 
-local function handleTrackForMIDIItem()
+local function handlePannerFX(track)
+    local pluginName = "JS: kusa_Wwhisper Panner"
+    local found = false
+    local index = 0
+    while true do
+        local retval, name, ident = reaper.EnumInstalledFX(index)
+        if not retval then break end
+        if name:find(pluginName) then
+            found = true
+            break
+        end
+        index = index + 1
+    end
+
+    local shouldStop
+    local fxIndex
+    if found then
+        fxIndex = reaper.TrackFX_GetByName(track, pluginName, true)
+        local numParams = reaper.TrackFX_GetNumParams(track, fxIndex)
+        for paramIndex = 0, math.min(3, numParams) - 1 do
+            local envelope = reaper.GetFXEnvelope(track, fxIndex, paramIndex, true)
+        end
+        shouldStop = false
+    else
+        reaper.DeleteTrack(track)
+        local userChoice = reaper.ShowMessageBox(pluginName .. " is not installed. It is required for spatialisation. Would you like to visit the documentation ?", "Whoops !", 4)
+        if userChoice == 6 then
+            reaper.CF_ShellExecute("https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md")
+        end
+        shouldStop = true
+    end
+    return shouldStop
+end
+
+local function pannerOnTrackSetup(track)
+    reaper.SetTrackAutomationMode(track, 4) -- 4 = Latch
+    local shouldStop = handlePannerFX(track)
+    return shouldStop
+end
+
+local function handleTrackForMIDIItem(gameObjectName)
     local trackIndex
     local selectedTrack = reaper.GetSelectedTrack(0, 0)
     if selectedTrack then
@@ -143,11 +191,13 @@ local function handleTrackForMIDIItem()
     else
         newTrack = reaper.GetTrack(0, trackIndex)
     end
-    return newTrack
+    reaper.GetSetMediaTrackInfo_String(newTrack, "P_NAME", gameObjectName, true)
+    local shouldStop = pannerOnTrackSetup(newTrack)
+    return shouldStop, newTrack
 end
 
 
-local function createMIDIItem()
+local function createMIDIItem(gameObjectName)
     local loopStartTime, loopEndTime = reaper.GetSet_LoopTimeRange(false, false, 0, 0, false)
     local itemStart, itemEnd
     if loopStartTime == loopEndTime then
@@ -164,9 +214,11 @@ local function createMIDIItem()
         itemStart = loopStartTime
         itemEnd = loopEndTime
     end
-    local track = handleTrackForMIDIItem()
-    local midiItem = reaper.CreateNewMIDIItemInProj(track, itemStart, itemEnd, false)
-    reaper.SetMediaItemInfo_Value(midiItem, "B_LOOPSRC", 0)
+    local shouldStop, track = handleTrackForMIDIItem(gameObjectName)
+    if not shouldStop then
+        local midiItem = reaper.CreateNewMIDIItemInProj(track, itemStart, itemEnd, false)
+        reaper.SetMediaItemInfo_Value(midiItem, "B_LOOPSRC", 0)
+    else return end
 end
 
 local ctx = reaper.ImGui_CreateContext('Wwhisper - Marker Creator')
@@ -189,23 +241,16 @@ local inputs = {
     inputTextTargetValue = "",
     inputTextInterpTime = "",
     inputTextChildName = "",
-    inputTextPosX = "",
-    inputTextPosY = "",
-    inputTextPosZ = "",
-    inputTextTargetX = "",
-    inputTextTargetY = "",
-    inputTextTargetZ = "",
 }
 
 local eventTypeConfig = {
-    {eventType = "Event", fields = {{"Event name", "inputs.inputTextName"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
-    {eventType = "RTPC", fields = {{"RTPC name", "inputs.inputTextName"}, {"Value", "inputs.inputTextValue"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
+    {eventType = "Event", fields = {{"Event name", "inputs.inputTextName"}}},
+    {eventType = "RTPC", fields = {{"RTPC name", "inputs.inputTextName"}, {"Value", "inputs.inputTextValue"}}},
     {eventType = "State", fields = {{"State group name", "inputs.inputTextName"}, {"State name", "inputs.inputTextChildName"}}},
-    {eventType = "Switch", fields = {{"Switch group name", "inputs.inputTextName"}, {"Switch name", "inputs.inputTextChildName"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
-    {eventType = "SetPos", fields = {{"X", "inputs.inputTextPosX"}, {"Y", "inputs.inputTextPosY"}, {"Z", "inputs.inputTextPosZ"}, {"Game Object name", "inputs.inputTextGameObjectName"}}},
-    {eventType = "InitObj", fields = {{"Game Object name", "inputs.inputTextGameObjectName"}}},
-    {eventType = "UnRegObj", fields = {{"Game Object name", "inputs.inputTextGameObjectName"}}},
-    {eventType = "ResetAllObj", fields = {}}
+    {eventType = "Switch", fields = {{"Switch group name", "inputs.inputTextName"}, {"Switch name", "inputs.inputTextChildName"}}},
+    {eventType = "InitObj;"},
+    {eventType = "UnRegObj;"},
+    {eventType = "ResetAllObj;", fields = {}}
 }
 
 local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
@@ -215,17 +260,16 @@ local function handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
     local eventType = config.eventType
     if currentOption == 1 and shouldInterp then
         eventType = "RTPCInterp"
-        fields = {{"RTPC name", "inputs.inputTextName"}, {"Starting value", "inputs.inputTextStartingValue"}, {"Target value", "inputs.inputTextTargetValue"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
-    elseif currentOption == 4 and shouldInterp then
-        eventType = "SetPosInterp"
-        fields = {{"Start X", "inputs.inputTextPosX"}, {"Start Y", "inputs.inputTextPosY"}, {"Start Z", "inputs.inputTextPosZ"}, {"Target X", "inputs.inputTextTargetX"}, {"Target Y", "inputs.inputTextTargetY"}, {"Target Z", "inputs.inputTextTargetZ"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}, {"Game Object name", "inputs.inputTextGameObjectName"}}
+        fields = {{"RTPC name", "inputs.inputTextName"}, {"Starting value", "inputs.inputTextStartingValue"}, {"Target value", "inputs.inputTextTargetValue"}, {"Interpolation Time (ms)", "inputs.inputTextInterpTime"}}
     end
 
     local markerParts = {eventType}
-    for _, field in ipairs(fields) do
-        local label, varName = table.unpack(field)
-        _G[varName] = inputText(ctx, label, _G[varName])
-        table.insert(markerParts, _G[varName])
+    if fields then
+        for _, field in ipairs(fields) do
+            local label, varName = table.unpack(field)
+            _G[varName] = inputText(ctx, label, _G[varName])
+            table.insert(markerParts, _G[varName])
+        end
     end
 
     return concatenateWithSemicolon(table.unpack(markerParts))
@@ -237,22 +281,38 @@ local function handleMarkerColor(currentColorIndex)
     return currentColorValue
 end
 
+
 local function loop()
-    local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper - Take Marker Creator', true)
+    local visible, open = reaper.ImGui_Begin(ctx, 'Wwhisper Assistant', true)
     if visible then
+
+        _G[inputs.inputTextGameObjectName] = inputText(ctx, "Track / Game Object name", _G[inputs.inputTextGameObjectName])
+
+        reaper.ImGui_Indent(ctx, 175)
+
+        if reaper.ImGui_Button(ctx, 'Create new track and item') then
+            reaper.Undo_BeginBlock()
+            createMIDIItem(_G[inputs.inputTextGameObjectName])
+            reaper.Undo_EndBlock("Create new MIDI Item", 0)
+        end
+
+        reaper.ImGui_Unindent(ctx, 175)
+
+        reaper.ImGui_Spacing(ctx)
+        reaper.ImGui_Spacing(ctx)
 
         local colorChanged, selectedColorIndex = reaper.ImGui_Combo(ctx, 'Take marker color', currentColorIndex, "Red\0Green\0Blue\0Yellow\0Orange\0Purple\0")
         if colorChanged then
             currentColorIndex = selectedColorIndex
         end
         
-        local changed, selectedOption = reaper.ImGui_Combo(ctx, 'Type', currentOption, "Event\0RTPC\0State\0Switch\0Position\0Register Game Object\0Unregister Game Object\0Unregister all Game Objects\0")
+        local changed, selectedOption = reaper.ImGui_Combo(ctx, 'Type', currentOption, "Event\0RTPC\0State\0Switch\0Register Game Object\0Unregister Game Object\0Unregister all Game Objects\0")
         if changed then
             currentOption = selectedOption
         end
 
         local markerName = handleInputsAndMarkerName(ctx, currentOption, shouldInterp)
-        if currentOption == 1 or currentOption == 4 then
+        if currentOption == 1 then
             _, shouldInterp = reaper.ImGui_Checkbox(ctx, "Interpolation", shouldInterp)
         end
 
@@ -284,14 +344,6 @@ local function loop()
             reaper.Undo_BeginBlock()
             duplicateNearestMarker()
             reaper.Undo_EndBlock("Duplicate nearest take marker", 0)
-        end
-
-        reaper.ImGui_Indent(ctx, 33)
-
-        if reaper.ImGui_Button(ctx, 'Create new MIDI Item') then
-            reaper.Undo_BeginBlock()
-            createMIDIItem()
-            reaper.Undo_EndBlock("Create new MIDI Item", 0)
         end
 
         reaper.ImGui_End(ctx)

@@ -1,0 +1,9 @@
+desc: kusa_Wwhisper Panner
+author: kusa
+version: 1.0
+changelog: Initial commit
+
+
+slider1: 0<-500,500,1>Front/Back
+slider2: 0<-100,100,1>Left/Right
+slider3: 0<-500,500,1>Up/Down

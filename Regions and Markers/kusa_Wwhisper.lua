@@ -1,11 +1,13 @@
 -- @description kusa_Wwhisper
--- @version 1.20
+-- @version 2.00
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Uses semicolon ";" instead of underscore "_" as a separator. I uploaded a script that can rename your markers if you were using Wwhisper on a project.
+--      # Changed Game Object system.
+--      # Changed positioning system.
+--      # Documentation is up to date for further details.
 
 if not reaper.AK_Waapi_Connect then
     reaper.ShowMessageBox("Missing dependency, please install ReaWwise.", "Whoops !", 0)
@@ -24,6 +26,24 @@ local playingIDs = {}
 
 
 ------------------------------------------
+local function print(string)
+    reaper.ShowConsoleMsg(string .. "\n")
+end
+
+local function tableToString(tbl, depth)
+    if depth == nil then depth = 1 end
+    if depth > 5 then return "..." end
+
+    local str = "{"
+    for k, v in pairs(tbl) do
+        local key = tostring(k)
+        local value = type(v) == "table" and tableToString(v, depth + 1) or tostring(v)
+        str = str .. "[" .. key .. "] = " .. value .. ", "
+    end
+    str = str:sub(1, -3)
+    str = str .. "}"
+    return str
+end
 
 local function registerObject(name)
     if gameObjectIDs[name] then
@@ -236,7 +256,7 @@ end
 ------------------------------------------
 
 
-local function processMarker(name, expectedParts, actionFunc)
+local function processMarker(name, trackName, expectedParts, actionFunc)
     local parts = {}
     for part in string.gmatch(name, "[^;]+") do
         table.insert(parts, part)
@@ -248,12 +268,12 @@ local function processMarker(name, expectedParts, actionFunc)
         return false
     end
 
-    return actionFunc(parts)
+    return actionFunc(parts, trackName)
 end
 
-local function actionEvent(parts)
+local function actionEvent(parts, trackName)
     local eventName = parts[2]
-    local gameObjectName = parts[3]
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if gameObjectID == nil then
@@ -265,10 +285,10 @@ local function actionEvent(parts)
     return true
 end
 
-local function actionRTPC(parts)
+local function actionRTPC(parts, trackName)
     local rtpcName = parts[2]
     local newRtpcValue = tonumber(parts[3])
-    local gameObjectName = parts[4]
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if gameObjectID == nil then
@@ -285,12 +305,12 @@ local function actionRTPC(parts)
     return true
 end
 
-local function actionRTPCInterp(parts)
+local function actionRTPCInterp(parts, trackName)
     local rtpcName = parts[2]
     local currentRtpcValue = tonumber(parts[3])
     local targetRtpcValue = tonumber(parts[4])
     local interpolationTimeMs = tonumber(parts[5])
-    local gameObjectName = parts[6]
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if gameObjectID == nil then
@@ -311,10 +331,10 @@ local function actionRTPCInterp(parts)
     return true
 end
 
-local function actionSwitch(parts)
+local function actionSwitch(parts, trackName)
     local switchGroupName = parts[2]
     local switchGroupState = parts[3]
-    local gameObjectName = parts[4]
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if gameObjectID == nil then
@@ -334,8 +354,8 @@ local function actionState(parts)
     return true
 end
 
-local function actionSetPos(parts)
-    local gameObjectName = parts[5]
+local function actionSetPos(parts, trackName)
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if gameObjectID == nil then
@@ -360,8 +380,8 @@ local function actionSetPos(parts)
     return true
 end
 
-local function actionPosInterp(parts)
-    local gameObjectName = parts[9]
+local function actionPosInterp(parts, trackName)
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if gameObjectID == nil then
@@ -389,8 +409,8 @@ local function actionPosInterp(parts)
     return true
 end
 
-local function actionInitObj(parts)
-    local gameObjectName = parts[2]
+local function actionInitObj(parts, trackName)
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if not gameObjectID then
@@ -399,8 +419,8 @@ local function actionInitObj(parts)
     return true
 end
 
-local function actionUnRegObj(parts)
-    local gameObjectName = parts[2]
+local function actionUnRegObj(parts, trackName)
+    local gameObjectName = trackName
     local gameObjectID = gameObjectIDs[gameObjectName]
 
     if gameObjectID then
@@ -411,27 +431,28 @@ end
 
 
 local actionMapping = {
-    Event = {func = actionEvent, parts = 3},
-    RTPC = {func = actionRTPC, parts = 4},
-    RTPCInterp = {func = actionRTPCInterp, parts = 6},
-    Switch = {func = actionSwitch, parts = 4},
+    Event = {func = actionEvent, parts = 2},
+    RTPC = {func = actionRTPC, parts = 3},
+    RTPCInterp = {func = actionRTPCInterp, parts = 5},
+    Switch = {func = actionSwitch, parts = 3},
     State = {func = actionState, parts = 3},
-    SetPos = {func = actionSetPos, parts = 5},
-    SetPosInterp = {func = actionPosInterp, parts = 9},
-    InitObj = {func = actionInitObj, parts = 2},
-    UnRegObj = {func = actionUnRegObj, parts = 2},
+    SetPos = {func = actionSetPos, parts = 4},
+    SetPosInterp = {func = actionPosInterp, parts = 8},
+    InitObj = {func = actionInitObj, parts = 1},
+    UnRegObj = {func = actionUnRegObj, parts = 1},
     ResetAllObj = {func = actionResetAllObj, parts = 1}
 }
 
 
 ------------------------------------------
-
 local function collectAndSortTakeMarkers()
     local markerData = {}
     local itemCount = reaper.CountMediaItems(0)
 
     for i = 0, itemCount - 1 do
         local item = reaper.GetMediaItem(0, i)
+        local track = reaper.GetMediaItem_Track(item)
+        local _, trackName = reaper.GetTrackName(track)
         local itemPos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
         for takeIndex = 0, reaper.CountTakes(item) - 1 do
             local take = reaper.GetMediaItemTake(item, takeIndex)
@@ -441,7 +462,7 @@ local function collectAndSortTakeMarkers()
                     local retval, name, pos = reaper.GetTakeMarker(take, k)
                     if retval ~= -1 then
                         local adjustedMarkerPos = itemPos + retval
-                        table.insert(markerData, {name = name, adjustedPos = adjustedMarkerPos})
+                        table.insert(markerData, {name = name, adjustedPos = adjustedMarkerPos, trackName = trackName})
                     end
                 end
             end
@@ -464,10 +485,41 @@ local function preprocessMarkers(sortedMarkers)
         if pos < playPos and name:sub(1,1) == "!" then
             local actionName = name:match("^!(.-);")
             if actionName and actionMapping[actionName] then
-                processMarker(name:sub(2), actionMapping[actionName].parts, actionMapping[actionName].func)
+                processMarker(name:sub(2), marker.trackName, actionMapping[actionName].parts, actionMapping[actionName].func)
             end
         end
     end
+end
+
+------------------------------------------
+
+local function collectTracksForPositioning()
+    local tracksForPos = {}
+    local trackCount = reaper.CountTracks(0)
+
+    for i = 0, trackCount - 1 do
+        local track = reaper.GetTrack(0, i)
+        if track then
+            local envX = reaper.GetTrackEnvelopeByName(track, "Left/Right / kusa_Wwhisper Panner")
+            local envY = reaper.GetTrackEnvelopeByName(track, "Up/Down / kusa_Wwhisper Panner")
+            local envZ = reaper.GetTrackEnvelopeByName(track, "Front/Back / kusa_Wwhisper Panner")
+            table.insert(tracksForPos, {track = track, envX = envX, envY = envY, envZ = envZ})
+        end
+    end
+
+    return tracksForPos
+end
+
+
+local function evaluateEnvelope(env, time)
+    if not env then return 0 end
+    local retval, value = reaper.Envelope_Evaluate(env, time, 0, 1)
+    return math.floor(value + 0.5)
+end
+
+local function adjustValueX(valueX, valueZ)
+    local minMaxRange = math.abs(valueZ)
+    return math.ceil((minMaxRange * valueX / 100))
 end
 
 ------------------------------------------
@@ -481,9 +533,10 @@ local markerCooldowns = {}
 local cooldownPeriod = 1
 
 local sortedMarkers = collectAndSortTakeMarkers()
+local trackForPos = collectTracksForPositioning()
 
 local function main()
-    if reaper.GetPlayState() == 0 then
+    if reaper.GetPlayState() ~= 1 then
         waapiCleanUp()
         return
     end
@@ -504,13 +557,29 @@ local function main()
     end
     lastPlayPos = playPos
 
+    for i, track in ipairs(trackForPos) do
+        local time = reaper.GetPlayPosition()
+        local valueX = evaluateEnvelope(track.envX, time)
+        local valueY = evaluateEnvelope(track.envY, time)
+        local valueZ = evaluateEnvelope(track.envZ, time)
+        valueX = adjustValueX(valueX, valueZ)
+        
+        if not (valueX == 0 and valueY == 0 and valueZ == 0) then
+            local _, trackName = reaper.GetTrackName(track.track)
+            local posCommand = string.format("SetPos;%d;%d;%d", valueX, valueY, valueZ)
+            processMarker(posCommand, trackName, 4, actionSetPos)
+        end
+    end
+
+
     for i, marker in ipairs(sortedMarkers) do
         if math.abs(playPos - marker.adjustedPos) <= marginOfError and lastMarker ~= i then
             if not markerCooldowns[i] or reaper.time_precise() - markerCooldowns[i] > cooldownPeriod then
                 local namePrefix = marker.name:sub(1, 1) == "!" and marker.name:sub(2) or marker.name
                 namePrefix = namePrefix:match("^(.-);")
+
                 if namePrefix and actionMapping[namePrefix] then
-                    if processMarker(marker.name, actionMapping[namePrefix].parts, actionMapping[namePrefix].func) then
+                    if processMarker(marker.name, marker.trackName, actionMapping[namePrefix].parts, actionMapping[namePrefix].func) then
                         lastMarker = i
                         lastMarkerTime = reaper.time_precise()
                         markerCooldowns[i] = reaper.time_precise()
@@ -519,6 +588,7 @@ local function main()
             end
         end
     end
+
     reaper.defer(main)
 end
 

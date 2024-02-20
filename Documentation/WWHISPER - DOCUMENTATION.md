@@ -3,16 +3,15 @@ WWHISPER - DOCUMENTATION
 
         Installation
 
--- You will need to install ReaWwise for this script to work --
-
 - Install ReaPack : https://reapack.com
-- In Reaper -> Extensions -> ReaPack -> Import repositories...
+- In REAPER -> Extensions -> ReaPack -> Import repositories...
 - Paste this link : https://github.com/TFKusa/kusa_reascripts/raw/master/index.xml
 - Paste this other link : https://github.com/Audiokinetic/Reaper-Tools/raw/main/index.xml
-- In Reaper -> Extensions -> ReaPack -> Browse packages
-- Type "kusa", right click on "kusa_Wwhisper" and install it.
+- In REAPER -> Extensions -> ReaPack -> Browse packages
+- Type "kusa", highlight "kusa_Wwhisper", "kusa_Wwhisper Panner" and "kusa_Wwhisper Assistant". Right click and install.
 - Type "ReaWwise", right click on it and install it.
-        If you'd like to use Wwhisper - Take Marker Creator as well (higly recommended), please download and install ReaImGui on ReaPack.
+
+Note : "kusa_Wwhisper Panner" is required for positioning Game Objects. "kusa_Wwhisper Assistant" is not mandatory, but will help you make things less tedious.
 
 
 
@@ -44,76 +43,45 @@ By default, only one Game Object is created when running the script ("Listener,"
 
 
 
-        If you are not using Wwhisper - Take Marker Creator, here's how you can manually rename your markers :
+
+        QUICK START :
+
+- Import your video into REAPER and select it. If you don't have a video available, create a time selection as an alternative.
+- Enter the name of your first Game Object in the Assistant's "Track / Game Object name" field, then click on "Create new track and item". Note that take markers will use the name of the parent track as the Game Object name.
 
 
-        BASIC GAME OBJECTS COMMANDS :
-
-InitObj;gameObjectName          - Registers a Game Object
-
-example : InitObj;Player
+<p align="center">
+  <img src="https://i.postimg.cc/7PmfhYdT/Wwhisper-Assistant.png" alt="Wwhisper Assistant" title="Wwhisper Assistant"/>
+</p>
 
 
-UnRegObj;gameObjectName         - Unregisters a Game Object
-
-example : UnRegObj;Player
+- When using "Wwhisper Assistant" to initiate a new track, it will automatically set the track in Latch mode, insert the Panner plugin and enable automation for its parameters.
 
 
-ResetAllObj                     - Unregisters all Game Objects
+<p align="center">
+  <img src="https://i.postimg.cc/prjCsk05/Panner.png" alt="New track" title="New track"/>
+</p>
 
 
+- The Left/Right value is percentage based and relative to the Front/Back value. To track left and right movement, adjust the Panner plugin window size to match the width of your video. You could then set the global REAPER playrate at 0.25, press play, and click on the "Left/Right" fader. Without releasing the button, track your actor's movement with your mouse. It should record the automation and, if configured correctly in Wwise, spatialize your audio assets.
+Tip : To quickly toggle the visibility of automation envelopes for all tracks, use "Envelope: Toggle show all envelopes for all tracks" in the "Actions" menu.
 
 
-        POSTING AN EVENT :
-
-Event;eventName;gameObjectName
-
-example : Event;PlayFootsteps;Solaire
+<p align="center">
+  <img src="https://i.postimg.cc/5yW8pz6s/L-R.png" alt="Panner" title="Panner"/>
+</p>
 
 
+- You can have several tracks sharing the same name for organisational purposes, and even make use of track folders. It will not affect the processing of markers.
 
 
-        SETTING AN RTPC :
+<p align="center">
+  <img src="https://i.postimg.cc/fLXpL1pk/REAPER-Timeline.png" alt="REAPER Timeline example" title="REAPER Timeline example"/>
+</p>
 
-RTPC;rtpcName;value;gameObjectName
 
-example : RTPC;PlayerSpeed;100;TrustyPatches
-
-OR
-
-RTPCInterp;rtpcName;startingValue;targetValue;interpTimeInMs;gameObjectName
-
-example : RTPCInterp;PlayerSpeed;0;100;SiegmeyerOfCatarina
-
+Limitations : The L/R system is great for 2D style layout, but is kind of restrictive for precise 3D positioning. I will expand on the Panner plugin to handle both cases, so keep an eye out for future updates :).
 
 
 
-        SETTING A SWITCH :
-
-Switch;switchGroupName;switchGroupState;gameObjectName
-
-example : Switch;GroundMaterials;Stone;MarvelousChester
-
-
-
-
-        SETTING A STATE :
-
-State;stateGroupName;stateName
-
-example : State;MusicMenuState;CrestfallenWarrior
-
-
-
-
-        SETTING THE POSITION OF A GAME OBJECT :
-
-SetPos;PosX;PosY;PosZ;gameObjectName
-
-example : SetPos;10;0;0;BigHatLogan
-
-OR
-
-SetPosInterp;startPosX;startPosY;startPosZ;targetPosX;targetPosY;targetPosZ;interpTimeInMs;gameObjectName
-
-example : SetPosInterp;-20;0;0;20;0;0;1500;PetrusOfThorolund
+Forum thread : https://forum.cockos.com/showthread.php?p=2745640#post2745640
