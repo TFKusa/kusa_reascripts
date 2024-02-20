@@ -4,6 +4,7 @@ TOGGLE & MAIN SCRIPTS SETUP
         Installation
 
 Some scripts are provided in two parts :
+
 "kusa_AwesomeScriptName - Toggle"
 
 "kusa_AwesomeScriptName - Main"
