@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="48b521712c2993a9f4bff93ac651d449705cf882">
+<index version="1" name="kusa_reascripts" commit="66529bac3261a68988475f2022bd99c5e85b8dd5">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -386,6 +386,11 @@
       </metadata>
       <version name="1.00" author="Kusa" time="2024-02-20T13:09:56Z">
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/48b521712c2993a9f4bff93ac651d449705cf882/Regions%20and%20Markers/kusa_Wwhisper%20Assistant.lua</source>
+      </version>
+      <version name="1.01" author="Kusa" time="2024-02-26T13:22:09Z">
+        <changelog><![CDATA[:
+# Better error handling when trying to create a new track & clip using REAPER < v7.]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/66529bac3261a68988475f2022bd99c5e85b8dd5/Regions%20and%20Markers/kusa_Wwhisper%20Assistant.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Wwhisper.lua" type="script" desc="kusa_Wwhisper">
