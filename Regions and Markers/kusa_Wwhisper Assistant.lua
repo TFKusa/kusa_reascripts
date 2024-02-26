@@ -1,9 +1,11 @@
 -- @description kusa_Wwhisper Assistant
--- @version 1.00
+-- @version 1.01
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
+-- @changelog :
+--      # Better error handling when trying to create a new track & clip using REAPER < v7.
 
 
 local reaImguiAvailable = reaper.APIExists("ImGui_Begin")
@@ -292,8 +294,16 @@ local function loop()
 
         if reaper.ImGui_Button(ctx, 'Create new track and item') then
             reaper.Undo_BeginBlock()
-            createMIDIItem(_G[inputs.inputTextGameObjectName])
-            reaper.Undo_EndBlock("Create new MIDI Item", 0)
+
+            local appVersionStr = reaper.GetAppVersion()
+            local majorVersion = tonumber(string.match(appVersionStr, "(%d+)%."))
+
+            if majorVersion and majorVersion < 7 then
+                reaper.ShowMessageBox("This feature requires REAPER version 7.0 or newer.", "Version Error", 0)
+            else
+                createMIDIItem(_G[inputs.inputTextGameObjectName])
+                reaper.Undo_EndBlock("Create new MIDI Item", 0)
+            end
         end
 
         reaper.ImGui_Unindent(ctx, 175)

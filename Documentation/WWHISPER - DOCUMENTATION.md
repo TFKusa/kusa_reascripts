@@ -10,6 +10,8 @@ WWHISPER - DOCUMENTATION
 - In REAPER -> Extensions -> ReaPack -> Browse packages
 - Type "kusa", highlight "kusa_Wwhisper", "kusa_Wwhisper Panner" and "kusa_Wwhisper Assistant". Right click and install.
 - Type "ReaWwise", right click on it and install it.
+- You will also need the SWS Extension installed : https://www.sws-extension.org/
+
 
 Note : "kusa_Wwhisper Panner" is required for positioning Game Objects. "kusa_Wwhisper Assistant" is not mandatory, but will help you make things less tedious.
 
