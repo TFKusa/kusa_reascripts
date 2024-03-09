@@ -1,13 +1,11 @@
 -- @description kusa_Wwhisper
--- @version 2.00
+-- @version 2.01
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Changed Game Object system.
---      # Changed positioning system.
---      # Documentation is up to date for further details.
+--      # lastMarkerTime initialization fix
 
 if not reaper.AK_Waapi_Connect then
     reaper.ShowMessageBox("Missing dependency, please install ReaWwise.", "Whoops !", 0)
@@ -526,6 +524,7 @@ end
 
 
 local lastMarker = -1
+local lastMarkerTime = -1
 local lastPlayPos = -1
 local marginOfError = 0.040
 local isFirstLoop = true
