@@ -1,12 +1,11 @@
 -- @description kusa_Peaks and Valleys - Sound Iterations Manager
--- @version 2.01
+-- @version 2.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Fix : Align with marker : asks once for marker ID when multiple items are selected
---      # Improved performances for silence previews.
+--      # Fix : Performance issue on down or upsampled items
 
 local function tableToString(tbl, depth)
     if depth == nil then depth = 1 end
@@ -772,7 +771,20 @@ function alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
     end
 end
 
-function tableIsEmpty(table)
+local function audioIsRightSampleRate(take, item)
+    local source = reaper.GetMediaItemTake_Source(take) -- Get the source of the take
+    local sampleRate = reaper.GetMediaSourceSampleRate(source) -- Get the sample rate of the source
+    local retval, currentSampleRate = reaper.GetAudioDeviceInfo("SRATE")
+    local projectSampleRate = tonumber(currentSampleRate)
+    
+    if sampleRate == projectSampleRate then
+        return true
+    else
+        return false
+    end
+end
+
+local function tableIsEmpty(table)
     for _ in pairs(table) do
         return false
     end
@@ -787,7 +799,8 @@ local function itemsAreValid(selectedItems)
             local track = reaper.GetMediaItem_Track(item)
             local isWav = audioIsWav(take, item, track)
             local hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-            if not isWav or hasBeenStretched then
+            local isRightSampleRate = audioIsRightSampleRate(take, item)
+            if not isWav or hasBeenStretched or not isRightSampleRate then
                 table.insert(itemsToConvert, item)
             end
         end
@@ -815,7 +828,7 @@ local function unselectEveryItem()
 end
 
 local function askForBounce(shouldKeepOriginal, itemsToConvert, selectedItems)
-    local userChoice = showMessage("The item's playrate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+    local userChoice = showMessage("The item's playrate/sample rate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
     if userChoice == 6 then
         for i, item in ipairs(itemsToConvert) do
             local track = reaper.GetMediaItem_Track(item)
