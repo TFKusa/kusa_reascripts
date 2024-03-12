@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="3dc1e363742c3b616888d047c1619a534a41ef41">
+<index version="1" name="kusa_reascripts" commit="f0b998c73ef5118c9ae0898b2fe545557ad41387">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -167,6 +167,11 @@
 # Fix : Align with marker : asks once for marker ID when multiple items are selected
 # Improved performances for silence previews.]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/8a6c18314ad97ad19dbdd90739f93c4bc545a8a4/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
+      </version>
+      <version name="2.10" author="Kusa" time="2024-03-12T21:50:38Z">
+        <changelog><![CDATA[:
+# Fix : Performance issue on down or upsampled items]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/f0b998c73ef5118c9ae0898b2fe545557ad41387/Items/kusa_Peaks%20and%20Valleys%20-%20Sound%20Iterations%20Manager.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Q like Pro Tools under mouse cursor.lua" type="script" desc="kusa_Q like Pro Tools under mouse cursor">
