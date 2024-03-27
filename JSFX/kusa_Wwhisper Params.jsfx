@@ -1,0 +1,14 @@
+desc: kusa_Wwhisper Params
+author: kusa
+version: 1.0
+changelog: Please have a look at the documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md
+
+
+slider1: 0<-100,100,1>Front/Back
+slider2: 0<-100,100,1>Left/Right
+slider3: 0<-100,100,1>Up/Down
+slider4: 0<0,100,1>RTPC1
+slider5: 0<0,100,1>RTPC2
+slider6: 0<0,100,1>RTPC3
+slider7: 0<0,100,1>RTPC4
+slider8: 0<0,100,1>RTPC5

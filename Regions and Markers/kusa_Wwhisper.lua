@@ -1,11 +1,11 @@
 -- @description kusa_Wwhisper
--- @version 2.01
+-- @version 2.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # lastMarkerTime initialization fix
+--      # Compatible with Wwhisper Assistant 2. Please have a look at the updated documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md
 
 if not reaper.AK_Waapi_Connect then
     reaper.ShowMessageBox("Missing dependency, please install ReaWwise.", "Whoops !", 0)
@@ -92,6 +92,7 @@ end
 
 local function waapiCleanUp()
     actionResetAllObj()
+    reaper.AK_AkJson_ClearAll()
     reaper.AK_Waapi_Disconnect()
 end
 
@@ -115,7 +116,16 @@ local function setDefaultListener()
     end
 end
 
-local function setGameObjectPosition(gameObjectID, gameObjectName, positionX, positionY, positionZ)
+
+local valueOrientationFrontX = 1
+local valueOrientationFrontY = 0
+local valueOrientationFrontZ = 0
+
+local valueOrientationTopX = 0
+local valueOrientationTopY = 1
+local valueOrientationTopZ = 0
+
+local function setGameObjectPosition(gameObjectID, gameObjectName, positionX, positionY, positionZ, orientationFrontX, orientationFrontY, orientationFrontZ, orientationTopX, orientationTopY, orientationTopZ)
     if not gameObjectID then
         registerObject(gameObjectName)
     end
@@ -124,21 +134,21 @@ local function setGameObjectPosition(gameObjectID, gameObjectName, positionX, po
     local positionMap = reaper.AK_AkJson_Map()
 
     local orientationFront = reaper.AK_AkJson_Map()
-    reaper.AK_AkJson_Map_Set(orientationFront, "x", reaper.AK_AkVariant_Int(1))
-    reaper.AK_AkJson_Map_Set(orientationFront, "y", reaper.AK_AkVariant_Int(0))
-    reaper.AK_AkJson_Map_Set(orientationFront, "z", reaper.AK_AkVariant_Int(0))
+    reaper.AK_AkJson_Map_Set(orientationFront, "x", reaper.AK_AkVariant_Double(orientationFrontX))
+    reaper.AK_AkJson_Map_Set(orientationFront, "y", reaper.AK_AkVariant_Double(orientationFrontY))
+    reaper.AK_AkJson_Map_Set(orientationFront, "z", reaper.AK_AkVariant_Double(orientationFrontZ))
     reaper.AK_AkJson_Map_Set(positionMap, "orientationFront", orientationFront)
 
     local orientationTop = reaper.AK_AkJson_Map()
-    reaper.AK_AkJson_Map_Set(orientationTop, "x", reaper.AK_AkVariant_Int(0))
-    reaper.AK_AkJson_Map_Set(orientationTop, "y", reaper.AK_AkVariant_Int(1))
-    reaper.AK_AkJson_Map_Set(orientationTop, "z", reaper.AK_AkVariant_Int(0))
+    reaper.AK_AkJson_Map_Set(orientationTop, "x", reaper.AK_AkVariant_Double(orientationTopX))
+    reaper.AK_AkJson_Map_Set(orientationTop, "y", reaper.AK_AkVariant_Double(orientationTopY))
+    reaper.AK_AkJson_Map_Set(orientationTop, "z", reaper.AK_AkVariant_Double(orientationTopZ))
     reaper.AK_AkJson_Map_Set(positionMap, "orientationTop", orientationTop)
 
     local position = reaper.AK_AkJson_Map()
-    reaper.AK_AkJson_Map_Set(position, "x", reaper.AK_AkVariant_Int(positionX))
-    reaper.AK_AkJson_Map_Set(position, "y", reaper.AK_AkVariant_Int(positionY))
-    reaper.AK_AkJson_Map_Set(position, "z", reaper.AK_AkVariant_Int(positionZ))
+    reaper.AK_AkJson_Map_Set(position, "x", reaper.AK_AkVariant_Double(positionX))
+    reaper.AK_AkJson_Map_Set(position, "y", reaper.AK_AkVariant_Double(positionY))
+    reaper.AK_AkJson_Map_Set(position, "z", reaper.AK_AkVariant_Double(positionZ))
     reaper.AK_AkJson_Map_Set(positionMap, "position", position)
 
     reaper.AK_AkJson_Map_Set(gameObjectPositionArg, "gameObject", reaper.AK_AkVariant_Int(gameObjectID))
@@ -175,7 +185,7 @@ local function setRTPCValue(rtpcName, value, gameObjectID)
     local rtpcArg = reaper.AK_AkJson_Map()
 
     reaper.AK_AkJson_Map_Set(rtpcArg, "rtpc", reaper.AK_AkVariant_String(rtpcName))
-    reaper.AK_AkJson_Map_Set(rtpcArg, "value", reaper.AK_AkVariant_Int(value))
+    reaper.AK_AkJson_Map_Set(rtpcArg, "value", reaper.AK_AkVariant_Double(value))
     reaper.AK_AkJson_Map_Set(rtpcArg, "gameObject", reaper.AK_AkVariant_Int(gameObjectID))
 
     reaper.AK_Waapi_Call(setRtpcCommand, rtpcArg, reaper.AK_AkJson_Map())
@@ -192,7 +202,7 @@ local function interpolateRTPCValue(rtpcName, currentRtpcValue, targetRtpcValue,
 
         if progress < 1 then
             local newValue = currentRtpcValue + (targetRtpcValue - currentRtpcValue) * progress
-            newValue = math.floor(newValue + 0.5)
+            --newValue = math.floor(newValue + 0.5)
             setRTPCValue(rtpcName, newValue, gameObjectID)
             reaper.defer(updateRTPCValue)
         else
@@ -283,7 +293,7 @@ local function actionEvent(parts, trackName)
     return true
 end
 
-local function actionRTPC(parts, trackName)
+local function actionRTPCLegacy(parts, trackName)
     local rtpcName = parts[2]
     local newRtpcValue = tonumber(parts[3])
     local gameObjectName = trackName
@@ -293,13 +303,34 @@ local function actionRTPC(parts, trackName)
         registerObject(gameObjectName)
         gameObjectID = gameObjectIDs[gameObjectName]
     end
-    if type(newRtpcValue) ~= "number" or newRtpcValue % 1 ~= 0 then
-        reaper.Main_OnCommand(1016, 0) -- Stops the transport
-        reaper.MB("RTPC value needs to be an integer.", "Whoops !", 0)
-        return
-    end
 
     setRTPCValue(rtpcName, newRtpcValue, gameObjectID)
+    return true
+end
+
+local function actionRTPC(parts, trackName)
+    local rtpcName = parts[2]
+    local rtpcMinValue = tonumber(parts[3])
+    local rtpcMaxValue = tonumber(parts[4])
+    local rtpcValuePercentage = tonumber(parts[5])
+    local gameObjectName = trackName
+    local gameObjectID = gameObjectIDs[gameObjectName]
+
+    if type(rtpcMinValue) ~= "number" or type(rtpcMaxValue) ~= "number" then
+    return false end
+
+    if gameObjectID == nil then
+        registerObject(gameObjectName)
+        gameObjectID = gameObjectIDs[gameObjectName]
+    end
+
+    rtpcValuePercentage = math.max(0, math.min(100, rtpcValuePercentage))
+
+    local realRtpcValue = rtpcMinValue + (rtpcValuePercentage / 100) * (rtpcMaxValue - rtpcMinValue)
+
+    realRtpcValue = math.floor(realRtpcValue + 0.5)
+
+    setRTPCValue(rtpcName, realRtpcValue, gameObjectID)
     return true
 end
 
@@ -314,15 +345,6 @@ local function actionRTPCInterp(parts, trackName)
     if gameObjectID == nil then
         registerObject(gameObjectName)
         gameObjectID = gameObjectIDs[gameObjectName]
-    end
-
-    local numbers = {currentRtpcValue, targetRtpcValue, interpolationTimeMs}
-    for _, number in ipairs(numbers) do
-        if type(number) ~= "number" or number % 1 ~= 0 then
-            reaper.Main_OnCommand(1016, 0) -- Stops the transport
-            reaper.MB("RTPC values or interpolation time need to be integers.", "Whoops !", 0)
-            return
-        end
     end
 
     interpolateRTPCValue(rtpcName, currentRtpcValue, targetRtpcValue, gameObjectID, interpolationTimeMs)
@@ -365,16 +387,15 @@ local function actionSetPos(parts, trackName)
     local positionY = tonumber(parts[3])
     local positionZ = tonumber(parts[4])
 
-    local positions = {positionX, positionY, positionZ}
-    for _, position in ipairs(positions) do
-        if type(position) ~= "number" or position % 1 ~= 0 then
-            reaper.Main_OnCommand(1016, 0) -- Stops the transport
-            reaper.MB("Coordinates need to be integers.", "Whoops !", 0)
-            return
-        end
-    end
+    local orientationFrontX = tonumber(parts[5])
+    local orientationFrontY = tonumber(parts[6])
+    local orientationFrontZ = tonumber(parts[7])
 
-    setGameObjectPosition(gameObjectID, gameObjectName, positionX, positionY, positionZ)
+    local orientationTopX = tonumber(parts[8])
+    local orientationTopY = tonumber(parts[9])
+    local orientationTopZ = tonumber(parts[10])
+
+    setGameObjectPosition(gameObjectID, gameObjectName, positionX, positionY, positionZ, orientationFrontX, orientationFrontY, orientationFrontZ, orientationTopX, orientationTopY, orientationTopZ)
     return true
 end
 
@@ -430,11 +451,12 @@ end
 
 local actionMapping = {
     Event = {func = actionEvent, parts = 2},
-    RTPC = {func = actionRTPC, parts = 3},
+    RTPC = {func = actionRTPC, parts = 5},
+    RTPCLeg = {func = actionRTPCLegacy, parts = 3},
     RTPCInterp = {func = actionRTPCInterp, parts = 5},
     Switch = {func = actionSwitch, parts = 3},
     State = {func = actionState, parts = 3},
-    SetPos = {func = actionSetPos, parts = 4},
+    SetPos = {func = actionSetPos, parts = 10},
     SetPosInterp = {func = actionPosInterp, parts = 8},
     InitObj = {func = actionInitObj, parts = 1},
     UnRegObj = {func = actionUnRegObj, parts = 1},
@@ -498,14 +520,55 @@ local function collectTracksForPositioning()
     for i = 0, trackCount - 1 do
         local track = reaper.GetTrack(0, i)
         if track then
-            local envX = reaper.GetTrackEnvelopeByName(track, "Left/Right / kusa_Wwhisper Panner")
-            local envY = reaper.GetTrackEnvelopeByName(track, "Up/Down / kusa_Wwhisper Panner")
-            local envZ = reaper.GetTrackEnvelopeByName(track, "Front/Back / kusa_Wwhisper Panner")
-            table.insert(tracksForPos, {track = track, envX = envX, envY = envY, envZ = envZ})
+            local envX = reaper.GetTrackEnvelopeByName(track, "Left/Right / kusa_Wwhisper Params")
+            local envY = reaper.GetTrackEnvelopeByName(track, "Up/Down / kusa_Wwhisper Params")
+            local envZ = reaper.GetTrackEnvelopeByName(track, "Front/Back / kusa_Wwhisper Params")
+            if envX or envY or envZ then
+                table.insert(tracksForPos, {track = track, envX = envX, envY = envY, envZ = envZ})
+            end
         end
     end
 
     return tracksForPos
+end
+
+local function collectTracksForRTPC()
+    local tracksForRTPC = {}
+    local trackCount = reaper.CountTracks(0)
+
+    for i = 0, trackCount - 1 do
+        local track = reaper.GetTrack(0, i)
+        if track then
+            local validEnvs = {}
+            local envNames = {
+                "RTPC1 / kusa_Wwhisper Params",
+                "RTPC2 / kusa_Wwhisper Params",
+                "RTPC3 / kusa_Wwhisper Params",
+                "RTPC4 / kusa_Wwhisper Params",
+                "RTPC5 / kusa_Wwhisper Params"
+            }
+
+            for _, envName in ipairs(envNames) do
+                local env = reaper.GetTrackEnvelopeByName(track, envName)
+                if env then
+                    local envData = { env = env, automationItems = {} }
+                    local autoItemCount = reaper.CountAutomationItems(env)
+                    for ai = 0, autoItemCount - 1 do
+                        local _, poolName = reaper.GetSetAutomationItemInfo_String(env, ai, "P_POOL_NAME", "", false)
+                        table.insert(envData.automationItems, {index = ai, name = poolName})
+                    end
+                    table.insert(validEnvs, envData)
+                end
+            end
+
+            if #validEnvs > 0 then
+                local entry = {track = track, envelopes = validEnvs}
+                table.insert(tracksForRTPC, entry)
+            end
+        end
+    end
+
+    return tracksForRTPC
 end
 
 
@@ -529,10 +592,13 @@ local lastPlayPos = -1
 local marginOfError = 0.040
 local isFirstLoop = true
 local markerCooldowns = {}
-local cooldownPeriod = 1
+local cooldownPeriod = 0.5
 
 local sortedMarkers = collectAndSortTakeMarkers()
 local trackForPos = collectTracksForPositioning()
+local trackForRTPC = collectTracksForRTPC()
+
+local playPos
 
 local function main()
     if reaper.GetPlayState() ~= 1 then
@@ -540,7 +606,7 @@ local function main()
         return
     end
 
-    local playPos
+    --local playPos
 
     if isFirstLoop then
         playPos = reaper.GetCursorPosition()
@@ -556,20 +622,46 @@ local function main()
     end
     lastPlayPos = playPos
 
-    for i, track in ipairs(trackForPos) do
-        local time = reaper.GetPlayPosition()
-        local valueX = evaluateEnvelope(track.envX, time)
-        local valueY = evaluateEnvelope(track.envY, time)
-        local valueZ = evaluateEnvelope(track.envZ, time)
-        valueX = adjustValueX(valueX, valueZ)
-        
-        if not (valueX == 0 and valueY == 0 and valueZ == 0) then
-            local _, trackName = reaper.GetTrackName(track.track)
-            local posCommand = string.format("SetPos;%d;%d;%d", valueX, valueY, valueZ)
-            processMarker(posCommand, trackName, 4, actionSetPos)
+    -- If Pos automation
+    if trackForPos then
+        for i, track in ipairs(trackForPos) do
+            local time = reaper.GetPlayPosition()
+            local valuePosX = evaluateEnvelope(track.envX, time)
+            local valuePosY = evaluateEnvelope(track.envY, time)
+            local valuePosZ = evaluateEnvelope(track.envZ, time)
+            valuePosX = adjustValueX(valuePosX, valuePosZ)
+            
+            if not (valuePosX == 0 and valuePosY == 0 and valuePosZ == 0) then
+                local _, trackName = reaper.GetTrackName(track.track)
+                local posCommand = string.format("SetPos;%d;%d;%d;%d;%d;%d;%d;%d;%d", valuePosX, valuePosY, valuePosZ, valueOrientationFrontX, valueOrientationFrontY, valueOrientationFrontZ, valueOrientationTopX, valueOrientationTopY, valueOrientationTopZ)
+                local retval = processMarker(posCommand, trackName, 10, actionSetPos)
+                if not retval then 
+                    reaper.Main_OnCommand(1016, 0) -- Stops the transport
+                    reaper.ShowMessageBox("RTPC values must be numbers.", "Whoops !", 0)
+                return end
+            end
         end
     end
 
+    -- RTPC
+    for i, trackData in ipairs(trackForRTPC) do
+        local time = reaper.GetPlayPosition()
+        local _, trackName = reaper.GetTrackName(trackData.track, "")
+        
+        for _, envData in ipairs(trackData.envelopes) do
+            if #envData.automationItems > 0 then
+                local value = evaluateEnvelope(envData.env, time)
+                local poolName = envData.automationItems[1].name
+                local rtpcCommand = poolName .. ";" .. value
+                local retval = processMarker(rtpcCommand, trackName, 4, actionRTPC)
+                if not retval then 
+                    reaper.Main_OnCommand(1016, 0) -- Stops the transport
+                    reaper.ShowMessageBox("RTPC values must be numbers.", "Whoops !", 0)
+                return end
+            end
+        end
+    end
+    
 
     for i, marker in ipairs(sortedMarkers) do
         if math.abs(playPos - marker.adjustedPos) <= marginOfError and lastMarker ~= i then
