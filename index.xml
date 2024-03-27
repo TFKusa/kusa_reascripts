@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="f0b998c73ef5118c9ae0898b2fe545557ad41387">
+<index version="1" name="kusa_reascripts" commit="cc38c878802d5e84e77729886e52d0875422201b">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -257,6 +257,12 @@
         <source>https://github.com/TFKusa/kusa_reascripts/raw/48b521712c2993a9f4bff93ac651d449705cf882/JSFX/kusa_Wwhisper%20Panner.jsfx</source>
       </version>
     </reapack>
+    <reapack name="kusa_Wwhisper Params.jsfx" type="effect" desc="kusa_Wwhisper Params">
+      <version name="1.0" author="kusa" time="2024-03-27T00:46:36Z">
+        <changelog><![CDATA[Please have a look at the documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md]]></changelog>
+        <source>https://github.com/TFKusa/kusa_reascripts/raw/cc38c878802d5e84e77729886e52d0875422201b/JSFX/kusa_Wwhisper%20Params.jsfx</source>
+      </version>
+    </reapack>
   </category>
   <category name="Navigation">
     <reapack name="kusa_Tab like Pro Tools - Main Backwards.lua" type="script" desc="kusa_Tab like Pro Tools - Main Backwards">
@@ -397,6 +403,14 @@
 # Better error handling when trying to create a new track & clip using REAPER < v7.]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/66529bac3261a68988475f2022bd99c5e85b8dd5/Regions%20and%20Markers/kusa_Wwhisper%20Assistant.lua</source>
       </version>
+      <version name="2.00" author="Kusa" time="2024-03-27T00:46:36Z">
+        <changelog><![CDATA[:
+# Can sync to Wwise to retrieve Event, RTPC, States and Switches names.
+# New way of setting RTPC values. See documentation for further details.
+# Can import a TXT Wwise Capture Log.
+# Please have a look at the updated documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cc38c878802d5e84e77729886e52d0875422201b/Regions%20and%20Markers/kusa_Wwhisper%20Assistant.lua</source>
+      </version>
     </reapack>
     <reapack name="kusa_Wwhisper.lua" type="script" desc="kusa_Wwhisper">
       <metadata>
@@ -432,6 +446,11 @@
         <changelog><![CDATA[:
 # lastMarkerTime initialization fix]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/3dc1e363742c3b616888d047c1619a534a41ef41/Regions%20and%20Markers/kusa_Wwhisper.lua</source>
+      </version>
+      <version name="2.10" author="Kusa" time="2024-03-27T00:46:36Z">
+        <changelog><![CDATA[:
+# Compatible with Wwhisper Assistant 2. Please have a look at the updated documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cc38c878802d5e84e77729886e52d0875422201b/Regions%20and%20Markers/kusa_Wwhisper.lua</source>
       </version>
     </reapack>
   </category>
