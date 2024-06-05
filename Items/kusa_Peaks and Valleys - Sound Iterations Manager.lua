@@ -5,7 +5,8 @@
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Fix : Performance issue on down or upsampled items
+--      # More specific error messages
+--      # Playrate check re-work
 
 local function tableToString(tbl, depth)
     if depth == nil then depth = 1 end
@@ -305,25 +306,26 @@ local function bounceInPlace(item, track, shouldKeepOriginal, selectedItems)
     cleanupAfterRender(item, track, shouldKeepOriginal, selectedItems)
 end
 
-local function audioIsWav(take, item, track)
-    local source = reaper.GetMediaItemTake_Source(take)
-    local filenamebuf = ""
-    filenamebuf = reaper.GetMediaSourceFileName(source, filenamebuf)
-    if filenamebuf:match(".wav$") then
-        return true
-    else
-        return false
+local function audioIsWav(take)
+    if take then
+        local source = reaper.GetMediaItemTake_Source(take)
+        local sourceType = reaper.GetMediaSourceType(source, "")
+        return sourceType == "WAVE"
     end
+    return false
 end
 
 local function hasBeenStretchedFunction(take, item, track)
-    local retval, pos, srcpos = reaper.GetTakeStretchMarker(take, 0)
+    local retval = reaper.GetTakeNumStretchMarkers(take)
     local playrate = getSelectedItemPlayrate(take)
-    local epsilon = 0.00000000000001
-    if retval == 0 or math.abs(playrate - 1) > epsilon then
-        return true
+    local epsilon = 0.1
+
+    if retval > 0 then
+        return true, "The item has stretch markers."
+    elseif math.abs(playrate - 1) > epsilon then
+        return true, "The item's playrate has been altered."
     else
-        return false
+        return false, ""
     end
 end
 
@@ -771,20 +773,7 @@ function alignItemsToMarker(markerId, onPeak, shouldAlignToMarker, item)
     end
 end
 
-local function audioIsRightSampleRate(take, item)
-    local source = reaper.GetMediaItemTake_Source(take) -- Get the source of the take
-    local sampleRate = reaper.GetMediaSourceSampleRate(source) -- Get the sample rate of the source
-    local retval, currentSampleRate = reaper.GetAudioDeviceInfo("SRATE")
-    local projectSampleRate = tonumber(currentSampleRate)
-    
-    if sampleRate == projectSampleRate then
-        return true
-    else
-        return false
-    end
-end
-
-local function tableIsEmpty(table)
+function tableIsEmpty(table)
     for _ in pairs(table) do
         return false
     end
@@ -794,22 +783,27 @@ end
 local function itemsAreValid(selectedItems)
     if not tableIsEmpty(selectedItems) then
         local itemsToConvert = {}
+        local errorMessages = {}
         for _, item in ipairs(selectedItems) do
             local take = reaper.GetActiveTake(item)
             local track = reaper.GetMediaItem_Track(item)
-            local isWav = audioIsWav(take, item, track)
-            local hasBeenStretched = hasBeenStretchedFunction(take, item, track)
-            local isRightSampleRate = audioIsRightSampleRate(take, item)
-            if not isWav or hasBeenStretched or not isRightSampleRate then
+            local isWav = audioIsWav(take)
+            local hasBeenStretched, stretchErrorMessage = hasBeenStretchedFunction(take, item, track)
+            if not isWav then
                 table.insert(itemsToConvert, item)
+                table.insert(errorMessages, "The item is not in WAV format.")
+            elseif hasBeenStretched then
+                table.insert(itemsToConvert, item)
+                table.insert(errorMessages, stretchErrorMessage)
             end
         end
         if tableIsEmpty(itemsToConvert) then
             return nil
         else
-            return itemsToConvert
+            return itemsToConvert, errorMessages
         end
     end
+    return nil
 end
 
 local function itemsAreSelected(table)
@@ -827,12 +821,13 @@ local function unselectEveryItem()
     end
 end
 
-local function askForBounce(shouldKeepOriginal, itemsToConvert, selectedItems)
-    local userChoice = showMessage("The item's playrate/sample rate has been altered, or the audio is not in WAV format. \nAnalysing it might freeze REAPER. \nWould you like to create a usable copy ?", "Warning", 4)
+local function askForBounce(shouldKeepOriginal, itemsToConvert, errorMessages)
+    local message = table.concat(errorMessages, "\n") .. "\nAnalysing it might freeze REAPER. \nWould you like to create a usable copy?"
+    local userChoice = showMessage(message, "Warning", 4)
     if userChoice == 6 then
         for i, item in ipairs(itemsToConvert) do
             local track = reaper.GetMediaItem_Track(item)
-            bounceInPlace(item, track, shouldKeepOriginal, selectedItems)
+            bounceInPlace(item, track, shouldKeepOriginal, itemsToConvert)
         end
         return true
     else
@@ -850,16 +845,12 @@ end
 
 local function safeToExecute(selectedItems)
     cleanup()
-    local itemsToConvert = itemsAreValid(selectedItems)
+    local itemsToConvert, errorMessages = itemsAreValid(selectedItems)
     if itemsToConvert then
         reaper.Undo_BeginBlock()
-        local goodToGo = askForBounce(shouldKeepOriginal, itemsToConvert, selectedItems)
+        local goodToGo = askForBounce(shouldKeepOriginal, itemsToConvert, errorMessages)
         reaper.Undo_EndBlock("Bounce in place.", -1)
-        if goodToGo then
-            return true
-        else
-            return false
-        end
+        return goodToGo
     else
         return true
     end
