@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="fd2323d7d93e549540f3583a40fbc7009764d383">
+<index version="1" name="kusa_reascripts" commit="59058aa11cbe832661b746d316c548dc65a396d8">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -253,6 +253,15 @@
       <version name="1.02" author="Kusa" time="2023-12-26T23:12:09Z">
         <changelog><![CDATA[Applies to all item takes]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/ab37012a684c5cc6c483e0129450b57152c7215f/Items/kusa_Timestretch%20item%20to%20start,%20peak%20and%20end%20Markers.lua</source>
+      </version>
+    </reapack>
+    <reapack name="kusa_Toggle downmix mono.lua" type="script" desc="kusa_Toggle downmix mono">
+      <metadata>
+        <link rel="website" href="https://forum.cockos.com/showthread.php?p=2745640#post2745640">FORUM :</link>
+        <link rel="donation">https://paypal.me/tfkusa?country.x=FR&amp;locale.x=fr_FR</link>
+      </metadata>
+      <version name="1.00" author="Kusa" time="2024-06-20T18:18:10Z">
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/59058aa11cbe832661b746d316c548dc65a396d8/Items/kusa_Toggle%20downmix%20mono.lua</source>
       </version>
     </reapack>
   </category>
