@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="kusa_reascripts" commit="59058aa11cbe832661b746d316c548dc65a396d8">
+<index version="1" name="kusa_reascripts" commit="00db5c5f486bb1709bcd5d5b17834be0cc1791b9">
   <category name="FX">
     <reapack name="kusa_Setup Trackspacer from selected to hovered track.lua" type="script" desc="kusa_Setup Trackspacer from selected to hovered track">
       <metadata>
@@ -425,6 +425,11 @@
 # Can import a TXT Wwise Capture Log.
 # Please have a look at the updated documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md]]></changelog>
         <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/cc38c878802d5e84e77729886e52d0875422201b/Regions%20and%20Markers/kusa_Wwhisper%20Assistant.lua</source>
+      </version>
+      <version name="2.10" author="Kusa" time="2024-07-04T07:24:52Z">
+        <changelog><![CDATA[:
+# Fix ImGui]]></changelog>
+        <source main="main">https://github.com/TFKusa/kusa_reascripts/raw/00db5c5f486bb1709bcd5d5b17834be0cc1791b9/Regions%20and%20Markers/kusa_Wwhisper%20Assistant.lua</source>
       </version>
     </reapack>
     <reapack name="kusa_Wwhisper.lua" type="script" desc="kusa_Wwhisper">
