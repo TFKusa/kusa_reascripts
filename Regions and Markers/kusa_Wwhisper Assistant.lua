@@ -1,14 +1,11 @@
 -- @description kusa_Wwhisper Assistant
--- @version 2.00
+-- @version 2.10
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Can sync to Wwise to retrieve Event, RTPC, States and Switches names.
---      # New way of setting RTPC values. See documentation for further details.
---      # Can import a TXT Wwise Capture Log.
---      # Please have a look at the updated documentation : https://github.com/TFKusa/kusa_reascripts/blob/master/Documentation/WWHISPER%20-%20DOCUMENTATION.md
+--      # Fix ImGui
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1421,7 +1418,7 @@ local function loop()
     if visible then
 ------------------------------------------------------------------------------------------------------
     -- CREATION
-        if reaper.ImGui_BeginChild(ctx, 'LeftSection', leftSectionWidth, 410, true) then
+        if reaper.ImGui_BeginChild(ctx, 'LeftSection', leftSectionWidth, 410) then
             -- Title
             reaper.ImGui_Indent(ctx, 200)
             reaper.ImGui_Text(ctx, 'Creation')
@@ -1548,7 +1545,7 @@ local function loop()
 ------------------------------------------------------------------------------------------------------
         -- UTILITIES TAB
         if utilitiesCheckboxState then
-            if reaper.ImGui_BeginChild(ctx, 'RightSection', rightSectionWidth - 20, 410, true) then
+            if reaper.ImGui_BeginChild(ctx, 'RightSection', rightSectionWidth - 20, 410) then
                 reaper.ImGui_Indent(ctx, 165)
                 reaper.ImGui_Text(ctx, 'Utilities')
                 reaper.ImGui_Unindent(ctx, 165)
@@ -1658,7 +1655,7 @@ local function loop()
     else
         reaper.AK_AkJson_ClearAll()
         reaper.AK_Waapi_Disconnect()
-        reaper.ImGui_DestroyContext(ctx)
+        --reaper.ImGui_DestroyContext(ctx)
     end
 end
 
