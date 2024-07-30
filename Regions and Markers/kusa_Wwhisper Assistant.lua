@@ -1,11 +1,11 @@
 -- @description kusa_Wwhisper Assistant
--- @version 2.10
+-- @version 2.11
 -- @author Kusa
 -- @website PORTFOLIO : https://thomashugofritz.wixsite.com/website
 -- @website FORUM : https://forum.cockos.com/showthread.php?p=2745640#post2745640
 -- @donation https://paypal.me/tfkusa?country.x=FR&locale.x=fr_FR
 -- @changelog :
---      # Fix ImGui
+--      # Fix nil gameObjects
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -563,7 +563,7 @@ local function createTracksForGameObjects(entries)
     local uniqueGameObjects = {}
     local createdTracks = {}
     for _, entry in ipairs(entries) do
-        if entry then
+        if entry and entry.gameObject then
             uniqueGameObjects[entry.gameObject] = true
         end
     end
@@ -697,17 +697,21 @@ end
 
 
 local function prepareForProfilerMarkers(entry, createdTracks)
-    local track = findTrackInTable(createdTracks, entry.gameObject)
-    if not track then
-        local trackIndex = reaper.CountTracks(0)
-        reaper.InsertTrackAtIndex(trackIndex, true)
-        track = reaper.GetTrack(0, trackIndex)
-        reaper.GetSetMediaTrackInfo_String(track, "P_NAME", entry.gameObject, true)
-        table.insert(createdTracks, {track = track, name = entry.gameObject})
+    if entry.gameObject then
+        local track = findTrackInTable(createdTracks, entry.gameObject)
+        if not track then
+            local trackIndex = reaper.CountTracks(0)
+            reaper.InsertTrackAtIndex(trackIndex, true)
+            track = reaper.GetTrack(0, trackIndex)
+            reaper.GetSetMediaTrackInfo_String(track, "P_NAME", entry.gameObject, true)
+            table.insert(createdTracks, {track = track, name = entry.gameObject})
+        end
+        local item = reaper.GetTrackMediaItem(track, 0)
+        local take = reaper.GetActiveTake(item)
+        return take
+    else
+        return nil
     end
-    local item = reaper.GetTrackMediaItem(track, 0)
-    local take = reaper.GetActiveTake(item)
-    return take
 end
 
 local function gatherAllRTPCInfo()
@@ -880,9 +884,11 @@ local function handleProfilerInit(entries, offsetInSecondsToStartProject, create
     local gameObjEntries = filterEntriesByType(entries, "InitObj", offsetInSecondsToStartProject)
     for _, entry in ipairs(gameObjEntries) do
         local take = prepareForProfilerMarkers(entry, createdTracks)
-        local takeMarkerName = "InitObj;"
-        local color = getColorValue(colors, "Red")
-        reaper.SetTakeMarker(take, -1, takeMarkerName, entry.timestamp, color)
+        if take then
+            local takeMarkerName = "InitObj;"
+            local color = getColorValue(colors, "Red")
+            reaper.SetTakeMarker(take, -1, takeMarkerName, entry.timestamp, color)
+        end
     end
 end
 
